@@ -170,6 +170,11 @@ class SP
     }
 
     /**
+     * Obtain URL to redirect to browser to when trying to logout.
+     *
+     * NOTE: the IdP may not support "SLO", in that case the provided
+     * "relayState" is returned directly (after local logout).
+     *
      * @param string $relayState
      *
      * @throws \fkooman\SAML\SP\Exception\SpException
