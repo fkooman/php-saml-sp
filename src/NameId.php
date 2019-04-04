@@ -109,7 +109,7 @@ class NameId
     {
         // this only makes sense when we have "persistent" NameID
         if ('urn:oasis:names:tc:SAML:2.0:nameid-format:persistent' !== $this->nameIdFormat) {
-            throw new NameIdException(\sprintf('NameID format "%s" not supported for user identifiers', $this->nameIdFormat));
+            throw new NameIdException('only NameID format "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent" is supported for user identifiers');
         }
 
         return \sprintf('%s!%s!%s', $this->idpEntityId, $this->spEntityId, $this->nameIdValue);
