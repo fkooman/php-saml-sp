@@ -186,11 +186,11 @@ class Response
     private static function extractAttributes(XmlDocument $xmlDocument, DOMElement $assertionElement, IdpInfo $idpInfo, SpInfo $spInfo)
     {
         $attributeList = [];
-        $attributeDomNodeList = $xmlDocument->domXPath->query('saml:AttributeStatement/saml:Attribute', $assertionElement);
+        $attributeDomNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query('saml:AttributeStatement/saml:Attribute', $assertionElement));
         foreach ($attributeDomNodeList as $attributeDomNode) {
             $attributeElement = XmlDocument::requireDomElement($attributeDomNode);
             $attributeName = $attributeElement->getAttribute('Name');
-            $attributeValueDomNodeList = $xmlDocument->domXPath->query('saml:AttributeValue', $attributeElement);
+            $attributeValueDomNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query('saml:AttributeValue', $attributeElement));
             // loop over AttributeValue(s) for this Attribute
             foreach ($attributeValueDomNodeList as $attributeValueDomNode) {
                 $attributeValueElement = XmlDocument::requireDomElement($attributeValueDomNode);
