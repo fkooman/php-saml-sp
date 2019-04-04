@@ -228,7 +228,7 @@ class ResponseTest extends TestCase
 
     /**
      * @expectedException \fkooman\SAML\SP\Exception\CryptoException
-     * @expectedExceptionMessage digest method "http://www.w3.org/2000/09/xmldsig#sha1" not supported
+     * @expectedExceptionMessage only digest method "http://www.w3.org/2001/04/xmlenc#sha256" is supported
      */
     public function testSha1()
     {

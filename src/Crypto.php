@@ -59,12 +59,12 @@ class Crypto
 
         $digestMethod = $xmlDocument->domXPath->evaluate('string(ds:Signature/ds:SignedInfo/ds:Reference/ds:DigestMethod/@Algorithm)', $domElement);
         if (self::SIGN_DIGEST_ALGO !== $digestMethod) {
-            throw new CryptoException(\sprintf('digest method "%s" not supported', $digestMethod));
+            throw new CryptoException(\sprintf('only digest method "%s" is supported', self::SIGN_DIGEST_ALGO));
         }
 
         $signatureMethod = $xmlDocument->domXPath->evaluate('string(ds:Signature/ds:SignedInfo/ds:SignatureMethod/@Algorithm)', $domElement);
         if (self::SIGN_ALGO !== $signatureMethod) {
-            throw new CryptoException(\sprintf('signature method "%s" not supported', $signatureMethod));
+            throw new CryptoException(\sprintf('only signature method "%s" is supported', self::SIGN_ALGO));
         }
 
         $signatureValue = $xmlDocument->domXPath->evaluate('string(ds:Signature/ds:SignatureValue)', $domElement);
@@ -148,7 +148,7 @@ class Crypto
         // make sure we support the encryption algorithm
         $encryptionMethod = $xmlDocument->domXPath->evaluate('string(xenc:EncryptedData/xenc:EncryptionMethod/@Algorithm)', $domElement);
         if (self::ENCRYPT_ALGO !== $encryptionMethod) {
-            throw new CryptoException(\sprintf('encryption method "%s" not supported', $encryptionMethod));
+            throw new CryptoException(\sprintf('only encryption method "%s" is supported', self::ENCRYPT_ALGO));
         }
 
         // make sure we support the key transport encryption algorithm
@@ -161,13 +161,13 @@ class Crypto
         ];
 
         if (!\in_array($keyEncryptionMethod, $encryptKeyAlgoList, true)) {
-            throw new CryptoException(\sprintf('key encryption algorithm "%s" not supported', $keyEncryptionMethod));
+            throw new CryptoException(\sprintf('only key encryption algorithm(s) "%s" are supported', \implode(',', $encryptKeyAlgoList)));
         }
 
         // make sure we support the key transport encryption digest algorithm
         $keyEncryptionDigestMethod = $xmlDocument->domXPath->evaluate('string(xenc:EncryptedData/ds:KeyInfo/xenc:EncryptedKey/xenc:EncryptionMethod/ds:DigestMethod/@Algorithm)', $domElement);
         if (self::ENCRYPT_KEY_DIGEST_ALGO !== $keyEncryptionDigestMethod) {
-            throw new CryptoException(\sprintf('key encryption digest "%s" not supported', $keyEncryptionDigestMethod));
+            throw new CryptoException(\sprintf('only key encryption digest "%s" is supported', self::ENCRYPT_KEY_DIGEST_ALGO));
         }
 
         // extract the session key
