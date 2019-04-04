@@ -60,6 +60,8 @@ class PrivateKey
     }
 
     /**
+     * Create a new PrivateKey object from file.
+     *
      * @param string $fileName
      *
      * @throws \RuntimeException

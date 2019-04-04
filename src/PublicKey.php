@@ -57,6 +57,8 @@ class PublicKey
     }
 
     /**
+     * Create a new PublicKey object from file.
+     *
      * @param string $fileName
      *
      * @throws \RuntimeException
