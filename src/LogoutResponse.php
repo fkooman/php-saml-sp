@@ -44,7 +44,11 @@ class LogoutResponse
         $queryString = self::prepareQueryString($queryParameters);
         Crypto::verify($queryString, Base64::decode($queryParameters->requireQueryParameter('Signature')), $idpInfo->getPublicKeys());
 
-        $logoutResponseDocument = XmlDocument::fromProtocolMessage(\gzinflate(Base64::decode($queryParameters->requireQueryParameter('SAMLResponse'))));
+        if (false === $inflatedProtocolMessage = \gzinflate(Base64::decode($queryParameters->requireQueryParameter('SAMLResponse')))) {
+            throw new ResponseException('unable to "inflate" SAMLResponse');
+        }
+
+        $logoutResponseDocument = XmlDocument::fromProtocolMessage($inflatedProtocolMessage);
         $logoutResponseElement = XmlDocument::requireDomElement($logoutResponseDocument->domXPath->query('/samlp:LogoutResponse')->item(0));
 
         // the LogoutResponse Issuer MUST be IdP entityId
