@@ -205,7 +205,7 @@ class SP
             // IdP does not support logout, nothing we can do about it
             return $relayState;
         }
-        if (null === $spSloUrl = $this->spInfo->getSloUrl()) {
+        if (null === $this->spInfo->getSloUrl()) {
             // SP does not support logout, do not redirect to IdP
             return $relayState;
         }
