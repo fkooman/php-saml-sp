@@ -293,8 +293,12 @@ class SP
      */
     private static function prepareRequestUrl($requestUrl, $requestXml, $relayState, PrivateKey $privateKey)
     {
+        if (false === $deflatedXml = \gzdeflate($requestXml)) {
+            throw new SPException('unable to "deflate" the XML');
+        }
+
         $httpQueryParameters = [
-            'SAMLRequest' => Base64::encode(\gzdeflate($requestXml)),
+            'SAMLRequest' => Base64::encode($deflatedXml),
             'RelayState' => $relayState,
             'SigAlg' => 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256',
         ];
