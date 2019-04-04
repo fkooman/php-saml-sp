@@ -91,14 +91,20 @@ class PublicKey
      */
     public function toEncodedString()
     {
+        $withoutHeaderFooter = \preg_replace(
+            '/.*-----BEGIN CERTIFICATE-----(.*)-----END CERTIFICATE-----.*/msU',
+            '$1',
+            $this->pemStr
+        );
+
+        if (null === $withoutHeaderFooter) {
+            throw new RuntimeException('unable to strip header/footer from PEM certificate');
+        }
+
         return \str_replace(
             [' ', "\t", "\n", "\r", "\0", "\x0B"],
             '',
-            \preg_replace(
-                '/.*-----BEGIN CERTIFICATE-----(.*)-----END CERTIFICATE-----.*/msU',
-                '$1',
-                $this->pemStr
-            )
+            $withoutHeaderFooter
         );
     }
 
