@@ -24,6 +24,8 @@
 
 namespace fkooman\SAML\SP;
 
+use RuntimeException;
+
 class Template
 {
     /** @var string */
@@ -51,6 +53,10 @@ class Template
         /** @psalm-suppress UnresolvableInclude */
         include $templateFile;
 
-        return \trim(\ob_get_clean());
+        if (false === $bufferData = \ob_get_clean()) {
+            throw new RuntimeException('unable to get template data from buffer');
+        }
+
+        return \trim($bufferData);
     }
 }
