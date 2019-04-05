@@ -29,6 +29,9 @@ use fkooman\SAML\SP\Exception\SpException;
 use ParagonIE\ConstantTime\Base64;
 use ParagonIE\ConstantTime\Hex;
 
+/**
+ * The main controlling class for the SP.
+ */
 class SP
 {
     /** @var SpInfo */
@@ -102,6 +105,8 @@ class SP
     }
 
     /**
+     * Prepare and retrieve the login URL.
+     *
      * @param string        $idpEntityId
      * @param string        $relayState
      * @param array<string> $authnContextClassRef
@@ -138,7 +143,9 @@ class SP
     }
 
     /**
-     * @param string $samlResponse
+     * Handle the SAML response message received from the IdP.
+     *
+     * @param string $samlResponse Base64 encoded SAMLResponse
      *
      * @throws \fkooman\SAML\SP\Exception\SpException
      *
@@ -170,7 +177,7 @@ class SP
     }
 
     /**
-     * Obtain URL to redirect to browser to when trying to logout.
+     * Prepare and retrieve the logout URL.
      *
      * NOTE: the IdP may not support "SLO", in that case the provided
      * "relayState" is returned directly (after local logout).

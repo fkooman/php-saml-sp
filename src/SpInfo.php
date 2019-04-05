@@ -24,6 +24,9 @@
 
 namespace fkooman\SAML\SP;
 
+/**
+ * Holds the configuration information of this SP.
+ */
 class SpInfo
 {
     /** @var string */
@@ -45,17 +48,17 @@ class SpInfo
     private $requireEncryptedAssertion = false;
 
     /**
-     * @param string     $entityId
+     * @param string     $entityId   SP entityID
      * @param PrivateKey $privateKey
      * @param PublicKey  $publicKey
-     * @param string     $acsUrl
+     * @param string     $acsUrl     AssertionConsumerService URL
      */
     public function __construct($entityId, PrivateKey $privateKey, PublicKey $publicKey, $acsUrl)
     {
         $this->entityId = $entityId;
-        $this->acsUrl = $acsUrl;
         $this->privateKey = $privateKey;
         $this->publicKey = $publicKey;
+        $this->acsUrl = $acsUrl;
     }
 
     /**
@@ -115,6 +118,9 @@ class SpInfo
     }
 
     /**
+     * Set the requirement of a <saml:EncryptedAssertion> instead of
+     * <saml:Assertion> in the <samlp:Response> from the IdP.
+     *
      * @param bool $requireEncryptedAssertion
      *
      * @return void
@@ -125,6 +131,9 @@ class SpInfo
     }
 
     /**
+     * Get the requirement of a <saml:EncryptedAssertion> instead of
+     * <saml:Assertion> in the <samlp:Response> from the IdP.
+     *
      * @return bool
      */
     public function getRequireEncryptedAssertion()

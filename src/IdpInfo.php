@@ -24,6 +24,9 @@
 
 namespace fkooman\SAML\SP;
 
+/**
+ * Holds the configuration information of an IdP.
+ */
 class IdpInfo
 {
     /** @var string */
