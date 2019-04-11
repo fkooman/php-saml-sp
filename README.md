@@ -26,7 +26,7 @@ with real world deployed IdPs, and be secure at all times.
 - Supports multiple IdP certificates for key rollover
 - Allow specifying `AuthnContextClassRef` as part of the `AuthnRequest`
 - No dependency on `robrichards/xmlseclibs`
-- Serializes `eduPersonTargetedId` as `idpEntityId!spEntityId!persistentId` 
+- Serializes `eduPersonTargetedID` as `idpEntityId!spEntityId!persistentId` 
   like Shibboleth;
 - Verify "scope" of attributes based on `<shibmd:Scope>` metadata element iff
   metadata contains this element
