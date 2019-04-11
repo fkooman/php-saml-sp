@@ -10,6 +10,8 @@
 - Validate schema of outgoing SAML messages (`AuthnRequest`, `LogoutRequest`, `Metadata`)?
 - Validate `RelayState` on return from IdP?
 - check `xenc:EncryptedKey` `@Recipient`?
+- if we receive attributes not in the `urn:oid` format we don't apply any 
+  processing to them, e.g. for the `eduPersonTargetedID` et al.
 
 ## 1.1
 
