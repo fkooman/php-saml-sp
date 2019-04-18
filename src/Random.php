@@ -31,6 +31,6 @@ class Random implements RandomInterface
      */
     public static function requestId()
     {
-        return \random_bytes(16);
+        return \random_bytes(32);
     }
 }
