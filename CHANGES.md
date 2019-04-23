@@ -1,6 +1,6 @@
 # ChangeLog
 
-## 0.1.1 (...)
+## 0.1.1 (2019-04-23)
 - add some additional documentation to the code
 - make the code more robust
 - use 256 bits random instead of 128
