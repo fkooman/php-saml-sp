@@ -64,6 +64,16 @@ class ResponseTest extends TestCase
                     'urn:example:LC-admin',
                     'urn:example:admin',
                 ],
+                'uid' => [
+                    'foo',
+                ],
+                'eduPersonEntitlement' => [
+                    'foo',
+                    'bar',
+                    'baz',
+                    'urn:example:LC-admin',
+                    'urn:example:admin',
+                ],
             ],
             $samlAssertion->getAttributes()
         );
@@ -101,6 +111,14 @@ class ResponseTest extends TestCase
                     'c7ab9096f240ea83747f351c6fcb17d1f57f56f2',
                 ],
                 'urn:oid:1.3.6.1.4.1.5923.1.1.1.10' => [
+                    'https://idp.surfnet.nl!https://labrat.eduvpn.nl/saml!c7ab9096f240ea83747f351c6fcb17d1f57f56f2',
+                ],
+                'eduPersonEntitlement' => [
+                    'urn:mace:surfnet.nl:surfconext.nl:surfnet.nl:eduvpn:eduvpn-admin',
+                    'urn:mace:surfnet.nl:surfconext.nl:surfnet.nl:eduvpn:x-test1',
+                    'urn:mace:surfnet.nl:surfconext.nl:surfnet.nl:eduvpn:x-test3',
+                ],
+                'eduPersonTargetedID' => [
                     'https://idp.surfnet.nl!https://labrat.eduvpn.nl/saml!c7ab9096f240ea83747f351c6fcb17d1f57f56f2',
                 ],
             ],
@@ -296,6 +314,9 @@ class ResponseTest extends TestCase
                 'urn:oid:1.3.6.1.4.1.5923.1.1.1.10' => [
                     'https://testidp3-dev.aai.dfn.de/idp/shibboleth!https://vpn.tuxed.net/vpn-user-portal/_saml/metadata!KYzsRqRzQY5qp+bv9T8bHA/AvsI=',
                 ],
+                'eduPersonTargetedID' => [
+                    'https://testidp3-dev.aai.dfn.de/idp/shibboleth!https://vpn.tuxed.net/vpn-user-portal/_saml/metadata!KYzsRqRzQY5qp+bv9T8bHA/AvsI=',
+                ],
             ],
             $samlAssertion->getAttributes()
         );
@@ -355,6 +376,19 @@ class ResponseTest extends TestCase
                 'urn:oid:1.3.6.1.4.1.5923.1.1.1.6' => [
                     'foo@example.com',
                 ],
+                'uid' => [
+                    'foo',
+                ],
+                'eduPersonEntitlement' => [
+                    'foo',
+                    'bar',
+                    'baz',
+                    'urn:example:LC-admin',
+                    'urn:example:admin',
+                ],
+                'eduPersonPrincipalName' => [
+                    'foo@example.com',
+                ],
             ],
             $samlAssertion->getAttributes()
         );
@@ -383,6 +417,16 @@ class ResponseTest extends TestCase
                     'foo',
                 ],
                 'urn:oid:1.3.6.1.4.1.5923.1.1.1.7' => [
+                    'foo',
+                    'bar',
+                    'baz',
+                    'urn:example:LC-admin',
+                    'urn:example:admin',
+                ],
+                'uid' => [
+                    'foo',
+                ],
+                'eduPersonEntitlement' => [
                     'foo',
                     'bar',
                     'baz',

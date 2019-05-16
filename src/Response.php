@@ -163,6 +163,7 @@ class Response
         }
 
         $attributeList = self::extractAttributes($responseDocument, $assertionElement, $idpInfo, $spInfo);
+        self::friendlyNameMapping($attributeList);
         $samlAssertion = new Assertion($idpInfo->getEntityId(), $authnInstant, $authnContextClassRef, $attributeList);
 
         // NameID
@@ -204,6 +205,25 @@ class Response
         }
 
         return $attributeList;
+    }
+
+    /**
+     * @param array<string,array<string>> $attributeList
+     * @param-out array<string,array<string>> $attributeList
+     *
+     * @return void
+     */
+    private static function friendlyNameMapping(array &$attributeList)
+    {
+        $attributeMapping = include __DIR__.'/attribute_mapping.php';
+        foreach ($attributeList as $attributeName => $attributeValueList) {
+            if (\array_key_exists($attributeName, $attributeMapping)) {
+                $friendlyName = $attributeMapping[$attributeName];
+                if (!\array_key_exists($friendlyName, $attributeList)) {
+                    $attributeList[$friendlyName] = $attributeValueList;
+                }
+            }
+        }
     }
 
     /**
