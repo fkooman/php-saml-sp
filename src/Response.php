@@ -208,6 +208,11 @@ class Response
     }
 
     /**
+     * Map the OID variant to a "friendly name" variant, but only if the
+     * "friendly name" does not already exist as an attribute. If both the
+     * "friendly name" AND OID variant are available from the IdP, it will NOT
+     * be overridden.
+     *
      * @param array<string,array<string>> $attributeList
      * @param-out array<string,array<string>> $attributeList
      *
