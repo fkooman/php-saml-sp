@@ -214,12 +214,12 @@ class Response
      * be overridden.
      *
      * @param array<string,array<string>> $attributeList
-     * @param-out array<string,array<string>> $attributeList
      *
      * @return void
      */
     private static function friendlyNameMapping(array &$attributeList)
     {
+        /** @var array<string,string> */
         $attributeMapping = include __DIR__.'/attribute_mapping.php';
         foreach ($attributeList as $attributeName => $attributeValueList) {
             if (\array_key_exists($attributeName, $attributeMapping)) {
