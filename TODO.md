@@ -9,10 +9,13 @@
 - Do we also need to check `/samlp:Response/saml:Assertion/saml:Conditions/@NotOnOrAfter`?
 - Validate schema of outgoing SAML messages (`AuthnRequest`, `LogoutRequest`, `Metadata`)?
 - Validate `RelayState` on return from IdP?
+  - make sure `RelayState` does NOT exceed 80 bytes, i.e. create a key/value in
+    the user's session
 - check `xenc:EncryptedKey` `@Recipient`?
 - if we receive attributes not in the `urn:oid` format we don't apply any 
   processing to them, e.g. for the `eduPersonTargetedID` et al.
-- make sure `RelayState` does NOT exceed 80 bytes
+- implement automatic metadata refresh (somehow) and verify it using its XML
+  signature
 
 ## 1.1
 
