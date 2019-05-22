@@ -12,6 +12,7 @@
 - check `xenc:EncryptedKey` `@Recipient`?
 - if we receive attributes not in the `urn:oid` format we don't apply any 
   processing to them, e.g. for the `eduPersonTargetedID` et al.
+- make sure `RelayState` does NOT exceed 80 bytes
 
 ## 1.1
 
