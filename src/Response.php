@@ -163,6 +163,7 @@ class Response
         }
 
         $attributeList = self::extractAttributes($responseDocument, $assertionElement, $idpInfo, $spInfo);
+        self::friendlyNameMapping($attributeList);
         $samlAssertion = new Assertion($idpInfo->getEntityId(), $authnInstant, $authnContextClassRef, $attributeList);
 
         // NameID
@@ -204,6 +205,30 @@ class Response
         }
 
         return $attributeList;
+    }
+
+    /**
+     * Map the OID variant to a "friendly name" variant, but only if the
+     * "friendly name" does not already exist as an attribute. If both the
+     * "friendly name" AND OID variant are available from the IdP, it will NOT
+     * be overridden.
+     *
+     * @param array<string,array<string>> $attributeList
+     *
+     * @return void
+     */
+    private static function friendlyNameMapping(array &$attributeList)
+    {
+        /** @var array<string,string> */
+        $attributeMapping = include __DIR__.'/attribute_mapping.php';
+        foreach ($attributeList as $attributeName => $attributeValueList) {
+            if (\array_key_exists($attributeName, $attributeMapping)) {
+                $friendlyName = $attributeMapping[$attributeName];
+                if (!\array_key_exists($friendlyName, $attributeList)) {
+                    $attributeList[$friendlyName] = $attributeValueList;
+                }
+            }
+        }
     }
 
     /**

@@ -184,6 +184,16 @@ EOF;
                     'urn:example:LC-admin',
                     'urn:example:admin',
                 ],
+                'uid' => [
+                    'foo',
+                ],
+                'eduPersonEntitlement' => [
+                    'foo',
+                    'bar',
+                    'baz',
+                    'urn:example:LC-admin',
+                    'urn:example:admin',
+                ],
             ],
             $samlAssertion->getAttributes()
         );
