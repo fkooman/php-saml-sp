@@ -1,5 +1,5 @@
-<samlp:LogoutResponse xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="_6e09018c60b85586a4e513ddef8b311f9f22010ff656c4f530ed66c0f453a165" Version="2.0" IssueInstant="2019-02-23T17:04:25Z" Destination="http://localhost:8081/slo" InResponseTo="_9ac5774131771c2dff4e152c4ef31369">
-    <saml:Issuer>http://localhost:8080/metadata.php</saml:Issuer>
+<samlp:LogoutResponse xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="_837bb1ed0932a824e7a50d6d18870b801cc02db4579b98209bfab65cb527ebd4" Version="2.0" IssueInstant="2019-05-22T21:11:56Z" Destination="http://localhost:8081/slo" InResponseTo="_32d79225e7f53ecddead60c5096347070d4ce0521ee7d734d6a7b1cc1d666d32">
+    <saml:Issuer>http://localhost:8080/metadata</saml:Issuer>
     <samlp:Status>
         <samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success"/>
     </samlp:Status>

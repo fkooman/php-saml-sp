@@ -30,4 +30,9 @@ interface RandomInterface
      * @return string
      */
     public static function requestId();
+
+    /**
+     * @return string
+     */
+    public static function relayState();
 }

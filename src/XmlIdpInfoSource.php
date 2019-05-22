@@ -58,6 +58,8 @@ class XmlIdpInfoSource implements IdpInfoSourceInterface
         // find the IdP with specified entityId, if there is more than one
         // we pick the first... Just don't have multiple entries for the same
         // entityId...
+        // XXX if the IdP entityID does not exists, we have to give a better error!
+        // "expected "DOMElement"" is not helpful!
         $xPathQuery = \sprintf('//md:EntityDescriptor[@entityID="%s"]/md:IDPSSODescriptor', $entityId);
         $domElement = XmlDocument::requireDomElement($this->xmlDocument->domXPath->query($xPathQuery)->item(0));
 

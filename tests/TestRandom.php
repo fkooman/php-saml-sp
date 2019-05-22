@@ -35,4 +35,12 @@ class TestRandom implements RandomInterface
     {
         return '0123456789abcdef';
     }
+
+    /**
+     * @return string
+     */
+    public static function relayState()
+    {
+        return '1234_relay_state_5678';
+    }
 }

@@ -88,10 +88,9 @@ try {
         case '/acs':
             if ('POST' === $requestMethod) {
                 // listen only for POST HTTP request
-                $samlResponse = $_POST['SAMLResponse'];
-                $sp->handleResponse($samlResponse);
+                $returnTo = $sp->handleResponse($_POST);
                 \http_response_code(302);
-                \header(\sprintf('Location: %s', $_POST['RelayState']));
+                \header(\sprintf('Location: %s', $returnTo));
             } else {
                 \http_response_code(405);
                 echo '[405] only POST allowed on ACS';
@@ -108,9 +107,9 @@ try {
         case '/slo':
             // we need the "raw" query string to be able to verify the
             // signatures...
-            $sp->handleLogoutResponse($_SERVER['QUERY_STRING']);
+            $returnTo = $sp->handleLogoutResponse($_SERVER['QUERY_STRING']);
             \http_response_code(302);
-            \header(\sprintf('Location: %s', $_GET['RelayState']));
+            \header(\sprintf('Location: %s', $returnTo));
             break;
 
         default:

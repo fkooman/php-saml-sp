@@ -33,4 +33,12 @@ class Random implements RandomInterface
     {
         return \random_bytes(32);
     }
+
+    /**
+     * @return string
+     */
+    public static function relayState()
+    {
+        return \random_bytes(32);
+    }
 }

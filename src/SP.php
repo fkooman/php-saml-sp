@@ -108,14 +108,14 @@ class SP
      * Prepare and retrieve the login URL.
      *
      * @param string        $idpEntityId
-     * @param string        $relayState
+     * @param string        $returnTo
      * @param array<string> $authnContextClassRef
      *
      * @throws \fkooman\SAML\SP\Exception\SpException
      *
      * @return string
      */
-    public function login($idpEntityId, $relayState, array $authnContextClassRef = [])
+    public function login($idpEntityId, $returnTo, array $authnContextClassRef = [])
     {
         $requestId = \sprintf('_%s', Hex::encode($this->random->requestId()));
         if (false === $idpInfo = $this->idpInfoSource->get($idpEntityId)) {
@@ -135,9 +135,11 @@ class SP
             ]
         );
 
+        $relayState = Base64::encode($this->random->relayState());
         $this->session->set('_fkooman_saml_sp_auth_id', $requestId);
         $this->session->set('_fkooman_saml_sp_auth_idp', $idpEntityId);
         $this->session->set('_fkooman_saml_sp_auth_acr', $authnContextClassRef);
+        $this->session->set(\sprintf('_fkooman_saml_sp_auth_relay_state_%s', $relayState), $returnTo);
 
         return self::prepareRequestUrl($ssoUrl, $authnRequest, $relayState, $this->spInfo->getPrivateKey());
     }
@@ -145,14 +147,18 @@ class SP
     /**
      * Handle the SAML response message received from the IdP.
      *
-     * @param string $samlResponse Base64 encoded SAMLResponse
+     * @param array<string,string> $postData
      *
      * @throws \fkooman\SAML\SP\Exception\SpException
      *
-     * @return void
+     * @return string
      */
-    public function handleResponse($samlResponse)
+    public function handleResponse(array $postData)
     {
+        // XXX make keys exists in postData!
+        $samlResponse = $postData['SAMLResponse'];
+        $relayState = $postData['RelayState'];
+
         $idpEntityId = $this->session->get('_fkooman_saml_sp_auth_idp');
         if (false === $idpInfo = $this->idpInfoSource->get($idpEntityId)) {
             throw new SpException(\sprintf('IdP "%s" not registered', $idpEntityId));
@@ -170,29 +176,33 @@ class SP
             $authnContextClassRef
         );
 
+        $returnTo = $this->session->get(\sprintf('_fkooman_saml_sp_auth_relay_state_%s', $relayState));
+        $this->session->delete(\sprintf('_fkooman_saml_sp_auth_relay_state_%s', $relayState));
         $this->session->delete('_fkooman_saml_sp_auth_id');
         $this->session->delete('_fkooman_saml_sp_auth_idp');
         $this->session->delete('_fkooman_saml_sp_auth_acr');
         $this->session->set('_fkooman_saml_sp_auth_assertion', $samlAssertion);
+
+        return $returnTo;
     }
 
     /**
      * Prepare and retrieve the logout URL.
      *
      * NOTE: the IdP may not support "SLO", in that case the provided
-     * "relayState" is returned directly (after local logout).
+     * "returnTo" is returned directly (after local logout).
      *
-     * @param string $relayState
+     * @param string $returnTo
      *
      * @throws \fkooman\SAML\SP\Exception\SpException
      *
      * @return string
      */
-    public function logout($relayState)
+    public function logout($returnTo)
     {
         if (false === $samlAssertion = $this->getAssertion()) {
             // no session available
-            return $relayState;
+            return $returnTo;
         }
 
         $idpEntityId = $samlAssertion->getIssuer();
@@ -205,16 +215,16 @@ class SP
         if (null === $samlAssertion->getNameId()) {
             // IdP's assertion does NOT have a NameID, so we cannot construct a
             // LogoutRequest
-            return $relayState;
+            return $returnTo;
         }
         $idpSloUrl = $idpInfo->getSloUrl();
         if (null === $idpSloUrl) {
             // IdP does not support logout, nothing we can do about it
-            return $relayState;
+            return $returnTo;
         }
         if (null === $this->spInfo->getSloUrl()) {
             // SP does not support logout, do not redirect to IdP
-            return $relayState;
+            return $returnTo;
         }
 
         $requestId = \sprintf('_%s', Hex::encode($this->random->requestId()));
@@ -228,8 +238,11 @@ class SP
                 'NameID' => $samlAssertion->getNameId(),
             ]
         );
+
+        $relayState = Base64::encode($this->random->relayState());
         $this->session->set('_fkooman_saml_sp_auth_logout_id', $requestId);
         $this->session->set('_fkooman_saml_sp_auth_logout_idp', $idpEntityId);
+        $this->session->set(\sprintf('_fkooman_saml_sp_auth_logout_relay_state_%s', $relayState), $returnTo);
 
         return self::prepareRequestUrl($idpSloUrl, $logoutRequest, $relayState, $this->spInfo->getPrivateKey());
     }
@@ -239,7 +252,7 @@ class SP
      *
      * @throws \fkooman\SAML\SP\Exception\SpException
      *
-     * @return void
+     * @return string
      */
     public function handleLogoutResponse($queryString)
     {
@@ -253,16 +266,22 @@ class SP
             throw new SpException(\sprintf('IdP "%s" not registered', $idpEntityId));
         }
 
+        $queryParameters = new QueryParameters($queryString);
         $logoutResponse = new LogoutResponse();
         $logoutResponse->verify(
-            new QueryParameters($queryString),
+            $queryParameters,
             $this->session->get('_fkooman_saml_sp_auth_logout_id'),
             $spSloUrl,
             $idpInfo
         );
 
+        $relayState = $queryParameters->requireQueryParameter('RelayState');
+        $returnTo = $this->session->get(\sprintf('_fkooman_saml_sp_auth_logout_relay_state_%s', $relayState));
+        $this->session->delete(\sprintf('_fkooman_saml_sp_auth_logout_relay_state_%s', $relayState));
         $this->session->delete('_fkooman_saml_sp_auth_logout_id');
         $this->session->delete('_fkooman_saml_sp_auth_logout_idp');
+
+        return $returnTo;
     }
 
     /**

@@ -75,7 +75,7 @@ class SPTest extends TestCase
 </samlp:AuthnRequest>
 EOF;
 
-        $relayState = 'http://localhost:8080/app';
+        $relayState = \base64_encode('1234_relay_state_5678');
         $httpQuery = \http_build_query(
             [
                 'SAMLRequest' => \base64_encode(\gzdeflate($samlRequest)),
@@ -88,6 +88,7 @@ EOF;
         $this->assertSame('http://localhost:8080/metadata.php', $session->get('_fkooman_saml_sp_auth_idp'));
         $this->assertSame('_30313233343536373839616263646566', $session->get('_fkooman_saml_sp_auth_id'));
         $this->assertSame([], $session->get('_fkooman_saml_sp_auth_acr'));
+        $this->assertSame('http://localhost:8080/app', $session->get(\sprintf('_fkooman_saml_sp_auth_relay_state_%s', $relayState)));
     }
 
     public function testAuthnContextClassRef()
@@ -107,7 +108,7 @@ EOF;
 </samlp:AuthnRequest>
 EOF;
 
-        $relayState = 'http://localhost:8080/app';
+        $relayState = \base64_encode('1234_relay_state_5678');
         $httpQuery = \http_build_query(
             [
                 'SAMLRequest' => \base64_encode(\gzdeflate($samlRequest)),
@@ -158,9 +159,16 @@ EOF;
         $session->set('_fkooman_saml_sp_auth_idp', 'http://localhost:8080/metadata.php');
         $session->set('_fkooman_saml_sp_auth_id', '_2483d0b8847ccaa5edf203dad685f860');
         $session->set('_fkooman_saml_sp_auth_acr', []);
+        $session->set('_fkooman_saml_sp_auth_relay_state_1234_relay_state_5678', 'http://localhost:8080/return_to');
         $this->sp->setSession($session);
         $this->sp->setDateTime(new DateTime('2019-02-23T17:01:21Z'));
-        $this->sp->handleResponse(\base64_encode($samlResponse));
+        $returnTo = $this->sp->handleResponse(
+            [
+                'SAMLResponse' => \base64_encode($samlResponse),
+                'RelayState' => '1234_relay_state_5678',
+            ]
+        );
+        $this->assertSame('http://localhost:8080/return_to', $returnTo);
         $samlAssertion = $session->get('_fkooman_saml_sp_auth_assertion');
         $this->assertSame('http://localhost:8080/metadata.php', $samlAssertion->getIssuer());
         $this->assertSame('<saml:NameID SPNameQualifier="http://localhost:8081/metadata" Format="urn:oasis:names:tc:SAML:2.0:nameid-format:transient">bGFxwg50lVJbZsA2OHcqchfJ5HCDuxcFYBPxUi_dumo</saml:NameID>', $samlAssertion->getNameId()->toXML());
@@ -195,7 +203,12 @@ EOF;
         $session->set('_fkooman_saml_sp_auth_acr', ['urn:x-example:bar']);
         $this->sp->setSession($session);
         $this->sp->setDateTime(new DateTime('2019-02-23T17:01:21Z'));
-        $this->sp->handleResponse(\base64_encode($samlResponse));
+        $this->sp->handleResponse(
+            [
+                'SAMLResponse' => \base64_encode($samlResponse),
+                'RelayState' => \base64_encode('1234_relay_state_5678'),
+            ]
+        );
     }
 
     public function testLogout()
@@ -235,7 +248,7 @@ EOF;
   <saml:NameID SPNameQualifier="http://localhost:8081/metadata" Format="urn:oasis:names:tc:SAML:2.0:nameid-format:transient">LtrfxjC6GOQ5pywYueOfXJDwfhQ7dZ4t9k3yGEB1WhY</saml:NameID></samlp:LogoutRequest>
 EOF;
 
-        $relayState = 'http://localhost:8080/app';
+        $relayState = \base64_encode('1234_relay_state_5678');
         $httpQuery = \http_build_query(
             [
                 'SAMLRequest' => \base64_encode(\gzdeflate($logoutRequest)),
@@ -252,20 +265,22 @@ EOF;
     {
         $logoutResponse = \file_get_contents(__DIR__.'/data/assertion/LogoutResponse.xml');
         $session = new TestSession();
-        $session->set('_fkooman_saml_sp_auth_logout_id', '_9ac5774131771c2dff4e152c4ef31369');
-        $session->set('_fkooman_saml_sp_auth_logout_idp', 'http://localhost:8080/metadata.php');
+        $session->set('_fkooman_saml_sp_auth_logout_id', '_32d79225e7f53ecddead60c5096347070d4ce0521ee7d734d6a7b1cc1d666d32');
+        $session->set('_fkooman_saml_sp_auth_logout_idp', 'http://localhost:8080/metadata');
+        $session->set('_fkooman_saml_sp_auth_logout_relay_state_+/M7/sd8CgDR7BXVpw2lqgsalw54taH0E2eYa2RrZcI=', 'http://localhost:8081/');
         $this->sp->setSession($session);
 
         $queryString = \http_build_query(
             [
                 'SAMLResponse' => \base64_encode(\gzdeflate($logoutResponse)),
-                'RelayState' => 'http://localhost:8081/',
+                'RelayState' => '+/M7/sd8CgDR7BXVpw2lqgsalw54taH0E2eYa2RrZcI=',
                 'SigAlg' => 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256',
-                'Signature' => 'rp/pDrK7fK/FSflLxhj+jvSkj/EnLHJ+sOWTXRYwHWpHxA1SbRgxFlgNORAYGJgLHSVd/zL9eFiYVgfNlGznZVWIo/CBJK6RyV2/vNmyBh9XcMCVIajiAZ/OK6Q+NoH3AhGeJ4D9i8l+CJFFijMSqMBXPVxuajxVG80gxcnNWDtHTF5hi3/aHf10PsT5lG12IMHLwwwFNKIUIRROnUclqFuhDGwusb2qi5PCNlrn07Azl1vkFGuTDDjpXpH9K6sfZ5hx9aJ11X1YK2VKvsEnfMh6D/ZD34xlAC+VibTlggkDuldjvGtyUNM3qKgSAwQ7oir3CAReCg4YwHo82hHdg0BlNsIe8sScvFoR9GYM9YRoFQXiIbIFkpKYHR8EWduMqu5vaPko9T9f7YAmcjSkE9U4ilXD/82kfXQPtM5Bl+Ei/ZvbBDSHTLf45hnn5HsL6ze0/Hun6Yk6eCenDFdLVo1FG2UeJ7ogMbA6RqXxJKiM+ZyZuXmisLoPFSivO5TZ',
+                'Signature' => 'MNvAlJmSRH0PpRNpVLt4/diLRhi7LjV986I0ZL+VXMSxsEnd197D7H/xG4EpdpiA4n+BWPyPIhlvq3xCjcr1SI3UJ53NKYyOfTUq62c+Cz6ZmSmq3ttpw5VvSf8slUd/jfNs7NfdT80V7mo992DZjzE8DBoTzUS+ByrJCfkhiPrpjc2TwiL4X6XZ80DD51k4tdQyDVbgBCnw/AlIljzhodIzg+PQp89LkAXx+4wbsxy1pqltxOhZ2toE91SPzuVYPKJQXlFVLqaGPegU+9yJCtf676KNoJ19lxtKXigBZzEouJ72p/Tsxsa+gQI47YadTOP9a3KQSE1IHYeFYzg/EsbU5RqhLPYyFksSEY+a4VNenoIWbC7X3UMj8BTMrmtE+dqQgaJ/RhhCr+lwbtNCOqJ2l9h8bc5Nrq8ycgM6l0iR+h4AFpIYl3XdPcebNu90Sn8LNFQu+30vf9QT21VFQQmo2yKnYBUwyPbW8WgTVX+/JihlpnGjuRadY7efcHEK',
             ]
         );
-        $this->sp->handleLogoutResponse($queryString);
-
+        $returnTo = $this->sp->handleLogoutResponse($queryString);
+        $this->assertSame('http://localhost:8081/', $returnTo);
+        $this->assertFalse($session->has('_fkooman_saml_sp_auth_logout_relay_state_+/M7/sd8CgDR7BXVpw2lqgsalw54taH0E2eYa2RrZcI='));
         $this->assertFalse($session->has('_fkooman_saml_sp_auth_logout_id'));
         $this->assertFalse($session->has('_fkooman_saml_sp_auth_logout_idp'));
     }
