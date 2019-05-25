@@ -10,9 +10,11 @@
 - Validate schema of outgoing SAML messages (`AuthnRequest`, `LogoutRequest`, `Metadata`)?
 - check `xenc:EncryptedKey` `@Recipient`?
 - if we receive attributes not in the `urn:oid` format we don't apply any 
-  processing to them, e.g. for the `eduPersonTargetedID` et al.
+  processing to them, e.g. for the `eduPersonTargetedID` et al, that may be
+  dangerous!
 - implement automatic metadata refresh (somehow) and verify it using its XML
   signature
+- verify "Subject ID" attribute scopes as well
 
 ## 1.1
 
