@@ -260,6 +260,10 @@ class Response
                 'urn:oid:1.3.6.1.4.1.5923.1.1.1.6',  // eduPersonPrincipalName
                 'urn:oid:1.3.6.1.4.1.5923.1.1.1.9',  // eduPersonScopedAffiliation
                 'urn:oid:1.3.6.1.4.1.5923.1.1.1.13', // eduPersonUniqueId
+                // SAML V2.0 Subject Identifier Attributes Profile Version 1.0
+                // [SAML-SubjectID-v1.0]
+                'urn:oasis:names:tc:SAML:attribute:pairwise-id',
+                'urn:oasis:names:tc:SAML:attribute:subject-id',
             ];
 
             if (\in_array($attributeName, $scopedAttributeNameList, true)) {

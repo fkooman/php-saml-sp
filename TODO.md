@@ -14,7 +14,6 @@
   dangerous!
 - implement automatic metadata refresh (somehow) and verify it using its XML
   signature
-- verify "Subject ID" attribute scopes as well
 
 ## 1.1
 
