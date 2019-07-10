@@ -8,6 +8,7 @@
 - create an attribute mapping from `urn:oid` attributes to "friendly" 
   names
 - verify "Subject Identifier Attributes" scopes as well
+- remove all encryption support, better no encryption than insecure encryption
 
 ## 0.1.1 (2019-04-23)
 - add some additional documentation to the code
