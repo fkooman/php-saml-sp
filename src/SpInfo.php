@@ -44,9 +44,6 @@ class SpInfo
     /** @var string|null */
     private $sloUrl = null;
 
-    /** @var bool */
-    private $requireEncryptedAssertion = false;
-
     /**
      * @param string     $entityId   SP entityID
      * @param PrivateKey $privateKey
@@ -115,29 +112,5 @@ class SpInfo
     public function getSloUrl()
     {
         return $this->sloUrl;
-    }
-
-    /**
-     * Set the requirement of a <saml:EncryptedAssertion> instead of
-     * <saml:Assertion> in the <samlp:Response> from the IdP.
-     *
-     * @param bool $requireEncryptedAssertion
-     *
-     * @return void
-     */
-    public function setRequireEncryptedAssertion($requireEncryptedAssertion)
-    {
-        $this->requireEncryptedAssertion = $requireEncryptedAssertion;
-    }
-
-    /**
-     * Get the requirement of a <saml:EncryptedAssertion> instead of
-     * <saml:Assertion> in the <samlp:Response> from the IdP.
-     *
-     * @return bool
-     */
-    public function getRequireEncryptedAssertion()
-    {
-        return $this->requireEncryptedAssertion;
     }
 }

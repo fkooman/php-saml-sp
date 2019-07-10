@@ -43,11 +43,6 @@ with real world deployed IdPs, and be secure at all times.
 
 - PHP >= 5.4
 - `php-openssl`
-- `php-sodium` (PHP >= 7.2) or `php-pecl-libsodium` for `EncryptedAssertion` 
-  support
-  - Debian 9: `sudo apt install php-libsodium`
-  - CentOS 7: `sudo yum -y install php-pecl-libsodium`
-  - Fedora >= 28: `sudo dnf -y install php-sodium`
 - See `composer.json` for other dependencies
 
 # Crypto
@@ -59,15 +54,6 @@ implement. There is no choice, only the below algorithms are supported.
 
 - Digest: `http://www.w3.org/2001/04/xmlenc#sha256`
 - Signature: `http://www.w3.org/2001/04/xmldsig-more#rsa-sha256`
-
-## Encryption
-
-- Encryption: `http://www.w3.org/2009/xmlenc11#aes256-gcm`
-- Key Transport: `http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p`
-- Digest: `http://www.w3.org/2000/09/xmldsig#sha1`
-
-NOTE: currently only MGF1+SHA1 is supported due to PHP's OpenSSL limitations,
-we aim for MGF1+SHA256 support in version 1.1 of this library.
 
 # X.509
 
@@ -104,8 +90,6 @@ immediately to the IdP. The metadata of the SP can be found at this URL:
 Make sure:
 
 - the IdP signs the `saml:Assertion` and/or the `samlp:Response`;
-- the IdP, when supporting encryption, MUST encrypt using `aes-256-gcm`, other
-  algorithms are NOT supported;
 - the IdP verifies the signature on the `samlp:AuthnRequest`;
 - the IdP verifies the signature on the `samlp:LogoutRequest`;
 - the IdP signs the `samlp:LogoutResponse`.
@@ -118,10 +102,6 @@ for this SP library:
     'validate.authnrequest' => true,
     'sign.logout' => true,
     'validate.logout' => true,
-
-As of writing, simpleSAMLphp does not support `EncryptedAssertion` with 
-`aes-256-gcm`. Follow the 
-[progress](https://github.com/robrichards/xmlseclibs/pull/192).
 
 # Tests
 

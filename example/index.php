@@ -43,8 +43,7 @@ try {
     $spInfo = new SpInfo(
         'http://localhost:8081/metadata',
         PrivateKey::fromFile('sp.key'), // used to sign AuthnRequest /
-                                        // LogoutRequest and decrypt
-                                        // EncryptedAssertion
+                                        // LogoutRequest
         PublicKey::fromFile('sp.crt'),
         'http://localhost:8081/acs'
     );

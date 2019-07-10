@@ -293,35 +293,6 @@ class ResponseTest extends TestCase
         $this->assertSame('<saml:NameID Format="urn:oasis:names:tc:SAML:2.0:nameid-format:transient">WrlwOmM5zcufWzakxkurPqQnZtvlDoxJt6kwJvf950M=</saml:NameID>', $samlAssertion->getNameId()->toXML());
     }
 
-    public function testShibIdPEnc()
-    {
-        $response = new Response(new DateTime('2019-02-28T14:00:08.163Z'));
-        $samlResponse = \file_get_contents(__DIR__.'/data/assertion/ShibIdpEnc.xml');
-        $samlAssertion = $response->verify(
-            new SpInfo(
-                'https://vpn.tuxed.net/vpn-user-portal/_saml/metadata',
-                PrivateKey::fromFile(__DIR__.'/data/certs/sp2.key'),
-                PublicKey::fromFile(__DIR__.'/data/certs/sp2.crt'),
-                'https://vpn.tuxed.net/vpn-user-portal/_saml/acs'
-            ),
-            new IdpInfo('https://testidp3-dev.aai.dfn.de/idp/shibboleth', 'SSO', null, [PublicKey::fromFile(__DIR__.'/data/certs/shib_idp.crt')], []),
-            $samlResponse,
-            '_075f2ff7575c50efaead79a1c2a1805c',
-            []
-        );
-        $this->assertSame(
-            [
-                'urn:oid:1.3.6.1.4.1.5923.1.1.1.10' => [
-                    'https://testidp3-dev.aai.dfn.de/idp/shibboleth!https://vpn.tuxed.net/vpn-user-portal/_saml/metadata!KYzsRqRzQY5qp+bv9T8bHA/AvsI=',
-                ],
-                'eduPersonTargetedID' => [
-                    'https://testidp3-dev.aai.dfn.de/idp/shibboleth!https://vpn.tuxed.net/vpn-user-portal/_saml/metadata!KYzsRqRzQY5qp+bv9T8bHA/AvsI=',
-                ],
-            ],
-            $samlAssertion->getAttributes()
-        );
-    }
-
     /**
      * @expectedException \fkooman\SAML\SP\Exception\ResponseException
      * @expectedExceptionMessage urn:oasis:names:tc:SAML:2.0:status:Responder (urn:oasis:names:tc:SAML:2.0:status:NoAuthnContext)

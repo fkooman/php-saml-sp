@@ -27,8 +27,6 @@ namespace fkooman\SAML\SP;
 use DOMElement;
 use fkooman\SAML\SP\Exception\CryptoException;
 use ParagonIE\ConstantTime\Base64;
-use ParagonIE\ConstantTime\Binary;
-use RuntimeException;
 
 class Crypto
 {
@@ -36,9 +34,6 @@ class Crypto
     const SIGN_ALGO = 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256';
     const SIGN_DIGEST_ALGO = 'http://www.w3.org/2001/04/xmlenc#sha256';
     const SIGN_HASH_ALGO = 'sha256';
-
-    const ENCRYPT_ALGO = 'http://www.w3.org/2009/xmlenc11#aes256-gcm';
-    const ENCRYPT_KEY_DIGEST_ALGO = 'http://www.w3.org/2000/09/xmldsig#sha1';
 
     /**
      * @param XmlDocument      $xmlDocument
@@ -127,74 +122,5 @@ class Crypto
         }
 
         return $outSig;
-    }
-
-    /**
-     * @param XmlDocument $xmlDocument
-     * @param \DOMElement $domElement
-     * @param PrivateKey  $privateKey
-     *
-     * @throws \fkooman\SAML\SP\Exception\CryptoException
-     *
-     * @return string
-     */
-    public static function decryptXml(XmlDocument $xmlDocument, DOMElement $domElement, PrivateKey $privateKey)
-    {
-        // make sure this hardware supports aes-256-gcm
-        if (false === \sodium_crypto_aead_aes256gcm_is_available()) {
-            throw new RuntimeException('hardware accelerated AES not available on this system');
-        }
-
-        // make sure we support the encryption algorithm
-        $encryptionMethod = $xmlDocument->domXPath->evaluate('string(xenc:EncryptedData/xenc:EncryptionMethod/@Algorithm)', $domElement);
-        if (self::ENCRYPT_ALGO !== $encryptionMethod) {
-            throw new CryptoException(\sprintf('only encryption method "%s" is supported', self::ENCRYPT_ALGO));
-        }
-
-        // make sure we support the key transport encryption algorithm
-        $keyEncryptionMethod = $xmlDocument->domXPath->evaluate('string(xenc:EncryptedData/ds:KeyInfo/xenc:EncryptedKey/xenc:EncryptionMethod/@Algorithm)', $domElement);
-
-        // PHP 5.4 does not support "const" array
-        $encryptKeyAlgoList = [
-            'http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p',
-            'http://www.w3.org/2001/04/xmlenc#rsa-oaep',
-        ];
-
-        if (!\in_array($keyEncryptionMethod, $encryptKeyAlgoList, true)) {
-            throw new CryptoException(\sprintf('only key encryption algorithm(s) "%s" are supported', \implode(',', $encryptKeyAlgoList)));
-        }
-
-        // make sure we support the key transport encryption digest algorithm
-        $keyEncryptionDigestMethod = $xmlDocument->domXPath->evaluate('string(xenc:EncryptedData/ds:KeyInfo/xenc:EncryptedKey/xenc:EncryptionMethod/ds:DigestMethod/@Algorithm)', $domElement);
-        if (self::ENCRYPT_KEY_DIGEST_ALGO !== $keyEncryptionDigestMethod) {
-            throw new CryptoException(\sprintf('only key encryption digest "%s" is supported', self::ENCRYPT_KEY_DIGEST_ALGO));
-        }
-
-        // extract the session key
-        $keyCipherValue = $xmlDocument->domXPath->evaluate('string(xenc:EncryptedData/ds:KeyInfo/xenc:EncryptedKey/xenc:CipherData/xenc:CipherValue)', $domElement);
-
-        // decrypt the session key
-        if (false === \openssl_private_decrypt(Base64::decode($keyCipherValue), $symmetricEncryptionKey, $privateKey->raw(), OPENSSL_PKCS1_OAEP_PADDING)) {
-            throw new CryptoException('unable to extract session key');
-        }
-
-        // make sure the obtained key is the exact length we expect
-        if (SODIUM_CRYPTO_AEAD_AES256GCM_KEYBYTES !== Binary::safeStrlen($symmetricEncryptionKey)) {
-            throw new CryptoException('session key has unexpected length');
-        }
-
-        // extract the encrypted Assertion
-        $assertionCipherValue = Base64::decode($xmlDocument->domXPath->evaluate('string(xenc:EncryptedData/xenc:CipherData/xenc:CipherValue)', $domElement));
-
-        // split the nonce and data
-        $cipherNonce = Binary::safeSubstr($assertionCipherValue, 0, SODIUM_CRYPTO_AEAD_AES256GCM_NPUBBYTES);
-        $cipherText = Binary::safeSubstr($assertionCipherValue, SODIUM_CRYPTO_AEAD_AES256GCM_NPUBBYTES);
-
-        // decrypt the Assertion
-        if (false === $decryptedAssertion = \sodium_crypto_aead_aes256gcm_decrypt($cipherText, '', $cipherNonce, $symmetricEncryptionKey)) {
-            throw new CryptoException('unable to decrypt data');
-        }
-
-        return $decryptedAssertion;
     }
 }
