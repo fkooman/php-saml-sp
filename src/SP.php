@@ -52,10 +52,6 @@ class SP
     /** @var Template */
     private $tpl;
 
-    /**
-     * @param SpInfo                 $spInfo
-     * @param IdpInfoSourceInterface $idpInfoSource
-     */
     public function __construct(SpInfo $spInfo, IdpInfoSourceInterface $idpInfoSource)
     {
         $this->spInfo = $spInfo;
@@ -147,8 +143,8 @@ class SP
     /**
      * Handle the SAML response message received from the IdP.
      *
-     * @param string      $samlResponse
-     * @param string|null $relayState
+     * @param string $samlResponse
+     * @param string $relayState
      *
      * @throws \fkooman\SAML\SP\Exception\SpException
      *
