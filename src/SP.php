@@ -147,18 +147,15 @@ class SP
     /**
      * Handle the SAML response message received from the IdP.
      *
-     * @param array<string,string> $postData
+     * @param string      $samlResponse
+     * @param string|null $relayState
      *
      * @throws \fkooman\SAML\SP\Exception\SpException
      *
      * @return string
      */
-    public function handleResponse(array $postData)
+    public function handleResponse($samlResponse, $relayState)
     {
-        // XXX make keys exists in postData!
-        $samlResponse = $postData['SAMLResponse'];
-        $relayState = $postData['RelayState'];
-
         $idpEntityId = $this->session->get('_fkooman_saml_sp_auth_idp');
         if (false === $idpInfo = $this->idpInfoSource->get($idpEntityId)) {
             throw new SpException(\sprintf('IdP "%s" not registered', $idpEntityId));

@@ -160,10 +160,8 @@ EOF;
         $this->sp->setSession($session);
         $this->sp->setDateTime(new DateTime('2019-02-23T17:01:21Z'));
         $returnTo = $this->sp->handleResponse(
-            [
-                'SAMLResponse' => \base64_encode($samlResponse),
-                'RelayState' => '1234_relay_state_5678',
-            ]
+            \base64_encode($samlResponse),
+            '1234_relay_state_5678'
         );
         $this->assertSame('http://localhost:8080/return_to', $returnTo);
         $samlAssertion = $session->get('_fkooman_saml_sp_auth_assertion');
@@ -211,10 +209,8 @@ EOF;
         $this->sp->setSession($session);
         $this->sp->setDateTime(new DateTime('2019-02-23T17:01:21Z'));
         $this->sp->handleResponse(
-            [
-                'SAMLResponse' => \base64_encode($samlResponse),
-                'RelayState' => \base64_encode('1234_relay_state_5678'),
-            ]
+            \base64_encode($samlResponse),
+            \base64_encode('1234_relay_state_5678')
         );
     }
 

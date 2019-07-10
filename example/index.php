@@ -87,7 +87,7 @@ try {
         case '/acs':
             if ('POST' === $requestMethod) {
                 // listen only for POST HTTP request
-                $returnTo = $sp->handleResponse($_POST);
+                $returnTo = $sp->handleResponse($_POST['SAMLResponse'], $_POST['RelayState']);
                 \http_response_code(302);
                 \header(\sprintf('Location: %s', $returnTo));
             } else {
