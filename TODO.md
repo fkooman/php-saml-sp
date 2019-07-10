@@ -14,6 +14,8 @@
   dangerous!
 - implement automatic metadata refresh (somehow) and verify it using its XML
   signature
+- allow IdP-first login
+- work with `SameSite=Lax` (Google Chrome change)
 
 ## 1.1
 
