@@ -24,6 +24,7 @@
 
 namespace fkooman\SAML\SP;
 
+use DOMElement;
 use fkooman\SAML\SP\Exception\NameIdException;
 
 class NameId
@@ -53,7 +54,7 @@ class NameId
      *
      * @throws \fkooman\SAML\SP\Exception\NameIdException
      */
-    public function __construct($idpEntityId, $spEntityId, \DOMElement $nameIdElement)
+    public function __construct($idpEntityId, $spEntityId, DOMElement $nameIdElement)
     {
         $nameQualifier = $nameIdElement->hasAttribute('NameQualifier') ? $nameIdElement->getAttribute('NameQualifier') : null;
         if (null !== $nameQualifier) {

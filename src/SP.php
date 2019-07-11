@@ -250,8 +250,7 @@ class SP
     public function handleLogoutResponse($queryString)
     {
         if (null === $spSloUrl = $this->spInfo->getSloUrl()) {
-            // SP does not support logout, nothing we can do here...
-            return;
+            throw new SpException('SP does not support SLO');
         }
 
         $idpEntityId = $this->session->get('_fkooman_saml_sp_auth_logout_idp');
