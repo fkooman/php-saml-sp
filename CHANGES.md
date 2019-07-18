@@ -5,10 +5,14 @@
   "return to" URL to avoid creating a `RelayState` that exceeds 80 bytes which 
   is not allowed according to SAML specification and enforced by (some?) 
   Shibboleth IdPs
+- implement `SP::hasAssertion()` that returns `bool`, `SP::getAssertion()` will
+  always return `Assertion` or throw an `SPException`
 - create an attribute mapping from `urn:oid` attributes to "friendly" 
   names
 - verify "Subject Identifier Attributes" scopes as well
 - remove all encryption support, better no encryption than insecure encryption
+- cleanup session variable handling, use only keys for authentication, logout
+  and the assertion
 
 ## 0.1.1 (2019-04-23)
 - add some additional documentation to the code
