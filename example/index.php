@@ -58,11 +58,12 @@ try {
     switch ($pathInfo) {
         // landing page
         case '/':
-            if (false === $samlAssertion = $sp->getAssertion()) {
+            if (!$sp->hasAssertion()) {
                 // not logged in, redirect to IdP
                 \http_response_code(302);
                 \header(\sprintf('Location: %s', $sp->login($idpEntityId, $relayState)));
             } else {
+                $samlAssertion = $sp->getAssertion();
                 echo '<pre>';
                 echo 'Issuer      : '.$samlAssertion->getIssuer().PHP_EOL;
                 if (null !== $nameId = $samlAssertion->getNameId()) {
