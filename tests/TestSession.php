@@ -42,9 +42,11 @@ class TestSession implements SessionInterface
     }
 
     /**
+     * Return the value of the session key.
+     *
      * @param string $key
      *
-     * @return mixed
+     * @return string
      */
     public function get($key)
     {
@@ -56,8 +58,23 @@ class TestSession implements SessionInterface
     }
 
     /**
+     * Return the value of the session key and delete the key.
+     *
      * @param string $key
-     * @param mixed  $value
+     *
+     * @return string
+     */
+    public function take($key)
+    {
+        $sessionValue = $this->get($key);
+        $this->delete($key);
+
+        return $sessionValue;
+    }
+
+    /**
+     * @param string $key
+     * @param string $value
      *
      * @return void
      */

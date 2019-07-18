@@ -24,45 +24,66 @@
 
 namespace fkooman\SAML\SP;
 
-interface SessionInterface
+/**
+ * Keep track of the state of the AuthnRequest.
+ */
+class AuthnRequestState
 {
-    /**
-     * @param string $key
-     *
-     * @return bool
-     */
-    public function has($key);
+    /** @var string */
+    private $requestId;
+
+    /** @var string */
+    private $idpEntityId;
+
+    /** @var array<string> */
+    private $authnContextClassRef;
+
+    /** @var string */
+    private $returnTo;
 
     /**
-     * Return the value of the session key.
-     *
-     * @param string $key
-     *
+     * @param string        $requestId
+     * @param string        $idpEntityId
+     * @param array<string> $authnContextClassRef
+     * @param string        $returnTo
+     */
+    public function __construct($requestId, $idpEntityId, array $authnContextClassRef, $returnTo)
+    {
+        $this->requestId = $requestId;
+        $this->idpEntityId = $idpEntityId;
+        $this->authnContextClassRef = $authnContextClassRef;
+        $this->returnTo = $returnTo;
+    }
+
+    /**
      * @return string
      */
-    public function get($key);
+    public function getRequestId()
+    {
+        return $this->requestId;
+    }
 
     /**
-     * Return the value of the session key and delete the key.
-     *
-     * @param string $key
-     *
      * @return string
      */
-    public function take($key);
+    public function getIdpEntityId()
+    {
+        return $this->idpEntityId;
+    }
 
     /**
-     * @param string $key
-     * @param string $value
-     *
-     * @return void
+     * @return array<string>
      */
-    public function set($key, $value);
+    public function getAuthnContextClassRef()
+    {
+        return $this->authnContextClassRef;
+    }
 
     /**
-     * @param string $key
-     *
-     * @return void
+     * @return string
      */
-    public function delete($key);
+    public function getReturnTo()
+    {
+        return $this->returnTo;
+    }
 }

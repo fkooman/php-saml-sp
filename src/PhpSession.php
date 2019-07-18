@@ -26,7 +26,7 @@ namespace fkooman\SAML\SP;
 
 use fkooman\SAML\SP\Exception\SessionException;
 
-class Session implements SessionInterface
+class PhpSession implements SessionInterface
 {
     /**
      * @param string $key
@@ -41,11 +41,11 @@ class Session implements SessionInterface
     }
 
     /**
+     * Return the value of the session key.
+     *
      * @param string $key
      *
-     * @throws \fkooman\SAML\SP\Exception\SessionException
-     *
-     * @return mixed
+     * @return string
      */
     public function get($key)
     {
@@ -58,8 +58,23 @@ class Session implements SessionInterface
     }
 
     /**
+     * Return the value of the session key and delete the key.
+     *
      * @param string $key
-     * @param mixed  $value
+     *
+     * @return string
+     */
+    public function take($key)
+    {
+        $sessionValue = $this->get($key);
+        $this->delete($key);
+
+        return $sessionValue;
+    }
+
+    /**
+     * @param string $key
+     * @param string $value
      *
      * @return void
      */

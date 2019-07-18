@@ -57,7 +57,7 @@ class SP
         $this->spInfo = $spInfo;
         $this->idpInfoSource = $idpInfoSource;
         $this->dateTime = new DateTime();
-        $this->session = new Session();
+        $this->session = new PhpSession();
         $this->random = new Random();
         $this->tpl = new Template(__DIR__.'/tpl');
     }
@@ -132,10 +132,8 @@ class SP
         );
 
         $relayState = Base64::encode($this->random->relayState());
-        $this->session->set('_fkooman_saml_sp_auth_id', $requestId);
-        $this->session->set('_fkooman_saml_sp_auth_idp', $idpEntityId);
-        $this->session->set('_fkooman_saml_sp_auth_acr', $authnContextClassRef);
-        $this->session->set(\sprintf('_fkooman_saml_sp_auth_relay_state_%s', $relayState), $returnTo);
+        $authnRequestState = new AuthnRequestState($requestId, $idpEntityId, $authnContextClassRef, $returnTo);
+        $this->session->set($relayState, \serialize($authnRequestState));
 
         return self::prepareRequestUrl($ssoUrl, $authnRequest, $relayState, $this->spInfo->getPrivateKey());
     }
@@ -152,31 +150,31 @@ class SP
      */
     public function handleResponse($samlResponse, $relayState)
     {
-        $idpEntityId = $this->session->get('_fkooman_saml_sp_auth_idp');
+        $authnRequestState = \unserialize($this->session->take($relayState));
+        if (!($authnRequestState instanceof AuthnRequestState)) {
+            throw new \RuntimeException('Wat XXX');
+        }
+
+        $idpEntityId = $authnRequestState->getIdpEntityId();
         if (false === $idpInfo = $this->idpInfoSource->get($idpEntityId)) {
             throw new SpException(\sprintf('IdP "%s" not registered', $idpEntityId));
         }
 
         /** @var array<string> */
-        $authnContextClassRef = $this->session->get('_fkooman_saml_sp_auth_acr');
+        $authnContextClassRef = $authnRequestState->getAuthnContextClassRef();
 
         $response = new Response($this->dateTime);
         $samlAssertion = $response->verify(
             $this->spInfo,
             $idpInfo,
             Base64::decode($samlResponse),
-            $this->session->get('_fkooman_saml_sp_auth_id'),
+            $authnRequestState->getRequestId(),
             $authnContextClassRef
         );
 
-        $returnTo = $this->session->get(\sprintf('_fkooman_saml_sp_auth_relay_state_%s', $relayState));
-        $this->session->delete(\sprintf('_fkooman_saml_sp_auth_relay_state_%s', $relayState));
-        $this->session->delete('_fkooman_saml_sp_auth_id');
-        $this->session->delete('_fkooman_saml_sp_auth_idp');
-        $this->session->delete('_fkooman_saml_sp_auth_acr');
-        $this->session->set('_fkooman_saml_sp_auth_assertion', $samlAssertion);
+        $this->session->set('_fkooman_saml_sp_assertion', \serialize($samlAssertion));
 
-        return $returnTo;
+        return $authnRequestState->getReturnTo();
     }
 
     /**
@@ -193,17 +191,16 @@ class SP
      */
     public function logout($returnTo)
     {
-        if (false === $samlAssertion = $this->getAssertion()) {
-            // no session available
+        if (!$this->hasAssertion()) {
             return $returnTo;
         }
-
+        $samlAssertion = $this->getAssertion();
         $idpEntityId = $samlAssertion->getIssuer();
         if (false === $idpInfo = $this->idpInfoSource->get($idpEntityId)) {
             throw new SpException(\sprintf('IdP "%s" not registered', $idpEntityId));
         }
         // delete the assertion, so we are no longer authenticated
-        $this->session->delete('_fkooman_saml_sp_auth_assertion');
+        $this->session->delete('_fkooman_saml_sp_assertion');
 
         if (null === $samlAssertion->getNameId()) {
             // IdP's assertion does NOT have a NameID, so we cannot construct a
@@ -233,9 +230,8 @@ class SP
         );
 
         $relayState = Base64::encode($this->random->relayState());
-        $this->session->set('_fkooman_saml_sp_auth_logout_id', $requestId);
-        $this->session->set('_fkooman_saml_sp_auth_logout_idp', $idpEntityId);
-        $this->session->set(\sprintf('_fkooman_saml_sp_auth_logout_relay_state_%s', $relayState), $returnTo);
+        $logoutRequestState = new LogoutRequestState($requestId, $idpEntityId, $returnTo);
+        $this->session->set($relayState, \serialize($logoutRequestState));
 
         return self::prepareRequestUrl($idpSloUrl, $logoutRequest, $relayState, $this->spInfo->getPrivateKey());
     }
@@ -253,39 +249,53 @@ class SP
             throw new SpException('SP does not support SLO');
         }
 
-        $idpEntityId = $this->session->get('_fkooman_saml_sp_auth_logout_idp');
+        $queryParameters = new QueryParameters($queryString);
+        $relayState = $queryParameters->requireQueryParameter('RelayState');
+
+        $logoutRequestState = \unserialize($this->session->take($relayState));
+        if (!($logoutRequestState instanceof LogoutRequestState)) {
+            throw new \RuntimeException('Wat XXX');
+        }
+
+        $idpEntityId = $logoutRequestState->getIdpEntityId();
         if (false === $idpInfo = $this->idpInfoSource->get($idpEntityId)) {
             throw new SpException(\sprintf('IdP "%s" not registered', $idpEntityId));
         }
 
-        $queryParameters = new QueryParameters($queryString);
         $logoutResponse = new LogoutResponse();
         $logoutResponse->verify(
             $queryParameters,
-            $this->session->get('_fkooman_saml_sp_auth_logout_id'),
+            $logoutRequestState->getRequestId(),
             $spSloUrl,
             $idpInfo
         );
 
-        $relayState = $queryParameters->requireQueryParameter('RelayState');
-        $returnTo = $this->session->get(\sprintf('_fkooman_saml_sp_auth_logout_relay_state_%s', $relayState));
-        $this->session->delete(\sprintf('_fkooman_saml_sp_auth_logout_relay_state_%s', $relayState));
-        $this->session->delete('_fkooman_saml_sp_auth_logout_id');
-        $this->session->delete('_fkooman_saml_sp_auth_logout_idp');
-
-        return $returnTo;
+        return $logoutRequestState->getReturnTo();
     }
 
     /**
-     * @return false|Assertion
+     * @return bool
+     */
+    public function hasAssertion()
+    {
+        return $this->session->has('_fkooman_saml_sp_assertion');
+    }
+
+    /**
+     * @return Assertion
      */
     public function getAssertion()
     {
-        if (!$this->session->has('_fkooman_saml_sp_auth_assertion')) {
-            return false;
+        if (!$this->hasAssertion()) {
+            throw new SPException('no assertion available');
         }
 
-        return $this->session->get('_fkooman_saml_sp_auth_assertion');
+        $samlAssertion = \unserialize($this->session->get('_fkooman_saml_sp_assertion'));
+        if (!($samlAssertion instanceof Assertion)) {
+            throw new \RuntimeException('Wat XXX');
+        }
+
+        return $samlAssertion;
     }
 
     /**

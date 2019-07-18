@@ -24,45 +24,53 @@
 
 namespace fkooman\SAML\SP;
 
-interface SessionInterface
+/**
+ * Keep track of the state of the LogoutRequest.
+ */
+class LogoutRequestState
 {
-    /**
-     * @param string $key
-     *
-     * @return bool
-     */
-    public function has($key);
+    /** @var string */
+    private $requestId;
+
+    /** @var string */
+    private $idpEntityId;
+
+    /** @var string */
+    private $returnTo;
 
     /**
-     * Return the value of the session key.
-     *
-     * @param string $key
-     *
+     * @param string $requestId
+     * @param string $idpEntityId
+     * @param string $returnTo
+     */
+    public function __construct($requestId, $idpEntityId, $returnTo)
+    {
+        $this->requestId = $requestId;
+        $this->idpEntityId = $idpEntityId;
+        $this->returnTo = $returnTo;
+    }
+
+    /**
      * @return string
      */
-    public function get($key);
+    public function getRequestId()
+    {
+        return $this->requestId;
+    }
 
     /**
-     * Return the value of the session key and delete the key.
-     *
-     * @param string $key
-     *
      * @return string
      */
-    public function take($key);
+    public function getIdpEntityId()
+    {
+        return $this->idpEntityId;
+    }
 
     /**
-     * @param string $key
-     * @param string $value
-     *
-     * @return void
+     * @return string
      */
-    public function set($key, $value);
-
-    /**
-     * @param string $key
-     *
-     * @return void
-     */
-    public function delete($key);
+    public function getReturnTo()
+    {
+        return $this->returnTo;
+    }
 }
