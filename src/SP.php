@@ -133,7 +133,7 @@ class SP
 
         $relayState = Base64::encode($this->random->relayState());
         $authnRequestState = new AuthnRequestState($requestId, $idpEntityId, $authnContextClassRef, $returnTo);
-        $this->session->set($relayState, \serialize($authnRequestState));
+        $this->session->set('_php_saml_sp_'.$relayState, \serialize($authnRequestState));
 
         return self::prepareRequestUrl($ssoUrl, $authnRequest, $relayState, $this->spInfo->getPrivateKey());
     }
@@ -150,9 +150,9 @@ class SP
      */
     public function handleResponse($samlResponse, $relayState)
     {
-        $authnRequestState = \unserialize($this->session->take($relayState));
+        $authnRequestState = \unserialize($this->session->take('_php_saml_sp_'.$relayState));
         if (!($authnRequestState instanceof AuthnRequestState)) {
-            throw new \RuntimeException('Wat XXX');
+            throw new SpException('expected "AuthnRequestState" in session data');
         }
 
         $idpEntityId = $authnRequestState->getIdpEntityId();
@@ -172,7 +172,7 @@ class SP
             $authnContextClassRef
         );
 
-        $this->session->set('_fkooman_saml_sp_assertion', \serialize($samlAssertion));
+        $this->session->set('_php_saml_sp_assertion', \serialize($samlAssertion));
 
         return $authnRequestState->getReturnTo();
     }
@@ -231,7 +231,7 @@ class SP
 
         $relayState = Base64::encode($this->random->relayState());
         $logoutRequestState = new LogoutRequestState($requestId, $idpEntityId, $returnTo);
-        $this->session->set($relayState, \serialize($logoutRequestState));
+        $this->session->set('_php_saml_sp_'.$relayState, \serialize($logoutRequestState));
 
         return self::prepareRequestUrl($idpSloUrl, $logoutRequest, $relayState, $this->spInfo->getPrivateKey());
     }
@@ -251,10 +251,9 @@ class SP
 
         $queryParameters = new QueryParameters($queryString);
         $relayState = $queryParameters->requireQueryParameter('RelayState');
-
-        $logoutRequestState = \unserialize($this->session->take($relayState));
+        $logoutRequestState = \unserialize($this->session->take('_php_saml_sp_'.$relayState));
         if (!($logoutRequestState instanceof LogoutRequestState)) {
-            throw new \RuntimeException('Wat XXX');
+            throw new SpException('expected "LogoutRequestState" in session data');
         }
 
         $idpEntityId = $logoutRequestState->getIdpEntityId();
@@ -278,7 +277,7 @@ class SP
      */
     public function hasAssertion()
     {
-        return $this->session->has('_fkooman_saml_sp_assertion');
+        return $this->session->has('_php_saml_sp_assertion');
     }
 
     /**
@@ -290,9 +289,9 @@ class SP
             throw new SPException('no assertion available');
         }
 
-        $samlAssertion = \unserialize($this->session->get('_fkooman_saml_sp_assertion'));
+        $samlAssertion = \unserialize($this->session->get('_php_saml_sp_assertion'));
         if (!($samlAssertion instanceof Assertion)) {
-            throw new \RuntimeException('Wat XXX');
+            throw new SpException('expected "Assertion" in session data');
         }
 
         return $samlAssertion;

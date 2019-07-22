@@ -64,16 +64,6 @@ class XmlDocument
     }
 
     /**
-     * @param string $assertionStr
-     *
-     * @return self
-     */
-    public static function fromAssertion($assertionStr)
-    {
-        return self::loadStr($assertionStr, ['saml-schema-assertion-2.0.xsd']);
-    }
-
-    /**
      * @param string $metadataStr
      * @param bool   $validateSchema
      *

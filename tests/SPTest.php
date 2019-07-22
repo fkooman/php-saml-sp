@@ -88,7 +88,7 @@ EOF;
         $signatureQuery = \http_build_query(['Signature' => \base64_encode(Crypto::sign($httpQuery, PrivateKey::fromFile(__DIR__.'/data/sp.key')))]);
         $this->assertSame(\sprintf('http://localhost:8080/sso.php?%s&%s', $httpQuery, $signatureQuery), $ssoUrl);
 
-        $authnRequestState = \unserialize($session->get($relayState));
+        $authnRequestState = \unserialize($session->get('_php_saml_sp_'.$relayState));
         $this->assertSame('http://localhost:8080/metadata.php', $authnRequestState->getIdpEntityId());
         $this->assertSame('_30313233343536373839616263646566', $authnRequestState->getRequestId());
         $this->assertSame([], $authnRequestState->getAuthnContextClassRef());
@@ -158,7 +158,7 @@ EOF;
 
         $session = new TestSession();
         $authnRequestState = new AuthnRequestState('_2483d0b8847ccaa5edf203dad685f860', 'http://localhost:8080/metadata.php', [], 'http://localhost:8080/return_to');
-        $session->set('1234_relay_state_5678', \serialize($authnRequestState));
+        $session->set('_php_saml_sp_1234_relay_state_5678', \serialize($authnRequestState));
         $this->sp->setSession($session);
         $this->sp->setDateTime(new DateTime('2019-02-23T17:01:21Z'));
         $returnTo = $this->sp->handleResponse(
@@ -166,7 +166,7 @@ EOF;
             '1234_relay_state_5678'
         );
         $this->assertSame('http://localhost:8080/return_to', $returnTo);
-        $samlAssertion = \unserialize($session->get('_fkooman_saml_sp_assertion'));
+        $samlAssertion = \unserialize($session->get('_php_saml_sp_assertion'));
         $this->assertSame('http://localhost:8080/metadata.php', $samlAssertion->getIssuer());
         $this->assertSame('<saml:NameID SPNameQualifier="http://localhost:8081/metadata" Format="urn:oasis:names:tc:SAML:2.0:nameid-format:transient">bGFxwg50lVJbZsA2OHcqchfJ5HCDuxcFYBPxUi_dumo</saml:NameID>', $samlAssertion->getNameId()->toXML());
         $this->assertSame(
@@ -206,7 +206,7 @@ EOF;
 
         $session = new TestSession();
         $authnRequestState = new AuthnRequestState('_2483d0b8847ccaa5edf203dad685f860', 'http://localhost:8080/metadata.php', ['urn:x-example:bar'], 'return_to');
-        $session->set(\base64_encode('1234_relay_state_5678'), \serialize($authnRequestState));
+        $session->set('_php_saml_sp_'.\base64_encode('1234_relay_state_5678'), \serialize($authnRequestState));
         $this->sp->setSession($session);
         $this->sp->setDateTime(new DateTime('2019-02-23T17:01:21Z'));
         $this->sp->handleResponse(
@@ -240,7 +240,7 @@ EOF;
         );
         $samlAssertion->setNameId($nameId);
 
-        $testSession->set('_fkooman_saml_sp_assertion', \serialize($samlAssertion));
+        $testSession->set('_php_saml_sp_assertion', \serialize($samlAssertion));
         $this->sp->setSession($testSession);
         $sloUrl = $this->sp->logout(
             'http://localhost:8080/app'
@@ -270,7 +270,7 @@ EOF;
         $logoutResponse = \file_get_contents(__DIR__.'/data/assertion/LogoutResponse.xml');
         $session = new TestSession();
         $logoutRequestState = new LogoutRequestState('_32d79225e7f53ecddead60c5096347070d4ce0521ee7d734d6a7b1cc1d666d32', 'http://localhost:8080/metadata', 'http://localhost:8081/');
-        $session->set('+/M7/sd8CgDR7BXVpw2lqgsalw54taH0E2eYa2RrZcI=', \serialize($logoutRequestState));
+        $session->set('_php_saml_sp_+/M7/sd8CgDR7BXVpw2lqgsalw54taH0E2eYa2RrZcI=', \serialize($logoutRequestState));
         $this->sp->setSession($session);
 
         $queryString = \http_build_query(
@@ -283,6 +283,6 @@ EOF;
         );
         $returnTo = $this->sp->handleLogoutResponse($queryString);
         $this->assertSame('http://localhost:8081/', $returnTo);
-        $this->assertFalse($session->has('+/M7/sd8CgDR7BXVpw2lqgsalw54taH0E2eYa2RrZcI='));
+        $this->assertFalse($session->has('_php_saml_sp_+/M7/sd8CgDR7BXVpw2lqgsalw54taH0E2eYa2RrZcI='));
     }
 }
