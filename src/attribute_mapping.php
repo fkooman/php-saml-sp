@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-/**
+/*
  * List of OID attributes and their "friendly name".
  *
  * @see https://wiki.refeds.org/display/STAN/SCHAC+Releases

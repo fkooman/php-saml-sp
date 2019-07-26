@@ -57,15 +57,15 @@ class ResponseTest extends TestCase
                 'urn:oid:0.9.2342.19200300.100.1.1' => [
                     'foo',
                 ],
+                'uid' => [
+                    'foo',
+                ],
                 'urn:oid:1.3.6.1.4.1.5923.1.1.1.7' => [
                     'foo',
                     'bar',
                     'baz',
                     'urn:example:LC-admin',
                     'urn:example:admin',
-                ],
-                'uid' => [
-                    'foo',
                 ],
                 'eduPersonEntitlement' => [
                     'foo',
@@ -97,26 +97,18 @@ class ResponseTest extends TestCase
         );
         $this->assertSame(
             [
-                'urn:mace:dir:attribute-def:eduPersonEntitlement' => [
-                    'urn:mace:surfnet.nl:surfconext.nl:surfnet.nl:eduvpn:eduvpn-admin',
-                    'urn:mace:surfnet.nl:surfconext.nl:surfnet.nl:eduvpn:x-test1',
-                    'urn:mace:surfnet.nl:surfconext.nl:surfnet.nl:eduvpn:x-test3',
-                ],
                 'urn:oid:1.3.6.1.4.1.5923.1.1.1.7' => [
                     'urn:mace:surfnet.nl:surfconext.nl:surfnet.nl:eduvpn:eduvpn-admin',
                     'urn:mace:surfnet.nl:surfconext.nl:surfnet.nl:eduvpn:x-test1',
                     'urn:mace:surfnet.nl:surfconext.nl:surfnet.nl:eduvpn:x-test3',
                 ],
-                'urn:mace:dir:attribute-def:eduPersonTargetedID' => [
-                    'c7ab9096f240ea83747f351c6fcb17d1f57f56f2',
-                ],
-                'urn:oid:1.3.6.1.4.1.5923.1.1.1.10' => [
-                    'https://idp.surfnet.nl!https://labrat.eduvpn.nl/saml!c7ab9096f240ea83747f351c6fcb17d1f57f56f2',
-                ],
                 'eduPersonEntitlement' => [
                     'urn:mace:surfnet.nl:surfconext.nl:surfnet.nl:eduvpn:eduvpn-admin',
                     'urn:mace:surfnet.nl:surfconext.nl:surfnet.nl:eduvpn:x-test1',
                     'urn:mace:surfnet.nl:surfconext.nl:surfnet.nl:eduvpn:x-test3',
+                ],
+                'urn:oid:1.3.6.1.4.1.5923.1.1.1.10' => [
+                    'https://idp.surfnet.nl!https://labrat.eduvpn.nl/saml!c7ab9096f240ea83747f351c6fcb17d1f57f56f2',
                 ],
                 'eduPersonTargetedID' => [
                     'https://idp.surfnet.nl!https://labrat.eduvpn.nl/saml!c7ab9096f240ea83747f351c6fcb17d1f57f56f2',
@@ -126,35 +118,36 @@ class ResponseTest extends TestCase
         );
     }
 
-    public function testSimpleSamlPhp()
-    {
-        $response = new Response(new DateTime('2019-01-02T22:19:20Z'));
-        $samlResponse = \file_get_contents(__DIR__.'/data/assertion/simpleSAMLphp.xml');
-        $samlAssertion = $response->verify(
-            new SpInfo(
-                'https://vpn.tuxed.net/simplesaml/module.php/saml/sp/metadata.php/default-sp',
-                PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
-                PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
-                'https://vpn.tuxed.net/simplesaml/module.php/saml/sp/saml2-acs.php/default-sp'
-            ),
-            new IdpInfo('https://vpn.tuxed.net/simplesaml/saml2/idp/metadata.php', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/simpleSAMLphp.crt')], []),
-            $samlResponse,
-            '_b354c4367b3e379f940145868f28987e9520b1fb0b',
-            []
-        );
-        $this->assertSame(
-            [
-                'uid' => [
-                    'test',
-                ],
-                'eduPersonAffiliation' => [
-                    'member',
-                    'student',
-                ],
-            ],
-            $samlAssertion->getAttributes()
-        );
-    }
+    //  XXX we do not support "raw" attributes yet, only in urn:oid format
+//    public function testSimpleSamlPhp()
+//    {
+//        $response = new Response(new DateTime('2019-01-02T22:19:20Z'));
+//        $samlResponse = \file_get_contents(__DIR__.'/data/assertion/simpleSAMLphp.xml');
+//        $samlAssertion = $response->verify(
+//            new SpInfo(
+//                'https://vpn.tuxed.net/simplesaml/module.php/saml/sp/metadata.php/default-sp',
+//                PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
+//                PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
+//                'https://vpn.tuxed.net/simplesaml/module.php/saml/sp/saml2-acs.php/default-sp'
+//            ),
+//            new IdpInfo('https://vpn.tuxed.net/simplesaml/saml2/idp/metadata.php', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/simpleSAMLphp.crt')], []),
+//            $samlResponse,
+//            '_b354c4367b3e379f940145868f28987e9520b1fb0b',
+//            []
+//        );
+//        $this->assertSame(
+//            [
+//                'uid' => [
+//                    'test',
+//                ],
+//                'eduPersonAffiliation' => [
+//                    'member',
+//                    'student',
+//                ],
+//            ],
+//            $samlAssertion->getAttributes()
+//        );
+//    }
 
     /**
      * @expectedException \fkooman\SAML\SP\Exception\CryptoException
@@ -266,32 +259,33 @@ class ResponseTest extends TestCase
         );
     }
 
-    public function testAdfs()
-    {
-        $response = new Response(new DateTime('2019-01-18T10:32:06Z'));
-        $samlResponse = \file_get_contents(__DIR__.'/data/assertion/adfs_idp_response.xml');
-        $samlAssertion = $response->verify(
-            new SpInfo(
-                'https://vpn.tuxed.net/php-saml-sp/example/full.php/metadata',
-                PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
-                PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
-                'https://vpn.tuxed.net/php-saml-sp/example/full.php/acs'
-            ),
-            new IdpInfo('http://fs.tuxed.example/adfs/services/trust', 'SSO', null, [PublicKey::fromFile(__DIR__.'/data/certs/adfs_idp_response.crt')], []),
-            $samlResponse,
-            '_cf4383b97e07821f6b9a07e57b3d4557',
-            []
-        );
-        $this->assertSame(
-            [
-                'http://schemas.xmlsoap.org/claims/CommonName' => [
-                    'François Kooman',
-                ],
-            ],
-            $samlAssertion->getAttributes()
-        );
-        $this->assertSame('<saml:NameID Format="urn:oasis:names:tc:SAML:2.0:nameid-format:transient">WrlwOmM5zcufWzakxkurPqQnZtvlDoxJt6kwJvf950M=</saml:NameID>', $samlAssertion->getNameId()->toXML());
-    }
+    //  XXX we do not support "raw" attributes yet, only in urn:oid format
+//    public function testAdfs()
+//    {
+//        $response = new Response(new DateTime('2019-01-18T10:32:06Z'));
+//        $samlResponse = \file_get_contents(__DIR__.'/data/assertion/adfs_idp_response.xml');
+//        $samlAssertion = $response->verify(
+//            new SpInfo(
+//                'https://vpn.tuxed.net/php-saml-sp/example/full.php/metadata',
+//                PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
+//                PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
+//                'https://vpn.tuxed.net/php-saml-sp/example/full.php/acs'
+//            ),
+//            new IdpInfo('http://fs.tuxed.example/adfs/services/trust', 'SSO', null, [PublicKey::fromFile(__DIR__.'/data/certs/adfs_idp_response.crt')], []),
+//            $samlResponse,
+//            '_cf4383b97e07821f6b9a07e57b3d4557',
+//            []
+//        );
+//        $this->assertSame(
+//            [
+//                'http://schemas.xmlsoap.org/claims/CommonName' => [
+//                    'François Kooman',
+//                ],
+//            ],
+//            $samlAssertion->getAttributes()
+//        );
+//        $this->assertSame('<saml:NameID Format="urn:oasis:names:tc:SAML:2.0:nameid-format:transient">WrlwOmM5zcufWzakxkurPqQnZtvlDoxJt6kwJvf950M=</saml:NameID>', $samlAssertion->getNameId()->toXML());
+//    }
 
     /**
      * @expectedException \fkooman\SAML\SP\Exception\ResponseException
@@ -337,7 +331,17 @@ class ResponseTest extends TestCase
                 'urn:oid:0.9.2342.19200300.100.1.1' => [
                     'foo',
                 ],
+                'uid' => [
+                    'foo',
+                ],
                 'urn:oid:1.3.6.1.4.1.5923.1.1.1.7' => [
+                    'foo',
+                    'bar',
+                    'baz',
+                    'urn:example:LC-admin',
+                    'urn:example:admin',
+                ],
+                'eduPersonEntitlement' => [
                     'foo',
                     'bar',
                     'baz',
@@ -346,16 +350,6 @@ class ResponseTest extends TestCase
                 ],
                 'urn:oid:1.3.6.1.4.1.5923.1.1.1.6' => [
                     'foo@example.com',
-                ],
-                'uid' => [
-                    'foo',
-                ],
-                'eduPersonEntitlement' => [
-                    'foo',
-                    'bar',
-                    'baz',
-                    'urn:example:LC-admin',
-                    'urn:example:admin',
                 ],
                 'eduPersonPrincipalName' => [
                     'foo@example.com',
@@ -387,15 +381,15 @@ class ResponseTest extends TestCase
                 'urn:oid:0.9.2342.19200300.100.1.1' => [
                     'foo',
                 ],
+                'uid' => [
+                    'foo',
+                ],
                 'urn:oid:1.3.6.1.4.1.5923.1.1.1.7' => [
                     'foo',
                     'bar',
                     'baz',
                     'urn:example:LC-admin',
                     'urn:example:admin',
-                ],
-                'uid' => [
-                    'foo',
                 ],
                 'eduPersonEntitlement' => [
                     'foo',

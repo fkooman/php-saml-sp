@@ -140,7 +140,6 @@ class Response
         }
 
         $attributeList = self::extractAttributes($responseDocument, $assertionElement, $idpInfo, $spInfo);
-        self::friendlyNameMapping($attributeList);
         $samlAssertion = new Assertion($idpInfo->getEntityId(), $authnInstant, $authnContextClassRef, $attributeList);
 
         // NameID
@@ -165,9 +164,18 @@ class Response
     {
         $attributeList = [];
         $attributeDomNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query('saml:AttributeStatement/saml:Attribute', $assertionElement));
+
+        /** @var array<string,string> */
+        $attributeMapping = include __DIR__.'/attribute_mapping.php';
+
         foreach ($attributeDomNodeList as $attributeDomNode) {
             $attributeElement = XmlDocument::requireDomElement($attributeDomNode);
             $attributeName = $attributeElement->getAttribute('Name');
+            if (!\array_key_exists($attributeName, $attributeMapping)) {
+                // we only process attributes in urn:oid syntax we know about,
+                // the rest we ignore...
+                continue;
+            }
             $attributeValueDomNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query('saml:AttributeValue', $attributeElement));
             // loop over AttributeValue(s) for this Attribute
             foreach ($attributeValueDomNodeList as $attributeValueDomNode) {
@@ -179,33 +187,15 @@ class Response
                     $attributeList[$attributeName][] = $attributeValue;
                 }
             }
+
+            // make the attribute also available under its friendly name iff it
+            // got through processing, e.g. passed shibmd:Scope validation
+            if (\array_key_exists($attributeName, $attributeList)) {
+                $attributeList[$attributeMapping[$attributeName]] = $attributeList[$attributeName];
+            }
         }
 
         return $attributeList;
-    }
-
-    /**
-     * Map the OID variant to a "friendly name" variant, but only if the
-     * "friendly name" does not already exist as an attribute. If both the
-     * "friendly name" AND OID variant are available from the IdP, it will NOT
-     * be overridden.
-     *
-     * @param array<string,array<string>> $attributeList
-     *
-     * @return void
-     */
-    private static function friendlyNameMapping(array &$attributeList)
-    {
-        /** @var array<string,string> */
-        $attributeMapping = include __DIR__.'/attribute_mapping.php';
-        foreach ($attributeList as $attributeName => $attributeValueList) {
-            if (\array_key_exists($attributeName, $attributeMapping)) {
-                $friendlyName = $attributeMapping[$attributeName];
-                if (!\array_key_exists($friendlyName, $attributeList)) {
-                    $attributeList[$friendlyName] = $attributeValueList;
-                }
-            }
-        }
     }
 
     /**

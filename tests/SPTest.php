@@ -174,15 +174,15 @@ EOF;
                 'urn:oid:0.9.2342.19200300.100.1.1' => [
                     'foo',
                 ],
+                'uid' => [
+                    'foo',
+                ],
                 'urn:oid:1.3.6.1.4.1.5923.1.1.1.7' => [
                     'foo',
                     'bar',
                     'baz',
                     'urn:example:LC-admin',
                     'urn:example:admin',
-                ],
-                'uid' => [
-                    'foo',
                 ],
                 'eduPersonEntitlement' => [
                     'foo',
