@@ -259,6 +259,18 @@ class Response
 
                 return false;
             }
+
+            // schacHomeOrganization
+            if ('urn:oid:1.3.6.1.4.1.25178.1.2.9' === $attributeName) {
+                $attributeValue = $attributeValueElement->textContent;
+                // make sure the mentioned domain matches the value(s) of
+                // shibmd:Scope *exactly*
+                if (!\in_array($attributeValue, $idpScopeList, true)) {
+                    return false;
+                }
+
+                return $attributeValue;
+            }
         }
 
         return $attributeValueElement->textContent;
