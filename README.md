@@ -11,7 +11,7 @@ production until there is a 1.0 release!
 I wanted to have a minimal implementation of a SAML SP library. Existing (PHP) 
 software either has a much larger scope, or tries to conform fully to the SAML 
 specification. This library only tries to implement the minimum amount to work 
-with real world deployed IdPs, and be secure at all times.
+with (most) real world deployed IdPs, and be secure at all times.
 
 # Features
 
@@ -37,7 +37,7 @@ with real world deployed IdPs, and be secure at all times.
   - [FrkoIdP](https://github.com/fkooman/php-saml-idp/)
   - [AD FS](https://en.wikipedia.org/wiki/Active_Directory_Federation_Services)
   - [Shibboleth IdP](https://www.shibboleth.net/products/identity-provider/)
-- Currently ~1400 NCLOC
+- Currently ~1600 SLOC
 
 # Requirements
 
