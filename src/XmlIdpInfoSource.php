@@ -57,7 +57,7 @@ class XmlIdpInfoSource implements IdpInfoSourceInterface
      */
     public function has($entityId)
     {
-        $this->validate($entityId);
+        self::validate($entityId);
         $xPathQuery = \sprintf('//md:EntityDescriptor[@entityID="%s"]/md:IDPSSODescriptor', $entityId);
 
         return 1 === $this->xmlDocument->domXPath->query($xPathQuery)->length;
@@ -72,7 +72,7 @@ class XmlIdpInfoSource implements IdpInfoSourceInterface
      */
     public function get($entityId)
     {
-        $this->validate($entityId);
+        self::validate($entityId);
         if (!$this->has($entityId)) {
             throw new XmlIdpInfoSourceException(\sprintf('IdP "%s" not available', $entityId));
         }
