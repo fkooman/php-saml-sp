@@ -175,6 +175,8 @@ class XmlIdpInfoSource implements IdpInfoSourceInterface
         // the filter accepts all of those... anything outside this range is
         // probably not a valid xsd:anyURI anyway... this may need tweaking in
         // the future...
+        //
+        // Maybe it is enough to allow everything, except DQUOTE (")?
         if (1 !== \preg_match('|^[0-9a-zA-Z-./:=_?]+$|', $entityId)) {
             throw new XmlIdpInfoSourceException('invalid entityID');
         }
