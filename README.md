@@ -89,6 +89,8 @@ immediately to the IdP. The metadata of the SP can be found at this URL:
 
 Make sure:
 
+- the IdP uses the HTTP-Redirect binding for receiving the `AuthnRequest`;
+- the IdP uses the HTTP-POST binding to provide the `samlp:Response` to the SP;
 - the IdP signs the `saml:Assertion` and/or the `samlp:Response`;
 - the IdP verifies the signature on the `samlp:AuthnRequest`;
 - the IdP verifies the signature on the `samlp:LogoutRequest`;
