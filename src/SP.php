@@ -194,14 +194,16 @@ class SP
             return $returnTo;
         }
         $samlAssertion = $this->getAssertion();
+
+        // delete the assertion from the session, so we are no longer
+        // authenticated...
+        $this->session->delete('_php_saml_sp_assertion');
+
         $idpEntityId = $samlAssertion->getIssuer();
         if (!$this->idpInfoSource->has($idpEntityId)) {
             throw new SpException(\sprintf('IdP "%s" not registered', $idpEntityId));
         }
         $idpInfo = $this->idpInfoSource->get($idpEntityId);
-
-        // delete the assertion, so we are no longer authenticated
-        $this->session->delete('_fkooman_saml_sp_assertion');
 
         if (null === $samlAssertion->getNameId()) {
             // IdP's assertion does NOT have a NameID, so we cannot construct a
@@ -289,7 +291,7 @@ class SP
     public function getAssertion()
     {
         if (!$this->hasAssertion()) {
-            throw new SPException('no assertion available');
+            throw new SPException('no SAML assertion available');
         }
 
         $samlAssertion = \unserialize($this->session->get('_php_saml_sp_assertion'));
