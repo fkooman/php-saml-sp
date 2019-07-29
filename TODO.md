@@ -2,6 +2,7 @@
  
 ## 1.0
 
+- input validation on ALL (public) methods
 - make absolutely sure we verify the assertion with the right public key as to
   avoid allowing one IdP to pretend to be another IdP
 - Do we also need to check `/samlp:Response/saml:Assertion/saml:Conditions/@NotOnOrAfter`?

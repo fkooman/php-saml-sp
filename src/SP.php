@@ -34,20 +34,20 @@ use ParagonIE\ConstantTime\Hex;
  */
 class SP
 {
+    /** @var \DateTime */
+    protected $dateTime;
+
+    /** @var RandomInterface */
+    protected $random;
+
     /** @var SpInfo */
     private $spInfo;
 
     /** @var IdpInfoSourceInterface */
     private $idpInfoSource;
 
-    /** @var \DateTime */
-    private $dateTime;
-
     /** @var SessionInterface */
     private $session;
-
-    /** @var RandomInterface */
-    private $random;
 
     /** @var Template */
     private $tpl;
@@ -71,16 +71,6 @@ class SP
     }
 
     /**
-     * @param \DateTime $dateTime
-     *
-     * @return void
-     */
-    public function setDateTime(DateTime $dateTime)
-    {
-        $this->dateTime = $dateTime;
-    }
-
-    /**
      * @param SessionInterface $session
      *
      * @return void
@@ -88,16 +78,6 @@ class SP
     public function setSession(SessionInterface $session)
     {
         $this->session = $session;
-    }
-
-    /**
-     * @param RandomInterface $random
-     *
-     * @return void
-     */
-    public function setRandom(RandomInterface $random)
-    {
-        $this->random = $random;
     }
 
     /**

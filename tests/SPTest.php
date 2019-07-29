@@ -33,7 +33,6 @@ use fkooman\SAML\SP\LogoutRequestState;
 use fkooman\SAML\SP\NameId;
 use fkooman\SAML\SP\PrivateKey;
 use fkooman\SAML\SP\PublicKey;
-use fkooman\SAML\SP\SP;
 use fkooman\SAML\SP\SpInfo;
 use fkooman\SAML\SP\XmlIdpInfoSource;
 use PHPUnit\Framework\TestCase;
@@ -52,7 +51,7 @@ class SPTest extends TestCase
             'http://localhost:8081/acs'
         );
         $spInfo->setSloUrl('http://localhost:8081/slo');
-        $this->sp = new SP(
+        $this->sp = new TestSP(
             $spInfo,
             new XmlIdpInfoSource(__DIR__.'/data/metadata/localhost.xml')
         );
