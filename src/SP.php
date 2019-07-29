@@ -114,9 +114,10 @@ class SP
     public function login($idpEntityId, $returnTo, array $authnContextClassRef = [])
     {
         $requestId = \sprintf('_%s', Hex::encode($this->random->requestId()));
-        if (false === $idpInfo = $this->idpInfoSource->get($idpEntityId)) {
+        if (!$this->idpInfoSource->has($idpEntityId)) {
             throw new SpException(\sprintf('IdP "%s" not registered', $idpEntityId));
         }
+        $idpInfo = $this->idpInfoSource->get($idpEntityId);
         $ssoUrl = $idpInfo->getSsoUrl();
 
         $authnRequest = $this->tpl->render(
@@ -156,13 +157,11 @@ class SP
         }
 
         $idpEntityId = $authnRequestState->getIdpEntityId();
-        if (false === $idpInfo = $this->idpInfoSource->get($idpEntityId)) {
+        if (!$this->idpInfoSource->has($idpEntityId)) {
             throw new SpException(\sprintf('IdP "%s" not registered', $idpEntityId));
         }
-
-        /** @var array<string> */
+        $idpInfo = $this->idpInfoSource->get($idpEntityId);
         $authnContextClassRef = $authnRequestState->getAuthnContextClassRef();
-
         $response = new Response($this->dateTime);
         $samlAssertion = $response->verify(
             $this->spInfo,
@@ -196,9 +195,11 @@ class SP
         }
         $samlAssertion = $this->getAssertion();
         $idpEntityId = $samlAssertion->getIssuer();
-        if (false === $idpInfo = $this->idpInfoSource->get($idpEntityId)) {
+        if (!$this->idpInfoSource->has($idpEntityId)) {
             throw new SpException(\sprintf('IdP "%s" not registered', $idpEntityId));
         }
+        $idpInfo = $this->idpInfoSource->get($idpEntityId);
+
         // delete the assertion, so we are no longer authenticated
         $this->session->delete('_fkooman_saml_sp_assertion');
 
@@ -257,9 +258,11 @@ class SP
         }
 
         $idpEntityId = $logoutRequestState->getIdpEntityId();
-        if (false === $idpInfo = $this->idpInfoSource->get($idpEntityId)) {
+
+        if (!$this->idpInfoSource->has($idpEntityId)) {
             throw new SpException(\sprintf('IdP "%s" not registered', $idpEntityId));
         }
+        $idpInfo = $this->idpInfoSource->get($idpEntityId);
 
         $logoutResponse = new LogoutResponse();
         $logoutResponse->verify(

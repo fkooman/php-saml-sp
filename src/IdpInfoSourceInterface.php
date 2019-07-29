@@ -27,9 +27,20 @@ namespace fkooman\SAML\SP;
 interface IdpInfoSourceInterface
 {
     /**
+     * Make sure there is exactly 1 IdP with this entityID.
+     *
      * @param string $entityId
      *
-     * @return false|IdpInfo
+     * @return bool
+     */
+    public function has($entityId);
+
+    /**
+     * Get IdP information for an IdP.
+     *
+     * @param string $entityId
+     *
+     * @return IdpInfo
      */
     public function get($entityId);
 }
