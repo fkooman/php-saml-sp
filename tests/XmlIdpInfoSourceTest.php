@@ -50,4 +50,14 @@ class XmlIdpInfoSourceTest extends TestCase
         $this->assertSame('https://x509idp.moonshot.utr.surfcloud.nl/sso', $idpInfo->getSsoUrl());
         $this->assertNull($idpInfo->getSloUrl());
     }
+
+    /**
+     * @expectedException \fkooman\SAML\SP\Exception\XmlIdpInfoSourceException
+     * @expectedExceptionMessage invalid entityID
+     */
+    public function testInvalidEntityId()
+    {
+        $xmlIdpInfoSource = new XmlIdpInfoSource(__DIR__.'/data/metadata/x509idp.moonshot.utr.surfcloud.nl_metadata.xml');
+        $xmlIdpInfoSource->get('%');
+    }
 }
