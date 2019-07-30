@@ -110,11 +110,16 @@ class NameId
     {
         // this only makes sense when we have "persistent" NameID
         if ('urn:oasis:names:tc:SAML:2.0:nameid-format:persistent' !== $this->nameIdFormat) {
-            // simpleSAMLphp has a bug where it does not provide the
+            // simpleSAMLphp has a bug where it does not (always) provide the
             // "NameFormat" attribute. The SAML specification says if it is not
             // specified it is
             // "urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified" which
             // is not a good when needing to determine the "persistent NameID".
+            //
+            // What we do here, is, if it is NOT specified (at all) we *assume*
+            // it is meant to be persistent. If it *is* specified and it is NOT
+            // persistent, we throw an error.
+            //
             // @see https://github.com/simplesamlphp/simplesamlphp/issues/1135
             if (null !== $this->nameIdFormat) {
                 throw new NameIdException('only NameID format "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent" is supported for user identifiers');
