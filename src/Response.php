@@ -97,41 +97,41 @@ class Response
         }
 
         // the saml:Assertion Issuer MUST be IdP entityId
-        $issuerElement = $responseDocument->domXPath->evaluate('string(saml:Issuer)', $assertionElement);
+        $issuerElement = XmlDocument::requireNonEmptyString($responseDocument->domXPath->evaluate('string(saml:Issuer)', $assertionElement));
         if ($issuerElement !== $idpInfo->getEntityId()) {
             throw new ResponseException(\sprintf('expected saml:Issuer "%s", got "%s"', $idpInfo->getEntityId(), $issuerElement));
         }
 
         // the saml:Conditions/saml:AudienceRestriction MUST be us
-        $audienceElement = $responseDocument->domXPath->evaluate('string(saml:Conditions/saml:AudienceRestriction/saml:Audience)', $assertionElement);
+        $audienceElement = XmlDocument::requireNonEmptyString($responseDocument->domXPath->evaluate('string(saml:Conditions/saml:AudienceRestriction/saml:Audience)', $assertionElement));
         if ($audienceElement !== $spInfo->getEntityId()) {
             throw new ResponseException(\sprintf('expected saml:Audience "%s", got "%s"', $spInfo->getEntityId(), $audienceElement));
         }
 
-        $notOnOrAfter = new DateTime($responseDocument->domXPath->evaluate('string(saml:Subject/saml:SubjectConfirmation/saml:SubjectConfirmationData/@NotOnOrAfter)', $assertionElement));
+        $notOnOrAfter = new DateTime(XmlDocument::requireNonEmptyString($responseDocument->domXPath->evaluate('string(saml:Subject/saml:SubjectConfirmation/saml:SubjectConfirmationData/@NotOnOrAfter)', $assertionElement)));
         if (DateTimeValidator::isOnOrAfter($this->dateTime, $notOnOrAfter)) {
             throw new ResponseException('saml:Assertion no longer valid (/samlp:Response/saml:Assertion/saml:Subject/saml:SubjectConfirmation/saml:SubjectConfirmationData/@NotOnOrAfter)');
         }
 
-        $recipient = $responseDocument->domXPath->evaluate('string(saml:Subject/saml:SubjectConfirmation/saml:SubjectConfirmationData/@Recipient)', $assertionElement);
+        $recipient = XmlDocument::requireNonEmptyString($responseDocument->domXPath->evaluate('string(saml:Subject/saml:SubjectConfirmation/saml:SubjectConfirmationData/@Recipient)', $assertionElement));
         if ($recipient !== $spInfo->getAcsUrl()) {
             throw new ResponseException(\sprintf('expected Recipient "%s", got "%s"', $spInfo->getAcsUrl(), $recipient));
         }
 
-        $inResponseTo = $responseDocument->domXPath->evaluate('string(saml:Subject/saml:SubjectConfirmation/saml:SubjectConfirmationData/@InResponseTo)', $assertionElement);
+        $inResponseTo = XmlDocument::requireNonEmptyString($responseDocument->domXPath->evaluate('string(saml:Subject/saml:SubjectConfirmation/saml:SubjectConfirmationData/@InResponseTo)', $assertionElement));
         if ($inResponseTo !== $expectedInResponseTo) {
             throw new ResponseException(\sprintf('expected InResponseTo "%s", got "%s"', $expectedInResponseTo, $inResponseTo));
         }
 
         // notBefore
-        $notBefore = new DateTime($responseDocument->domXPath->evaluate('string(saml:Conditions/@NotBefore)', $assertionElement));
+        $notBefore = new DateTime(XmlDocument::requireNonEmptyString($responseDocument->domXPath->evaluate('string(saml:Conditions/@NotBefore)', $assertionElement)));
         if (DateTimeValidator::isBefore($this->dateTime, $notBefore)) {
             throw new ResponseException('saml:Assertion not yet valid (/samlp:Response/saml:Assertion/saml:Conditions/@NotBefore)');
         }
 
-        $authnInstant = new DateTime($responseDocument->domXPath->evaluate('string(saml:AuthnStatement/@AuthnInstant)', $assertionElement));
-        $sessionNotOnOrAfter = new DateTime($responseDocument->domXPath->evaluate('string(saml:AuthnStatement/@SessionNotOnOrAfter)', $assertionElement));
-        $authnContextClassRef = $responseDocument->domXPath->evaluate('string(saml:AuthnStatement/saml:AuthnContext/saml:AuthnContextClassRef)', $assertionElement);
+        $authnInstant = new DateTime(XmlDocument::requireNonEmptyString($responseDocument->domXPath->evaluate('string(saml:AuthnStatement/@AuthnInstant)', $assertionElement)));
+        $sessionNotOnOrAfter = new DateTime(XmlDocument::requireNonEmptyString($responseDocument->domXPath->evaluate('string(saml:AuthnStatement/@SessionNotOnOrAfter)', $assertionElement)));
+        $authnContextClassRef = XmlDocument::requireNonEmptyString($responseDocument->domXPath->evaluate('string(saml:AuthnStatement/saml:AuthnContext/saml:AuthnContextClassRef)', $assertionElement));
         if (0 !== \count($authnContext)) {
             // we requested a particular AuthnContext, make sure we got it
             if (!\in_array($authnContextClassRef, $authnContext, true)) {

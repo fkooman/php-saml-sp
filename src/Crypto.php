@@ -46,24 +46,24 @@ class Crypto
      */
     public static function verifyXml(XmlDocument $xmlDocument, DOMElement $domElement, array $publicKeys)
     {
-        $rootElementId = $xmlDocument->domXPath->evaluate('string(self::node()/@ID)', $domElement);
-        $referenceUri = $xmlDocument->domXPath->evaluate('string(ds:Signature/ds:SignedInfo/ds:Reference/@URI)', $domElement);
+        $rootElementId = XmlDocument::requireNonEmptyString($xmlDocument->domXPath->evaluate('string(self::node()/@ID)', $domElement));
+        $referenceUri = XmlDocument::requireNonEmptyString($xmlDocument->domXPath->evaluate('string(ds:Signature/ds:SignedInfo/ds:Reference/@URI)', $domElement));
         if (\sprintf('#%s', $rootElementId) !== $referenceUri) {
             throw new CryptoException('reference URI does not point to document ID');
         }
 
-        $digestMethod = $xmlDocument->domXPath->evaluate('string(ds:Signature/ds:SignedInfo/ds:Reference/ds:DigestMethod/@Algorithm)', $domElement);
+        $digestMethod = XmlDocument::requireNonEmptyString($xmlDocument->domXPath->evaluate('string(ds:Signature/ds:SignedInfo/ds:Reference/ds:DigestMethod/@Algorithm)', $domElement));
         if (self::SIGN_DIGEST_ALGO !== $digestMethod) {
             throw new CryptoException(\sprintf('only digest method "%s" is supported', self::SIGN_DIGEST_ALGO));
         }
 
-        $signatureMethod = $xmlDocument->domXPath->evaluate('string(ds:Signature/ds:SignedInfo/ds:SignatureMethod/@Algorithm)', $domElement);
+        $signatureMethod = XmlDocument::requireNonEmptyString($xmlDocument->domXPath->evaluate('string(ds:Signature/ds:SignedInfo/ds:SignatureMethod/@Algorithm)', $domElement));
         if (self::SIGN_ALGO !== $signatureMethod) {
             throw new CryptoException(\sprintf('only signature method "%s" is supported', self::SIGN_ALGO));
         }
 
-        $signatureValue = $xmlDocument->domXPath->evaluate('string(ds:Signature/ds:SignatureValue)', $domElement);
-        $digestValue = $xmlDocument->domXPath->evaluate('string(ds:Signature/ds:SignedInfo/ds:Reference/ds:DigestValue)', $domElement);
+        $signatureValue = XmlDocument::requireNonEmptyString($xmlDocument->domXPath->evaluate('string(ds:Signature/ds:SignatureValue)', $domElement));
+        $digestValue = XmlDocument::requireNonEmptyString($xmlDocument->domXPath->evaluate('string(ds:Signature/ds:SignedInfo/ds:Reference/ds:DigestValue)', $domElement));
 
         $signedInfoElement = XmlDocument::requireDomElement($xmlDocument->domXPath->query('ds:Signature/ds:SignedInfo', $domElement)->item(0));
         $canonicalSignedInfo = $signedInfoElement->C14N(true, false);

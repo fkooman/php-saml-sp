@@ -110,6 +110,26 @@ class XmlDocument
     }
 
     /**
+     * @param mixed $inputVar
+     *
+     * @throws \fkooman\SAML\SP\Exception\XmlDocumentException
+     *
+     * @return string
+     */
+    public static function requireNonEmptyString($inputVar)
+    {
+        if (!\is_string($inputVar)) {
+            throw new XmlDocumentException('expected "string"');
+        }
+
+        if ('' === $inputVar) {
+            throw new XmlDocumentException('expected non-empty "string"');
+        }
+
+        return $inputVar;
+    }
+
+    /**
      * @param string        $xmlStr
      * @param array<string> $schemaFiles
      *
