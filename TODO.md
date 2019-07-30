@@ -7,10 +7,6 @@
   avoid allowing one IdP to pretend to be another IdP
 - Do we also need to check `/samlp:Response/saml:Assertion/saml:Conditions/@NotOnOrAfter`?
 - Validate schema of outgoing SAML messages (`AuthnRequest`, `LogoutRequest`, `Metadata`)?
-- if we receive attributes not in the `urn:oid` format we don't apply any 
-  processing to them, e.g. for the `eduPersonTargetedID` et al, that may be
-  dangerous! Implement whitelist, only accepting `urn:oid` attributes by 
-  default?!
 
 ## 2.0
 
