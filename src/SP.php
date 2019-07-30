@@ -34,6 +34,8 @@ use ParagonIE\ConstantTime\Hex;
  */
 class SP
 {
+    const SESSION_KEY_PREFIX = '_php_saml_sp_';
+
     /** @var \DateTime */
     protected $dateTime;
 
@@ -114,7 +116,7 @@ class SP
 
         $relayState = Base64::encode($this->random->relayState());
         $authnRequestState = new AuthnRequestState($requestId, $idpEntityId, $authnContextClassRef, $returnTo);
-        $this->session->set('_php_saml_sp_'.$relayState, \serialize($authnRequestState));
+        $this->session->set(self::SESSION_KEY_PREFIX.$relayState, \serialize($authnRequestState));
 
         return self::prepareRequestUrl($ssoUrl, $authnRequest, $relayState, $this->spInfo->getPrivateKey());
     }
@@ -131,7 +133,7 @@ class SP
      */
     public function handleResponse($samlResponse, $relayState)
     {
-        $authnRequestState = \unserialize($this->session->take('_php_saml_sp_'.$relayState));
+        $authnRequestState = \unserialize($this->session->take(self::SESSION_KEY_PREFIX.$relayState));
         if (!($authnRequestState instanceof AuthnRequestState)) {
             throw new SpException('expected "AuthnRequestState" in session data');
         }
@@ -151,7 +153,7 @@ class SP
             $authnContextClassRef
         );
 
-        $this->session->set('_php_saml_sp_assertion', \serialize($samlAssertion));
+        $this->session->set(self::SESSION_KEY_PREFIX.'assertion', \serialize($samlAssertion));
 
         return $authnRequestState->getReturnTo();
     }
@@ -178,7 +180,7 @@ class SP
 
         // delete the assertion from the session, so we are no longer
         // authenticated...
-        $this->session->delete('_php_saml_sp_assertion');
+        $this->session->delete(self::SESSION_KEY_PREFIX.'assertion');
 
         $idpEntityId = $samlAssertion->getIssuer();
         if (!$this->idpInfoSource->has($idpEntityId)) {
@@ -215,7 +217,7 @@ class SP
 
         $relayState = Base64::encode($this->random->relayState());
         $logoutRequestState = new LogoutRequestState($requestId, $idpEntityId, $returnTo);
-        $this->session->set('_php_saml_sp_'.$relayState, \serialize($logoutRequestState));
+        $this->session->set(self::SESSION_KEY_PREFIX.$relayState, \serialize($logoutRequestState));
 
         return self::prepareRequestUrl($idpSloUrl, $logoutRequest, $relayState, $this->spInfo->getPrivateKey());
     }
@@ -235,7 +237,7 @@ class SP
 
         $queryParameters = new QueryParameters($queryString);
         $relayState = $queryParameters->requireQueryParameter('RelayState');
-        $logoutRequestState = \unserialize($this->session->take('_php_saml_sp_'.$relayState));
+        $logoutRequestState = \unserialize($this->session->take(self::SESSION_KEY_PREFIX.$relayState));
         if (!($logoutRequestState instanceof LogoutRequestState)) {
             throw new SpException('expected "LogoutRequestState" in session data');
         }
@@ -296,14 +298,14 @@ class SP
      */
     private function getAndVerifyAssertion()
     {
-        if (!$this->session->has('_php_saml_sp_assertion')) {
+        if (!$this->session->has(self::SESSION_KEY_PREFIX.'assertion')) {
             return null;
         }
 
-        $samlAssertion = \unserialize($this->session->get('_php_saml_sp_assertion'));
+        $samlAssertion = \unserialize($this->session->get(self::SESSION_KEY_PREFIX.'assertion'));
         if (!($samlAssertion instanceof Assertion)) {
             // we are unable to unserialize the Assertion
-            $this->session->delete('_php_saml_sp_assertion');
+            $this->session->delete(self::SESSION_KEY_PREFIX.'assertion');
 
             return null;
         }
@@ -311,7 +313,7 @@ class SP
         // make sure the SAML session is still valid
         $sessionNotOnOrAfter = $samlAssertion->getSessionNotOnOrAfter();
         if ($sessionNotOnOrAfter <= $this->dateTime) {
-            $this->session->delete('_php_saml_sp_assertion');
+            $this->session->delete(self::SESSION_KEY_PREFIX.'assertion');
 
             return null;
         }
