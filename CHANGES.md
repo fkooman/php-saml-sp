@@ -1,18 +1,22 @@
 # ChangeLog
 
 ## 0.2.0 (...)
-- **API CHANGE**: use encoded random value as `RelayState` instead of the 
-  "return to" URL to avoid creating a `RelayState` that exceeds 80 bytes which 
-  is not allowed according to SAML specification and enforced by (some?) 
-  Shibboleth IdPs
+- use encoded random value as `RelayState` instead of the `ReturnTo` URL to 
+  avoid creating a `RelayState` that exceeds 80 bytes which is not allowed 
+  according to SAML specification and enforced by (some?) Shibboleth IdPs
+- break API where SP consumers have to use the return values of `SP::login`, 
+  `SP::logout`, `SP::handleResponse` and `SP::handleLogoutResponse` instead of 
+  using `RelayState` as the "return to" URL
 - implement `SP::hasAssertion()` that returns `bool`, `SP::getAssertion()` will
   always return `Assertion` or throw an `SPException`
 - create an attribute mapping from `urn:oid` attributes to "friendly" 
-  names
+  names so applications can use the friendly name instead of only the `urn:oid` 
+  variant
 - verify "Subject Identifier Attributes" scopes as well
+- cleanup session variable handling, store objects in the session instead of 
+  a bunch of variables
+- only support "known" attributes in their `urn:oid` variant, ignore the rest
 - remove all encryption support, better no encryption than insecure encryption
-- cleanup session variable handling, use only keys for authentication, logout
-  and the assertion
 
 ## 0.1.1 (2019-04-23)
 - add some additional documentation to the code
