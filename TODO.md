@@ -1,5 +1,10 @@
 # TODO
 
+## 0.2
+
+- do not use `domXPath->evaluate` anymore, or make sure it does not return 
+  `null`...
+
 ## 1.0
 
 - input validation on ALL (public) methods
