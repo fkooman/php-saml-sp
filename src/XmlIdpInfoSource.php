@@ -57,7 +57,7 @@ class XmlIdpInfoSource implements IdpInfoSourceInterface
      */
     public function has($entityId)
     {
-        self::validate($entityId);
+        self::validateEntityId($entityId);
         $xPathQuery = \sprintf('//md:EntityDescriptor[@entityID="%s"]/md:IDPSSODescriptor', $entityId);
 
         return 1 === $this->xmlDocument->domXPath->query($xPathQuery)->length;
@@ -72,7 +72,7 @@ class XmlIdpInfoSource implements IdpInfoSourceInterface
      */
     public function get($entityId)
     {
-        self::validate($entityId);
+        self::validateEntityId($entityId);
         if (!$this->has($entityId)) {
             throw new XmlIdpInfoSourceException(\sprintf('IdP "%s" not available', $entityId));
         }
@@ -169,7 +169,7 @@ class XmlIdpInfoSource implements IdpInfoSourceInterface
      *
      * @return void
      */
-    private static function validate($entityId)
+    private static function validateEntityId($entityId)
     {
         // we took all IdP entityID entries from eduGAIN metadata and made sure
         // the filter accepts all of those... anything outside this range is

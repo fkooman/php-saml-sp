@@ -93,13 +93,13 @@ class SP
      */
     public function login($idpEntityId, $returnTo, array $authnContextClassRef = [])
     {
+        self::validateReturnTo($returnTo);
         $requestId = \sprintf('_%s', Hex::encode($this->random->requestId()));
         if (!$this->idpInfoSource->has($idpEntityId)) {
             throw new SpException(\sprintf('IdP "%s" not registered', $idpEntityId));
         }
         $idpInfo = $this->idpInfoSource->get($idpEntityId);
         $ssoUrl = $idpInfo->getSsoUrl();
-
         $authnRequest = $this->tpl->render(
             'AuthnRequest',
             [
@@ -170,6 +170,7 @@ class SP
      */
     public function logout($returnTo)
     {
+        self::validateReturnTo($returnTo);
         if (!$this->hasAssertion()) {
             return $returnTo;
         }
@@ -329,5 +330,17 @@ class SP
             false === \strpos($requestUrl, '?') ? '?' : '&',
             \http_build_query($httpQueryParameters)
         );
+    }
+
+    /**
+     * @param string $returnTo
+     *
+     * @return void
+     */
+    private static function validateReturnTo($returnTo)
+    {
+        if (false === \filter_var($returnTo, FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED)) {
+            throw new SPException('invalid "ReturnTo" URL provided');
+        }
     }
 }
