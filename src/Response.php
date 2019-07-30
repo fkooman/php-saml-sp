@@ -129,8 +129,8 @@ class Response
             throw new ResponseException('saml:Assertion not yet valid (/samlp:Response/saml:Assertion/saml:Conditions/@NotBefore)');
         }
 
-        $authnInstant = new DateTime($responseDocument->domXPath->evaluate('string(saml:AuthnStatement/saml:AuthnContext/@AuthnInstant)', $assertionElement));
-        $sessionNotOnOrAfter = new DateTime($responseDocument->domXPath->evaluate('string(saml:AuthnStatement/saml:AuthnContext/@SessionNotOnOrAfter)', $assertionElement));
+        $authnInstant = new DateTime($responseDocument->domXPath->evaluate('string(saml:AuthnStatement/@AuthnInstant)', $assertionElement));
+        $sessionNotOnOrAfter = new DateTime($responseDocument->domXPath->evaluate('string(saml:AuthnStatement/@SessionNotOnOrAfter)', $assertionElement));
         $authnContextClassRef = $responseDocument->domXPath->evaluate('string(saml:AuthnStatement/saml:AuthnContext/saml:AuthnContextClassRef)', $assertionElement);
         if (0 !== \count($authnContext)) {
             // we requested a particular AuthnContext, make sure we got it
