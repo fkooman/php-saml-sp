@@ -263,7 +263,7 @@ class SP
      */
     public function hasAssertion()
     {
-        return $this->session->has('_php_saml_sp_assertion');
+        return null !== $this->getAndVerifyAssertion();
     }
 
     /**
@@ -271,13 +271,8 @@ class SP
      */
     public function getAssertion()
     {
-        if (!$this->hasAssertion()) {
+        if (null === $samlAssertion = $this->getAndVerifyAssertion()) {
             throw new SPException('no SAML assertion available');
-        }
-
-        $samlAssertion = \unserialize($this->session->get('_php_saml_sp_assertion'));
-        if (!($samlAssertion instanceof Assertion)) {
-            throw new SpException('expected "Assertion" in session data');
         }
 
         return $samlAssertion;
@@ -294,6 +289,34 @@ class SP
                 'spInfo' => $this->spInfo,
             ]
         );
+    }
+
+    /**
+     * @return Assertion|null
+     */
+    private function getAndVerifyAssertion()
+    {
+        if (!$this->session->has('_php_saml_sp_assertion')) {
+            return null;
+        }
+
+        $samlAssertion = \unserialize($this->session->get('_php_saml_sp_assertion'));
+        if (!($samlAssertion instanceof Assertion)) {
+            // we are unable to unserialize the Assertion
+            $this->session->delete('_php_saml_sp_assertion');
+
+            return null;
+        }
+
+        // make sure the SAML session is still valid
+        $sessionNotOnOrAfter = $samlAssertion->getSessionNotOnOrAfter();
+        if ($sessionNotOnOrAfter <= $this->dateTime) {
+            $this->session->delete('_php_saml_sp_assertion');
+
+            return null;
+        }
+
+        return $samlAssertion;
     }
 
     /**

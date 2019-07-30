@@ -130,7 +130,7 @@ class Response
         }
 
         $authnInstant = new DateTime($responseDocument->domXPath->evaluate('string(saml:AuthnStatement/saml:AuthnContext/@AuthnInstant)', $assertionElement));
-
+        $sessionNotOnOrAfter = new DateTime($responseDocument->domXPath->evaluate('string(saml:AuthnStatement/saml:AuthnContext/@SessionNotOnOrAfter)', $assertionElement));
         $authnContextClassRef = $responseDocument->domXPath->evaluate('string(saml:AuthnStatement/saml:AuthnContext/saml:AuthnContextClassRef)', $assertionElement);
         if (0 !== \count($authnContext)) {
             // we requested a particular AuthnContext, make sure we got it
@@ -140,7 +140,7 @@ class Response
         }
 
         $attributeList = self::extractAttributes($responseDocument, $assertionElement, $idpInfo, $spInfo);
-        $samlAssertion = new Assertion($idpInfo->getEntityId(), $authnInstant, $authnContextClassRef, $attributeList);
+        $samlAssertion = new Assertion($idpInfo->getEntityId(), $authnInstant, $sessionNotOnOrAfter, $authnContextClassRef, $attributeList);
 
         // NameID
         $domNodeList = $responseDocument->domXPath->query('saml:Subject/saml:NameID', $assertionElement);

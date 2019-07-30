@@ -225,6 +225,7 @@ EOF;
         $samlAssertion = new Assertion(
             'http://localhost:8080/metadata.php',
             new DateTime('2019-01-02T20:05:33Z'),
+            new DateTime('2019-01-03T04:05:33Z'),
             'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport',
             [
                 'urn:oid:0.9.2342.19200300.100.1.1' => [
@@ -241,12 +242,13 @@ EOF;
 
         $testSession->set('_php_saml_sp_assertion', \serialize($samlAssertion));
         $this->sp->setSession($testSession);
+        $this->sp->setDateTime(new DateTime('2019-01-03T03:05:33Z'));
         $sloUrl = $this->sp->logout(
             'http://localhost:8080/app'
         );
 
         $logoutRequest = <<< EOF
-<samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="_30313233343536373839616263646566" Version="2.0" IssueInstant="2018-01-01T08:00:00Z" Destination="http://localhost:8080/slo.php">
+<samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="_30313233343536373839616263646566" Version="2.0" IssueInstant="2019-01-03T03:05:33Z" Destination="http://localhost:8080/slo.php">
   <saml:Issuer>http://localhost:8081/metadata</saml:Issuer>
   <saml:NameID SPNameQualifier="http://localhost:8081/metadata" Format="urn:oasis:names:tc:SAML:2.0:nameid-format:transient">LtrfxjC6GOQ5pywYueOfXJDwfhQ7dZ4t9k3yGEB1WhY</saml:NameID></samlp:LogoutRequest>
 EOF;

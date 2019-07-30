@@ -3,10 +3,9 @@
 ## 0.2
 
 - make sure all session keys are deleted after they are no longer needed
-- figure out how long the user is allowed to be authenticated, store this in
-  the assertion and verify this time is not yet expired when calling 
-  `SP::getAssertion()` and `SP::hasAssertion()`
- 
+- make it possible to update the session variables globally (version) in case 
+  the data format (serialization of objects) changes...
+
 ## 1.0
 
 - input validation on ALL (public) methods
