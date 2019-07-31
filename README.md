@@ -3,8 +3,8 @@
 This library allows adding SAML Service Provider (SP) support to your PHP web
 application and interface with SAML Identity Providers (IdPs).
 
-**NOTE**: this library did NOT receive a security audit. Do **NOT** use it in
-production until there is a 1.0 release!
+**NOTE**: this library did NOT receive a comprehensive security audit. Do 
+**NOT** use it in production until there is a 1.0 release!
 
 # Why
 
@@ -26,10 +26,14 @@ with (most) real world deployed IdPs, and be secure at all times.
 - Supports multiple IdP certificates for key rollover
 - Allow specifying `AuthnContextClassRef` as part of the `AuthnRequest`
 - No dependency on `robrichards/xmlseclibs`
-- Serializes `eduPersonTargetedID` as `idpEntityId!spEntityId!persistentId` 
-  like Shibboleth;
-- Verify "scope" of attributes based on `<shibmd:Scope>` metadata element iff
-  metadata contains this element
+- Serializes `eduPersonTargetedID` as `idpEntityId!spEntityId!persistentId`, 
+  just like Shibboleth;
+- Only supports `urn:oid` SAML attributes, ignores the rest
+- Verify "scope" of attributes based on `<shibmd:Scope>` metadata element when
+  the IdP metadata contains this element
+  - Silently removes the attribute (value) when scope does not match
+- Converts `urn:oid` attribute names to "friendly" names for use by 
+  applications
 - Validates XML schema(s) when processing XML protocol messages
 - Tested with IdPs:
   - [simpleSAMLphp](https://simplesamlphp.org/)
@@ -58,7 +62,7 @@ implement. There is no choice, only the below algorithms are supported.
 # X.509
 
 Use the following command to create a self-signed certificate for use with the
-SP library.
+SP library. It will be used for signing the `AuthnRequest` and `LogoutRequest`.
 
     $ openssl req \
         -nodes \
@@ -99,7 +103,7 @@ Make sure:
 ## simpleSAMLphp
 
 In your simpleSAMLphp's `metadata/saml20-sp-remote.php` file, configure this 
-for this SP library:
+for this SP:
 
     'validate.authnrequest' => true,
     'sign.logout' => true,
