@@ -1,6 +1,6 @@
 # ChangeLog
 
-## 0.2.0 (...)
+## 0.2.0 (2019-07-31)
 - use encoded random value as `RelayState` instead of the `ReturnTo` URL to 
   avoid creating a `RelayState` that exceeds 80 bytes which is not allowed 
   according to SAML specification and enforced by (some?) Shibboleth IdPs
@@ -12,7 +12,8 @@
 - create an attribute mapping from `urn:oid` attributes to "friendly" 
   names so applications can use the friendly name instead of only the `urn:oid` 
   variant
-- verify "Subject Identifier Attributes" scopes as well
+- verify "Subject Identifier Attributes" and `schacHomeOrganization` scopes as 
+  well
 - cleanup session variable handling, store objects in the session instead of 
   a bunch of variables
 - only support "known" attributes in their `urn:oid` variant, ignore the rest
