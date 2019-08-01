@@ -50,8 +50,14 @@ class QueryParameters
     public function __construct($queryString)
     {
         foreach (\explode('&', $queryString) as $queryElement) {
-            list($k, $v) = \explode('=', $queryElement);
-            $this->queryData[$k] = $v;
+            if ('' !== $queryElement) {
+                if (false === \strpos($queryElement, '=')) {
+                    $this->queryData[$queryElement] = '';
+                    continue;
+                }
+                list($k, $v) = \explode('=', $queryElement, 2);
+                $this->queryData[$k] = $v;
+            }
         }
     }
 
