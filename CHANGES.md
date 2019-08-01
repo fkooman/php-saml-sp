@@ -1,5 +1,8 @@
 # ChangeLog
 
+## 0.2.1 (...)
+- more robust handling of QueryParameters
+
 ## 0.2.0 (2019-07-31)
 - use encoded random value as `RelayState` instead of the `ReturnTo` URL to 
   avoid creating a `RelayState` that exceeds 80 bytes which is not allowed 
