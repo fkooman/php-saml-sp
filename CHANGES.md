@@ -1,6 +1,6 @@
 # ChangeLog
 
-## 0.2.1 (...)
+## 0.2.1 (2019-08-05)
 - more robust handling of QueryParameters
 
 ## 0.2.0 (2019-07-31)
