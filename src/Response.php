@@ -24,6 +24,7 @@
 
 namespace fkooman\SAML\SP;
 
+use DateInterval;
 use DateTime;
 use DOMElement;
 use fkooman\SAML\SP\Exception\ResponseException;
@@ -130,7 +131,11 @@ class Response
         }
 
         $authnInstant = new DateTime(XmlDocument::requireNonEmptyString($responseDocument->domXPath->evaluate('string(saml:AuthnStatement/@AuthnInstant)', $assertionElement)));
-        $sessionNotOnOrAfter = new DateTime(XmlDocument::requireNonEmptyString($responseDocument->domXPath->evaluate('string(saml:AuthnStatement/@SessionNotOnOrAfter)', $assertionElement)));
+
+        // SessionNotOnOrAfter (Optional)
+        $sessionNotOnOrAfterString = XmlDocument::requireString($responseDocument->domXPath->evaluate('string(saml:AuthnStatement/@SessionNotOnOrAfter)', $assertionElement));
+        $sessionNotOnOrAfter = '' === $sessionNotOnOrAfterString ? \date_add(clone $this->dateTime, new DateInterval('PT8H')) : new DateTime($sessionNotOnOrAfterString);
+
         $authnContextClassRef = XmlDocument::requireNonEmptyString($responseDocument->domXPath->evaluate('string(saml:AuthnStatement/saml:AuthnContext/saml:AuthnContextClassRef)', $assertionElement));
         if (0 !== \count($authnContext)) {
             // we requested a particular AuthnContext, make sure we got it

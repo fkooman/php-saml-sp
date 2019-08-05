@@ -1,5 +1,9 @@
 # ChangeLog
 
+## 0.2.2 (...)
+- do not throw error when attribute `saml:AuthnStatement/@SessionNotOnOrAfter`
+  is missing, it is optional
+
 ## 0.2.1 (2019-08-05)
 - more robust handling of QueryParameters
 
