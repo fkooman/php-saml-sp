@@ -1,5 +1,8 @@
 # ChangeLog
 
+## 0.3.0 (...)
+- remove support for `saml:AuthnStatement/@SessionNotOnOrAfter` completely
+
 ## 0.2.2 (2019-08-06)
 - do not throw error when attribute `saml:AuthnStatement/@SessionNotOnOrAfter`
   is missing, it is optional

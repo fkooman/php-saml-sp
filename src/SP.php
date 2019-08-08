@@ -310,14 +310,6 @@ class SP
             return null;
         }
 
-        // make sure the SAML session is still valid
-        $sessionNotOnOrAfter = $samlAssertion->getSessionNotOnOrAfter();
-        if ($sessionNotOnOrAfter <= $this->dateTime) {
-            $this->session->delete(self::SESSION_KEY_PREFIX.'assertion');
-
-            return null;
-        }
-
         return $samlAssertion;
     }
 

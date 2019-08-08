@@ -37,9 +37,6 @@ class Assertion
     /** @var \DateTime */
     private $authnInstant;
 
-    /** @var \DateTime */
-    private $sessionNotOnOrAfter;
-
     /** @var string */
     private $authnContext;
 
@@ -49,16 +46,14 @@ class Assertion
     /**
      * @param string                      $issuer
      * @param \DateTime                   $authnInstant
-     * @param \DateTime                   $sessionNotOnOrAfter
      * @param string                      $authnContext
      * @param array<string,array<string>> $attributeList
      */
-    public function __construct($issuer, DateTime $authnInstant, DateTime $sessionNotOnOrAfter, $authnContext, array $attributeList)
+    public function __construct($issuer, DateTime $authnInstant, $authnContext, array $attributeList)
     {
         $this->issuer = $issuer;
         $this->authnInstant = $authnInstant;
         $this->authnContext = $authnContext;
-        $this->sessionNotOnOrAfter = $sessionNotOnOrAfter;
         $this->attributeList = $attributeList;
     }
 
@@ -94,14 +89,6 @@ class Assertion
     public function getAuthnInstant()
     {
         return $this->authnInstant;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getSessionNotOnOrAfter()
-    {
-        return $this->sessionNotOnOrAfter;
     }
 
     /**

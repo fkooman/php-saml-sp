@@ -116,22 +116,6 @@ class XmlDocument
      *
      * @return string
      */
-    public static function requireString($inputVar)
-    {
-        if (!\is_string($inputVar)) {
-            throw new XmlDocumentException('expected "string"');
-        }
-
-        return $inputVar;
-    }
-
-    /**
-     * @param mixed $inputVar
-     *
-     * @throws \fkooman\SAML\SP\Exception\XmlDocumentException
-     *
-     * @return string
-     */
     public static function requireNonEmptyString($inputVar)
     {
         if (!\is_string($inputVar)) {
