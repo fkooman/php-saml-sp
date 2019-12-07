@@ -25,6 +25,8 @@
 namespace fkooman\SAML\SP\Tests;
 
 use DateTime;
+use fkooman\SAML\SP\Exception\CryptoException;
+use fkooman\SAML\SP\Exception\ResponseException;
 use fkooman\SAML\SP\IdpInfo;
 use fkooman\SAML\SP\PrivateKey;
 use fkooman\SAML\SP\PublicKey;
@@ -149,114 +151,119 @@ class ResponseTest extends TestCase
 //        );
 //    }
 
-    /**
-     * @expectedException \fkooman\SAML\SP\Exception\CryptoException
-     * @expectedExceptionMessage unexpected digest
-     */
     public function testInvalidDigest()
     {
-        $response = new Response(new DateTime('2019-01-02T20:05:33Z'));
-        $samlResponse = \file_get_contents(__DIR__.'/data/assertion/FrkoIdP_invalid_digest.xml');
-        $response->verify(
-            new SpInfo(
-                'http://localhost:8081/metadata',
-                PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
-                PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
-                'http://localhost:8081/acs'
-            ),
-            new IdpInfo('http://localhost:8080/metadata.php', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/FrkoIdP.crt')], []),
-            $samlResponse,
-            '_6f4ccd6d1ced9e0f5ac6333893c64a2010487d289044b6bb4497b716ebc0a067',
-            []
-        );
+        try {
+            $response = new Response(new DateTime('2019-01-02T20:05:33Z'));
+            $samlResponse = \file_get_contents(__DIR__.'/data/assertion/FrkoIdP_invalid_digest.xml');
+            $response->verify(
+                new SpInfo(
+                    'http://localhost:8081/metadata',
+                    PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
+                    PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
+                    'http://localhost:8081/acs'
+                ),
+                new IdpInfo('http://localhost:8080/metadata.php', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/FrkoIdP.crt')], []),
+                $samlResponse,
+                '_6f4ccd6d1ced9e0f5ac6333893c64a2010487d289044b6bb4497b716ebc0a067',
+                []
+            );
+            $this->fail();
+        } catch (CryptoException $e) {
+            $this->assertSame('unexpected digest', $e->getMessage());
+        }
     }
 
-    /**
-     * @expectedException \fkooman\SAML\SP\Exception\CryptoException
-     * @expectedExceptionMessage unable to verify signature
-     */
     public function testWrongCertificate()
     {
-        $response = new Response(new DateTime('2019-01-02T20:05:33Z'));
-        $samlResponse = \file_get_contents(__DIR__.'/data/assertion/FrkoIdP.xml');
-        $response->verify(
-            new SpInfo(
-                'http://localhost:8081/metadata',
-                PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
-                PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
-                'http://localhost:8081/acs'
-            ),
-            new IdpInfo('http://localhost:8080/metadata.php', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/simpleSAMLphp.crt')], []),
-            $samlResponse,
-            '_6f4ccd6d1ced9e0f5ac6333893c64a2010487d289044b6bb4497b716ebc0a067',
-            []
-        );
+        try {
+            $response = new Response(new DateTime('2019-01-02T20:05:33Z'));
+            $samlResponse = \file_get_contents(__DIR__.'/data/assertion/FrkoIdP.xml');
+            $response->verify(
+                new SpInfo(
+                    'http://localhost:8081/metadata',
+                    PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
+                    PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
+                    'http://localhost:8081/acs'
+                ),
+                new IdpInfo('http://localhost:8080/metadata.php', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/simpleSAMLphp.crt')], []),
+                $samlResponse,
+                '_6f4ccd6d1ced9e0f5ac6333893c64a2010487d289044b6bb4497b716ebc0a067',
+                []
+            );
+            $this->fail();
+        } catch (CryptoException $e) {
+            $this->assertSame('unable to verify signature', $e->getMessage());
+        }
     }
 
-    /**
-     * @expectedException \fkooman\SAML\SP\Exception\CryptoException
-     * @expectedExceptionMessage unable to verify signature
-     */
     public function testWrongSignature()
     {
-        $response = new Response(new DateTime('2019-01-02T20:05:33Z'));
-        $samlResponse = \file_get_contents(__DIR__.'/data/assertion/FrkoIdP_invalid_signature.xml');
-        $response->verify(
-            new SpInfo(
-                'http://localhost:8081/metadata',
-                PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
-                PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
-                'http://localhost:8081/acs'
-            ),
-            new IdpInfo('http://localhost:8080/metadata.php', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/FrkoIdP.crt')], []),
-            $samlResponse,
-            '_6f4ccd6d1ced9e0f5ac6333893c64a2010487d289044b6bb4497b716ebc0a067',
-            []
-        );
+        try {
+            $response = new Response(new DateTime('2019-01-02T20:05:33Z'));
+            $samlResponse = \file_get_contents(__DIR__.'/data/assertion/FrkoIdP_invalid_signature.xml');
+            $response->verify(
+                new SpInfo(
+                    'http://localhost:8081/metadata',
+                    PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
+                    PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
+                    'http://localhost:8081/acs'
+                ),
+                new IdpInfo('http://localhost:8080/metadata.php', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/FrkoIdP.crt')], []),
+                $samlResponse,
+                '_6f4ccd6d1ced9e0f5ac6333893c64a2010487d289044b6bb4497b716ebc0a067',
+                []
+            );
+            $this->fail();
+        } catch (CryptoException $e) {
+            $this->assertSame('unable to verify signature', $e->getMessage());
+        }
     }
 
-    /**
-     * @expectedException \fkooman\SAML\SP\Exception\ResponseException
-     * @expectedExceptionMessage samlp:Response and/or saml:Assertion MUST be signed
-     */
     public function testNotSigned()
     {
-        $response = new Response(new DateTime('2019-01-02T20:05:33Z'));
-        $samlResponse = \file_get_contents(__DIR__.'/data/assertion/FrkoIdP_not_signed.xml');
-        $response->verify(
-            new SpInfo(
-                'http://localhost:8081/metadata',
-                PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
-                PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
-                'http://localhost:8081/acs'
-            ),
-            new IdpInfo('http://localhost:8080/metadata.php', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/FrkoIdP.crt')], []),
-            $samlResponse,
-            '_6f4ccd6d1ced9e0f5ac6333893c64a2010487d289044b6bb4497b716ebc0a067',
-            []
-        );
+        try {
+            $response = new Response(new DateTime('2019-01-02T20:05:33Z'));
+            $samlResponse = \file_get_contents(__DIR__.'/data/assertion/FrkoIdP_not_signed.xml');
+            $response->verify(
+                new SpInfo(
+                    'http://localhost:8081/metadata',
+                    PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
+                    PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
+                    'http://localhost:8081/acs'
+                ),
+                new IdpInfo('http://localhost:8080/metadata.php', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/FrkoIdP.crt')], []),
+                $samlResponse,
+                '_6f4ccd6d1ced9e0f5ac6333893c64a2010487d289044b6bb4497b716ebc0a067',
+                []
+            );
+            $this->fail();
+        } catch (ResponseException $e) {
+            $this->assertSame('samlp:Response and/or saml:Assertion MUST be signed', $e->getMessage());
+        }
     }
 
-    /**
-     * @expectedException \fkooman\SAML\SP\Exception\CryptoException
-     * @expectedExceptionMessage only digest method "http://www.w3.org/2001/04/xmlenc#sha256" is supported
-     */
     public function testSha1()
     {
-        $response = new Response(new DateTime('2019-01-16T23:47:31Z'));
-        $samlResponse = \file_get_contents(__DIR__.'/data/assertion/x509idp.moonshot.utr.surfcloud.nl.xml');
-        $response->verify(
-            new SpInfo(
-                'http://localhost:8081/metadata',
-                PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
-                PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
-                'http://localhost:8081/acs'
-            ),
-            new IdpInfo('https://x509idp.moonshot.utr.surfcloud.nl/metadata', 'https://x509idp.moonshot.utr.surfcloud.nl/sso', null, [PublicKey::fromFile(__DIR__.'/data/certs/x509idp.moonshot.utr.surfcloud.nl.crt')], []),
-            $samlResponse,
-            '_3c35f56a7156b0805fbccb717cc15194',
-            []
-        );
+        try {
+            $response = new Response(new DateTime('2019-01-16T23:47:31Z'));
+            $samlResponse = \file_get_contents(__DIR__.'/data/assertion/x509idp.moonshot.utr.surfcloud.nl.xml');
+            $response->verify(
+                new SpInfo(
+                    'http://localhost:8081/metadata',
+                    PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
+                    PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
+                    'http://localhost:8081/acs'
+                ),
+                new IdpInfo('https://x509idp.moonshot.utr.surfcloud.nl/metadata', 'https://x509idp.moonshot.utr.surfcloud.nl/sso', null, [PublicKey::fromFile(__DIR__.'/data/certs/x509idp.moonshot.utr.surfcloud.nl.crt')], []),
+                $samlResponse,
+                '_3c35f56a7156b0805fbccb717cc15194',
+                []
+            );
+            $this->fail();
+        } catch (CryptoException $e) {
+            $this->assertSame('only digest method "http://www.w3.org/2001/04/xmlenc#sha256" is supported', $e->getMessage());
+        }
     }
 
     //  XXX we do not support "raw" attributes yet, only in urn:oid format
@@ -287,26 +294,27 @@ class ResponseTest extends TestCase
 //        $this->assertSame('<saml:NameID Format="urn:oasis:names:tc:SAML:2.0:nameid-format:transient">WrlwOmM5zcufWzakxkurPqQnZtvlDoxJt6kwJvf950M=</saml:NameID>', $samlAssertion->getNameId()->toXML());
 //    }
 
-    /**
-     * @expectedException \fkooman\SAML\SP\Exception\ResponseException
-     * @expectedExceptionMessage urn:oasis:names:tc:SAML:2.0:status:Responder (urn:oasis:names:tc:SAML:2.0:status:NoAuthnContext)
-     */
     public function testErrorResponse()
     {
-        $response = new Response(new DateTime('2019-01-16T23:47:31Z'));
-        $samlResponse = \file_get_contents(__DIR__.'/data/assertion/SURFsecureID_error.xml');
-        $response->verify(
-            new SpInfo(
-                'https://kluitje.eduvpn.nl/saml',
-                PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
-                PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
-                'https://kluitje.eduvpn.nl/portal/_saml/acs'
-            ),
-            new IdpInfo('https://sa-gw.test.surfconext.nl/authentication/metadata', 'SSO', null, [PublicKey::fromFile(__DIR__.'/data/certs/SURFsecureID.crt')], []),
-            $samlResponse,
-            '_6a31edbaec0922414f9a96e5fdb5493e',
-            []
-        );
+        try {
+            $response = new Response(new DateTime('2019-01-16T23:47:31Z'));
+            $samlResponse = \file_get_contents(__DIR__.'/data/assertion/SURFsecureID_error.xml');
+            $response->verify(
+                new SpInfo(
+                    'https://kluitje.eduvpn.nl/saml',
+                    PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
+                    PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
+                    'https://kluitje.eduvpn.nl/portal/_saml/acs'
+                ),
+                new IdpInfo('https://sa-gw.test.surfconext.nl/authentication/metadata', 'SSO', null, [PublicKey::fromFile(__DIR__.'/data/certs/SURFsecureID.crt')], []),
+                $samlResponse,
+                '_6a31edbaec0922414f9a96e5fdb5493e',
+                []
+            );
+            $this->fail();
+        } catch (ResponseException $e) {
+            $this->assertSame('urn:oasis:names:tc:SAML:2.0:status:Responder (urn:oasis:names:tc:SAML:2.0:status:NoAuthnContext)', $e->getMessage());
+        }
     }
 
     public function testEPPNScopeMatch()

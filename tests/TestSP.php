@@ -31,8 +31,6 @@ use fkooman\SAML\SP\SP;
 class TestSP extends SP
 {
     /**
-     * @param RandomInterface $random
-     *
      * @return void
      */
     public function setRandom(RandomInterface $random)
@@ -41,8 +39,6 @@ class TestSP extends SP
     }
 
     /**
-     * @param \DateTime $dateTime
-     *
      * @return void
      */
     public function setDateTime(DateTime $dateTime)

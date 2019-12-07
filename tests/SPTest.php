@@ -29,6 +29,7 @@ use DOMDocument;
 use fkooman\SAML\SP\Assertion;
 use fkooman\SAML\SP\AuthnRequestState;
 use fkooman\SAML\SP\Crypto;
+use fkooman\SAML\SP\Exception\ResponseException;
 use fkooman\SAML\SP\LogoutRequestState;
 use fkooman\SAML\SP\NameId;
 use fkooman\SAML\SP\PrivateKey;
@@ -195,23 +196,24 @@ EOF;
         );
     }
 
-    /**
-     * @expectedException \fkooman\SAML\SP\Exception\ResponseException
-     * @expectedExceptionMessage expected AuthnContext containing any of [urn:x-example:bar], got "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport"
-     */
     public function testHandleResponseWrongAuthnContext()
     {
-        $samlResponse = \file_get_contents(__DIR__.'/data/assertion/FrkoIdP.xml');
+        try {
+            $samlResponse = \file_get_contents(__DIR__.'/data/assertion/FrkoIdP.xml');
 
-        $session = new TestSession();
-        $authnRequestState = new AuthnRequestState('_2483d0b8847ccaa5edf203dad685f860', 'http://localhost:8080/metadata.php', ['urn:x-example:bar'], 'return_to');
-        $session->set(TestSP::SESSION_KEY_PREFIX.''.\base64_encode('1234_relay_state_5678'), \serialize($authnRequestState));
-        $this->sp->setSession($session);
-        $this->sp->setDateTime(new DateTime('2019-02-23T17:01:21Z'));
-        $this->sp->handleResponse(
-            \base64_encode($samlResponse),
-            \base64_encode('1234_relay_state_5678')
-        );
+            $session = new TestSession();
+            $authnRequestState = new AuthnRequestState('_2483d0b8847ccaa5edf203dad685f860', 'http://localhost:8080/metadata.php', ['urn:x-example:bar'], 'return_to');
+            $session->set(TestSP::SESSION_KEY_PREFIX.''.\base64_encode('1234_relay_state_5678'), \serialize($authnRequestState));
+            $this->sp->setSession($session);
+            $this->sp->setDateTime(new DateTime('2019-02-23T17:01:21Z'));
+            $this->sp->handleResponse(
+                \base64_encode($samlResponse),
+                \base64_encode('1234_relay_state_5678')
+            );
+            $this->fail();
+        } catch (ResponseException $e) {
+            $this->assertSame('expected AuthnContext containing any of [urn:x-example:bar], got "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport"', $e->getMessage());
+        }
     }
 
     public function testLogout()
