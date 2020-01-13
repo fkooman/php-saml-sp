@@ -24,6 +24,8 @@
 
 namespace fkooman\SAML\SP\Api;
 
+use DateTime;
+use fkooman\SAML\SP\Api\Exception\AuthException;
 use fkooman\SAML\SP\Assertion;
 use fkooman\SAML\SP\PhpSession;
 use fkooman\SAML\SP\SessionInterface;
@@ -42,6 +44,9 @@ class SamlAuth
     /** @var \fkooman\SAML\SP\SessionInterface */
     private $session;
 
+    /** @var \DateTime */
+    private $dateTime;
+
     public function __construct(SessionInterface $session = null)
     {
         $this->config = Config::fromFile(\dirname(\dirname(__DIR__)).'/config/config.php');
@@ -54,43 +59,72 @@ class SamlAuth
             $session->start($secureCookie);
         }
         $this->session = $session;
+        $this->dateTime = new DateTime();
     }
 
     /**
-     * @return \fkooman\SAML\SP\Assertion|string
+     * @return string
      */
-    public function requireAuth()
+    public function getLoginURL(AuthOptions $authOptions = null)
     {
-        // do we have an active session?
-        if (null !== $samlAssertion = $this->getAndVerifyAssertion()) {
-            return $samlAssertion;
+        if (null === $authOptions) {
+            $authOptions = new AuthOptions();
         }
 
-        // return a redirect URI
         if (null === $spPath = $this->config->requireKey('spPath')) {
             $spPath = '/php-saml-sp';
         }
 
+        if (null === $returnTo = $authOptions->getReturnTo()) {
+            $returnTo = $this->request->getUri();
+        }
+
         $queryParameters = [
-            'ReturnTo' => $this->request->getUri(),
+            'ReturnTo' => $returnTo,
         ];
 
         return $this->request->getOrigin().$spPath.'/login'.'?'.\http_build_query($queryParameters);
     }
 
     /**
+     * @return \fkooman\SAML\SP\Assertion
+     */
+    public function getAssertion()
+    {
+        if (null === $samlAssertion = $this->getAndVerifyAssertion()) {
+            throw new AuthException('not authenticated');
+        }
+
+        return $samlAssertion;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAuthenticated()
+    {
+        return null !== $this->getAndVerifyAssertion();
+    }
+
+    /**
      * @return \fkooman\SAML\SP\Assertion|null
      */
-    private function getAndVerifyAssertion()
+    public function getAndVerifyAssertion()
     {
-        if (null === $assertionData = $this->session->get(SP::SESSION_KEY_PREFIX.'assertion')) {
+        if (null === $sessionValue = $this->session->get(SP::SESSION_KEY_PREFIX.'assertion')) {
+            return null;
+        }
+        $samlAssertion = \unserialize($sessionValue);
+        if (!($samlAssertion instanceof Assertion)) {
+            // we are unable to unserialize the Assertion
+            $this->session->delete(SP::SESSION_KEY_PREFIX.'assertion');
+
             return null;
         }
 
-        // XXX where do we check whether or not it expired?!
-        $samlAssertion = \unserialize($assertionData);
-        if (!($samlAssertion instanceof Assertion)) {
-            // we are unable to unserialize the Assertion
+        // make sure the SAML session is still valid
+        $sessionNotOnOrAfter = $samlAssertion->getSessionNotOnOrAfter();
+        if ($sessionNotOnOrAfter <= $this->dateTime) {
             $this->session->delete(SP::SESSION_KEY_PREFIX.'assertion');
 
             return null;

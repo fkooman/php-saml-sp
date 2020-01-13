@@ -22,21 +22,53 @@
  * SOFTWARE.
  */
 
-require_once \dirname(__DIR__).'/vendor/autoload.php';
+namespace fkooman\SAML\SP\Api;
 
-// manual install in /var/www/html/php-saml-sp
-//require_once '/var/www/html/php-saml-sp/vendor/autoload.php';
+class AuthOptions
+{
+    /** @var array<string> */
+    private $authnContextClassRef = [];
 
-// when using Debian/Fedora/CentOS/RHEL package
-//require_once '/usr/share/php/fkooman/SAML/SP/autoload.php';
+    /** @var string|null */
+    private $returnTo = null;
 
-use fkooman\SAML\SP\Api\SamlAuth;
+    /**
+     * @param array<string> $authnContextClassRef
+     *
+     * @return self
+     */
+    public function setAuthnContextClassRef(array $authnContextClassRef)
+    {
+        $this->authnContextClassRef = $authnContextClassRef;
 
-$samlAuth = new SamlAuth();
-if (!$samlAuth->isAuthenticated()) {
-    \header('Location: '.$samlAuth->getLoginURL());
-    exit(0);
+        return $this;
+    }
+
+    /**
+     * @return array<string>
+     */
+    public function getAuthnContextClassRef()
+    {
+        return $this->authnContextClassRef;
+    }
+
+    /**
+     * @param string $returnTo
+     *
+     * @return self
+     */
+    public function setReturnTo($returnTo)
+    {
+        $this->returnTo = $returnTo;
+
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getReturnTo()
+    {
+        return $this->returnTo;
+    }
 }
-$samlAssertion = $samlAuth->getAssertion();
-echo \htmlentities($samlAssertion->getIssuer()).'<br>';
-echo \htmlentities($samlAssertion->getNameId()->toXml()).'<br>';

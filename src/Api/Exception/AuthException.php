@@ -22,21 +22,10 @@
  * SOFTWARE.
  */
 
-require_once \dirname(__DIR__).'/vendor/autoload.php';
+namespace fkooman\SAML\SP\Api\Exception;
 
-// manual install in /var/www/html/php-saml-sp
-//require_once '/var/www/html/php-saml-sp/vendor/autoload.php';
+use Exception;
 
-// when using Debian/Fedora/CentOS/RHEL package
-//require_once '/usr/share/php/fkooman/SAML/SP/autoload.php';
-
-use fkooman\SAML\SP\Api\SamlAuth;
-
-$samlAuth = new SamlAuth();
-if (!$samlAuth->isAuthenticated()) {
-    \header('Location: '.$samlAuth->getLoginURL());
-    exit(0);
+class AuthException extends Exception
+{
 }
-$samlAssertion = $samlAuth->getAssertion();
-echo \htmlentities($samlAssertion->getIssuer()).'<br>';
-echo \htmlentities($samlAssertion->getNameId()->toXml()).'<br>';
