@@ -63,6 +63,7 @@ ul {
 ul button {
     width: 100%;
     text-align: start;
+    padding: 1em;
 }
 
 p.warning {
