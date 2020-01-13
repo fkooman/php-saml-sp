@@ -3,6 +3,8 @@
 ## 0.3.0 (...)
 - small API update for `XmlIdpInfoSource` now taking array in contructor to
   allow specifying multiple metdata files 
+- initial support for "Web", i.e. run fkooman/saml-sp as an app on your server
+  next to the application(s) you want to use SAML authentication with
 
 ## 0.2.2 (2019-08-06)
 - do not throw error when attribute `saml:AuthnStatement/@SessionNotOnOrAfter`
