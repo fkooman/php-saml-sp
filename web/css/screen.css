@@ -55,6 +55,16 @@ blockquote {
     margin-left: 1em;
 }
 
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+ul button {
+    width: 100%;
+    text-align: start;
+}
+
 p.warning {
     padding: 1em;
     background-color: #ffc107;

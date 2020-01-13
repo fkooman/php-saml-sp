@@ -11,7 +11,13 @@
     </p>
     <ul>
 <?php foreach ($availableIdpList as $entityId): ?>
-        <li><a href="login?ReturnTo=<?=$this->e($returnTo); ?>&IdP=<?=$this->e($entityId); ?>"><?=$this->e($entityId); ?></a></li>
+        <li>
+            <form method="get" action="login">
+                <input type="hidden" name="ReturnTo" value="<?=$this->e($returnTo); ?>">
+                <input type="hidden" name="IdP" value="<?=$this->e($entityId); ?>">
+                <button type="submit"><?=$this->e($entityId); ?></button>
+            </form>
+        </li>
 <?php endforeach; ?>
     </ul>
 <?php endif; ?>
