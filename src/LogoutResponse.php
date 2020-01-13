@@ -30,10 +30,8 @@ use ParagonIE\ConstantTime\Base64;
 class LogoutResponse
 {
     /**
-     * @param QueryParameters $queryParameters
-     * @param string          $expectedInResponseTo
-     * @param string          $expectedSloUrl
-     * @param IdpInfo         $idpInfo
+     * @param string $expectedInResponseTo
+     * @param string $expectedSloUrl
      *
      * @throws \fkooman\SAML\SP\Exception\ResponseException
      *
@@ -74,8 +72,6 @@ class LogoutResponse
     }
 
     /**
-     * @param QueryParameters $queryParameters
-     *
      * @return string
      */
     private static function prepareQueryString(QueryParameters $queryParameters)

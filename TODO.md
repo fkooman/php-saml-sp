@@ -1,6 +1,11 @@
 # TODO
 
-## 0.2
+## 0.3 
+- fix SamlAuth API
+- implement full SamlAuth() support
+- allow specifying `AuthnContext` through `src/Api/SamlAuth.php` and possibly other
+  options?
+- add tests for `src/Web` and `src/Api` classes
 
 ## 1.0
 

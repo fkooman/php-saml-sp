@@ -317,6 +317,28 @@ class ResponseTest extends TestCase
         }
     }
 
+    public function testMissingSessionNotOnOrAfter()
+    {
+        $response = new Response(new DateTime('2019-08-05T15:00:00Z'));
+        $samlResponse = \file_get_contents(__DIR__.'/data/assertion/SURFsecureID_no_SessionNotOnOrAfter.xml');
+        $samlAssertion = $response->verify(
+            new SpInfo(
+                'https://demo.eduvpn.nl/saml',
+                PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
+                PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
+                'https://demo.eduvpn.nl/portal/_saml/acs'
+            ),
+            new IdpInfo('https://sa-gw.surfconext.nl/authentication/metadata', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/SURFsecureID_production.crt')], []),
+            $samlResponse,
+            '_715f3d18c77d3a0b37a1ad4386b3351851e8876a4d35a57aaee38f33f46edb17',
+            []
+        );
+        $this->assertSame(
+            '2019-08-05T23:00:00+00:00',
+            $samlAssertion->getSessionNotOnOrAfter()->format(DateTime::ATOM)
+        );
+    }
+
     public function testEPPNScopeMatch()
     {
         // ePPN scope does not match IdP scope

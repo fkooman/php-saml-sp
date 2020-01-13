@@ -38,9 +38,6 @@ class XmlDocument
     /** @var \DOMXPath */
     public $domXPath;
 
-    /**
-     * @param \DOMDocument $domDocument
-     */
     private function __construct(DOMDocument $domDocument)
     {
         $this->domDocument = $domDocument;
@@ -104,6 +101,22 @@ class XmlDocument
     {
         if (!($inputVar instanceof DOMNodeList)) {
             throw new XmlDocumentException('expected "DOMNodeList"');
+        }
+
+        return $inputVar;
+    }
+
+    /**
+     * @param mixed $inputVar
+     *
+     * @throws \fkooman\SAML\SP\Exception\XmlDocumentException
+     *
+     * @return string
+     */
+    public static function requireString($inputVar)
+    {
+        if (!\is_string($inputVar)) {
+            throw new XmlDocumentException('expected "string"');
         }
 
         return $inputVar;

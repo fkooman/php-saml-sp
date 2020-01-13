@@ -22,82 +22,64 @@
  * SOFTWARE.
  */
 
-namespace fkooman\SAML\SP\Tests;
+namespace fkooman\SAML\SP\Web;
 
-use fkooman\SAML\SP\Exception\SessionException;
-use fkooman\SAML\SP\SessionInterface;
-
-class TestSession implements SessionInterface
+class Response
 {
-    private $sessionData = [];
+    /** @var int */
+    private $statusCode;
+
+    /** @var array<string,string> */
+    private $headers = [];
+
+    /** @var string */
+    private $body = '';
+
+    /**
+     * @param int                  $statusCode
+     * @param array<string,string> $headers
+     * @param string               $body
+     */
+    public function __construct($statusCode = 200, array $headers = [], $body = '')
+    {
+        $this->statusCode = $statusCode;
+        $this->headers = $headers;
+        $this->body = $body;
+    }
+
+    /**
+     * @return array<string,string>
+     */
+    public function getHeaders()
+    {
+        return $this->headers;
+    }
+
+    /**
+     * @return int
+     */
+    public function getStatusCode()
+    {
+        return $this->statusCode;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBody()
+    {
+        return $this->body;
+    }
 
     /**
      * @return void
      */
-    public function regenerate()
+    public function send()
     {
-        // NOP
-    }
-
-    /**
-     * @param string $key
-     *
-     * @return bool
-     */
-    public function has($key)
-    {
-        return \array_key_exists($key, $this->sessionData);
-    }
-
-    /**
-     * Return the value of the session key.
-     *
-     * @param string $key
-     *
-     * @return string
-     */
-    public function get($key)
-    {
-        if (!$this->has($key)) {
-            throw new SessionException(\sprintf('key "%s" not found in session', $key));
+        \http_response_code($this->statusCode);
+        foreach ($this->headers as $key => $value) {
+            \header(\sprintf('%s: %s', $key, $value));
         }
-
-        return $this->sessionData[$key];
-    }
-
-    /**
-     * Return the value of the session key and delete the key.
-     *
-     * @param string $key
-     *
-     * @return string
-     */
-    public function take($key)
-    {
-        $sessionValue = $this->get($key);
-        $this->delete($key);
-
-        return $sessionValue;
-    }
-
-    /**
-     * @param string $key
-     * @param string $value
-     *
-     * @return void
-     */
-    public function set($key, $value)
-    {
-        $this->sessionData[$key] = $value;
-    }
-
-    /**
-     * @param string $key
-     *
-     * @return void
-     */
-    public function delete($key)
-    {
-        unset($this->sessionData[$key]);
+        echo $this->body;
     }
 }

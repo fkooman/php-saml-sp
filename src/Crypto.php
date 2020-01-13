@@ -36,8 +36,6 @@ class Crypto
     const SIGN_HASH_ALGO = 'sha256';
 
     /**
-     * @param XmlDocument      $xmlDocument
-     * @param \DOMElement      $domElement
      * @param array<PublicKey> $publicKeys
      *
      * @throws \fkooman\SAML\SP\Exception\CryptoException
@@ -108,8 +106,7 @@ class Crypto
     }
 
     /**
-     * @param string     $inStr
-     * @param PrivateKey $privateKey
+     * @param string $inStr
      *
      * @throws \fkooman\SAML\SP\Exception\CryptoException
      *

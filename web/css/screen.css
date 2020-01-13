@@ -1,0 +1,76 @@
+body {
+    max-width: 60em;
+    margin: 0 auto;
+    padding: 0.5em;
+    text-align: inherit;    /* override for bootstrap-reboot */
+}
+
+main {
+    padding: 0 0.5em;
+}
+
+main h1 {
+    text-align: center;
+	margin-bottom: 0.5em;
+}
+
+button {
+    padding: 0.3em;
+    border: 1px solid #ccc;
+    outline: none;
+    margin: 0.5em 0;
+    background-color: #f8f8f8;
+}
+
+button {
+    padding: 0.3em 1em;
+    background-color: #f8f8f8;
+}
+
+table.tbl {
+    border: 1px solid #ccc;
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1em;
+}
+
+table.tbl thead tr {
+    background-color: #f8f8f8;
+    color: #555;
+}
+
+table.tbl tbody th {
+    vertical-align: top;
+}
+
+table.tbl td, table.tbl th {
+    padding: 0.8em 0.5em;
+}
+
+table.tbl tbody tr:nth-child(even) {
+    background-color: #f8f8f8;
+}
+
+blockquote {
+    margin-left: 1em;
+}
+
+p.warning {
+    padding: 1em;
+    background-color: #ffc107;
+    width: 100%;
+}
+
+pre {
+    background-color: #eee;
+    padding: 0.5em;
+    word-break: break-all; 
+    white-space: pre-wrap;
+    font-size: 85%;
+}
+
+footer {
+	margin-top: 2em;
+	font-size: 75%;
+	text-align: center;
+}

@@ -48,9 +48,8 @@ class NameId
     private $nameIdValue;
 
     /**
-     * @param string      $idpEntityId
-     * @param string      $spEntityId
-     * @param \DOMElement $nameIdElement
+     * @param string $idpEntityId
+     * @param string $spEntityId
      *
      * @throws \fkooman\SAML\SP\Exception\NameIdException
      */

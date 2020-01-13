@@ -22,40 +22,16 @@
  * SOFTWARE.
  */
 
-namespace fkooman\SAML\SP;
+namespace fkooman\SAML\SP\Web;
 
-use RuntimeException;
-
-class Template
+class HtmlResponse extends Response
 {
-    /** @var string */
-    private $tplDir;
-
     /**
-     * @param string $tplDir
+     * @param string $htmlBody
+     * @param int    $statusCode
      */
-    public function __construct($tplDir)
+    public function __construct($htmlBody, $statusCode = 200)
     {
-        $this->tplDir = $tplDir;
-    }
-
-    /**
-     * @param string $templateName
-     *
-     * @return string
-     */
-    public function render($templateName, array $templateVariables)
-    {
-        $templateFile = \sprintf('%s/%s.php', $this->tplDir, $templateName);
-        \extract($templateVariables);
-        \ob_start();
-        /** @psalm-suppress UnresolvableInclude */
-        include $templateFile;
-
-        if (false === $bufferData = \ob_get_clean()) {
-            throw new RuntimeException('unable to get template data from buffer');
-        }
-
-        return \trim($bufferData);
+        parent::__construct($statusCode, ['Content-Type' => 'text/html'], $htmlBody);
     }
 }

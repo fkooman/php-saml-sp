@@ -73,8 +73,6 @@ class SP
     }
 
     /**
-     * @param SessionInterface $session
-     *
      * @return void
      */
     public function setSession(SessionInterface $session)
@@ -133,7 +131,10 @@ class SP
      */
     public function handleResponse($samlResponse, $relayState)
     {
-        $authnRequestState = \unserialize($this->session->take(self::SESSION_KEY_PREFIX.$relayState));
+        if (null === $sessionValue = $this->session->take(self::SESSION_KEY_PREFIX.$relayState)) {
+            throw new SpException('"RelayState" not found in session data');
+        }
+        $authnRequestState = \unserialize($sessionValue);
         if (!($authnRequestState instanceof AuthnRequestState)) {
             throw new SpException('expected "AuthnRequestState" in session data');
         }
@@ -153,6 +154,7 @@ class SP
             $authnContextClassRef
         );
 
+        $this->session->regenerate();
         $this->session->set(self::SESSION_KEY_PREFIX.'assertion', \serialize($samlAssertion));
 
         return $authnRequestState->getReturnTo();
@@ -237,7 +239,11 @@ class SP
 
         $queryParameters = new QueryParameters($queryString);
         $relayState = $queryParameters->requireQueryParameter('RelayState');
-        $logoutRequestState = \unserialize($this->session->take(self::SESSION_KEY_PREFIX.$relayState));
+
+        if (null === $sessionValue = $this->session->take(self::SESSION_KEY_PREFIX.$relayState)) {
+            throw new SpException('"RelayState" not found in session data');
+        }
+        $logoutRequestState = \unserialize($sessionValue);
         if (!($logoutRequestState instanceof LogoutRequestState)) {
             throw new SpException('expected "LogoutRequestState" in session data');
         }
@@ -298,13 +304,20 @@ class SP
      */
     private function getAndVerifyAssertion()
     {
-        if (!$this->session->has(self::SESSION_KEY_PREFIX.'assertion')) {
+        if (null === $sessionValue = $this->session->get(self::SESSION_KEY_PREFIX.'assertion')) {
+            return null;
+        }
+        $samlAssertion = \unserialize($sessionValue);
+        if (!($samlAssertion instanceof Assertion)) {
+            // we are unable to unserialize the Assertion
+            $this->session->delete(self::SESSION_KEY_PREFIX.'assertion');
+
             return null;
         }
 
-        $samlAssertion = \unserialize($this->session->get(self::SESSION_KEY_PREFIX.'assertion'));
-        if (!($samlAssertion instanceof Assertion)) {
-            // we are unable to unserialize the Assertion
+        // make sure the SAML session is still valid
+        $sessionNotOnOrAfter = $samlAssertion->getSessionNotOnOrAfter();
+        if ($sessionNotOnOrAfter <= $this->dateTime) {
             $this->session->delete(self::SESSION_KEY_PREFIX.'assertion');
 
             return null;
@@ -314,10 +327,9 @@ class SP
     }
 
     /**
-     * @param string     $requestUrl
-     * @param string     $requestXml
-     * @param string     $relayState
-     * @param PrivateKey $privateKey
+     * @param string $requestUrl
+     * @param string $requestXml
+     * @param string $relayState
      *
      * @return string
      */

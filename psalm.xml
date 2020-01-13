@@ -3,6 +3,7 @@
   <projectFiles>
     <directory name="benchmarks"/>
     <directory name="src"/>
+    <directory name="web"/>
     <directory name="example"/>
     <ignoreFiles>
       <directory name="vendor"/>

@@ -1,7 +1,8 @@
 # ChangeLog
 
 ## 0.3.0 (...)
-- remove support for `saml:AuthnStatement/@SessionNotOnOrAfter` completely
+- small API update for `XmlIdpInfoSource` now taking array in contructor to
+  allow specifying multiple metdata files 
 
 ## 0.2.2 (2019-08-06)
 - do not throw error when attribute `saml:AuthnStatement/@SessionNotOnOrAfter`

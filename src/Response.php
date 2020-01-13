@@ -24,6 +24,7 @@
 
 namespace fkooman\SAML\SP;
 
+use DateInterval;
 use DateTime;
 use DOMElement;
 use fkooman\SAML\SP\Exception\ResponseException;
@@ -33,17 +34,12 @@ class Response
     /** @var \DateTime */
     private $dateTime;
 
-    /**
-     * @param \DateTime $dateTime
-     */
     public function __construct(DateTime $dateTime)
     {
         $this->dateTime = $dateTime;
     }
 
     /**
-     * @param SpInfo        $spInfo
-     * @param IdpInfo       $idpInfo
      * @param string        $samlResponse
      * @param string        $expectedInResponseTo
      * @param array<string> $authnContext
@@ -131,6 +127,10 @@ class Response
 
         $authnInstant = new DateTime(XmlDocument::requireNonEmptyString($responseDocument->domXPath->evaluate('string(saml:AuthnStatement/@AuthnInstant)', $assertionElement)));
 
+        // SessionNotOnOrAfter (Optional)
+        $sessionNotOnOrAfterString = XmlDocument::requireString($responseDocument->domXPath->evaluate('string(saml:AuthnStatement/@SessionNotOnOrAfter)', $assertionElement));
+        $sessionNotOnOrAfter = '' === $sessionNotOnOrAfterString ? \date_add(clone $this->dateTime, new DateInterval('PT8H')) : new DateTime($sessionNotOnOrAfterString);
+
         $authnContextClassRef = XmlDocument::requireNonEmptyString($responseDocument->domXPath->evaluate('string(saml:AuthnStatement/saml:AuthnContext/saml:AuthnContextClassRef)', $assertionElement));
         if (0 !== \count($authnContext)) {
             // we requested a particular AuthnContext, make sure we got it
@@ -140,7 +140,7 @@ class Response
         }
 
         $attributeList = self::extractAttributes($responseDocument, $assertionElement, $idpInfo, $spInfo);
-        $samlAssertion = new Assertion($idpInfo->getEntityId(), $authnInstant, $authnContextClassRef, $attributeList);
+        $samlAssertion = new Assertion($idpInfo->getEntityId(), $authnInstant, $sessionNotOnOrAfter, $authnContextClassRef, $attributeList);
 
         // NameID
         $domNodeList = $responseDocument->domXPath->query('saml:Subject/saml:NameID', $assertionElement);
@@ -153,11 +153,6 @@ class Response
     }
 
     /**
-     * @param XmlDocument $xmlDocument
-     * @param \DOMElement $assertionElement
-     * @param IdpInfo     $idpInfo
-     * @param SpInfo      $spInfo
-     *
      * @return array<string,array<string>>
      */
     private static function extractAttributes(XmlDocument $xmlDocument, DOMElement $assertionElement, IdpInfo $idpInfo, SpInfo $spInfo)
@@ -199,11 +194,7 @@ class Response
     }
 
     /**
-     * @param XmlDocument $xmlDocument
-     * @param \DOMElement $attributeValueElement
-     * @param string      $attributeName
-     * @param IdpInfo     $idpInfo
-     * @param SpInfo      $spInfo
+     * @param string $attributeName
      *
      * @return false|string
      */

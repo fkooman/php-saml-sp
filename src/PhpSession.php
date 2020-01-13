@@ -29,40 +29,50 @@ use fkooman\SAML\SP\Exception\SessionException;
 class PhpSession implements SessionInterface
 {
     /**
-     * @param string $key
+     * @param bool $secureCookie
      *
-     * @return bool
+     * @return void
      */
-    public function has($key)
+    public function start($secureCookie = true)
     {
-        self::requireSession();
+        if (PHP_SESSION_ACTIVE === \session_status()) {
+            throw new SessionException('session already active');
+        }
 
-        return \array_key_exists($key, $_SESSION);
+        // use ugly hack for old (<= 7.3) versions of PHP to support
+        // "SameSite" (idea taken from simpleSAMLphp)
+        \session_set_cookie_params(0, '/; SameSite=None', null, $secureCookie, true);
+        \session_start();
     }
 
     /**
-     * Return the value of the session key.
-     *
+     * @return void
+     */
+    public function regenerate()
+    {
+        self::requireSession();
+        \session_regenerate_id(true);
+    }
+
+    /**
      * @param string $key
      *
-     * @return string
+     * @return string|null
      */
     public function get($key)
     {
         self::requireSession();
-        if (!$this->has($key)) {
-            throw new SessionException(\sprintf('key "%s" not found in session', $key));
+        if (!\array_key_exists($key, $_SESSION)) {
+            return null;
         }
 
         return $_SESSION[$key];
     }
 
     /**
-     * Return the value of the session key and delete the key.
-     *
      * @param string $key
      *
-     * @return string
+     * @return string|null
      */
     public function take($key)
     {
@@ -96,8 +106,6 @@ class PhpSession implements SessionInterface
     }
 
     /**
-     * @throws \fkooman\SAML\SP\Exception\SessionException
-     *
      * @return void
      */
     private static function requireSession()

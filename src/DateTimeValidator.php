@@ -30,9 +30,6 @@ use DateTime;
 class DateTimeValidator
 {
     /**
-     * @param \DateTime $currentDateTime
-     * @param \DateTime $dateTime
-     *
      * @return bool
      */
     public static function isBefore(DateTime $currentDateTime, DateTime $dateTime)
@@ -43,9 +40,6 @@ class DateTimeValidator
     }
 
     /**
-     * @param \DateTime $currentDateTime
-     * @param \DateTime $dateTime
-     *
      * @return bool
      */
     public static function isOnOrAfter(DateTime $currentDateTime, DateTime $dateTime)

@@ -45,10 +45,8 @@ class SpInfo
     private $sloUrl = null;
 
     /**
-     * @param string     $entityId   SP entityID
-     * @param PrivateKey $privateKey
-     * @param PublicKey  $publicKey
-     * @param string     $acsUrl     AssertionConsumerService URL
+     * @param string $entityId SP entityID
+     * @param string $acsUrl   AssertionConsumerService URL
      */
     public function __construct($entityId, PrivateKey $privateKey, PublicKey $publicKey, $acsUrl)
     {

@@ -1,0 +1,22 @@
+<?php
+
+return [
+    // override the default SAML SP entityID
+    // DEFAULT: auto detect
+    //'entityId' => 'https://sp.example.org/saml',
+
+    // override the location the SAML SP can be found at
+    // DEFAULT: "/php-saml-sp"
+    //'spPath' => '/php-saml-sp',
+
+    // SAML discovery service implementing "Identity Provider Discovery Service
+    // Protocol and Profile"
+    // DEFAULT: built-in minimalist "discovery" if > 1 IdP is available
+    //'discoUrl' => 'https://discovery.example.org/',
+
+    // list of IdP entityIDs that are allowed for authentication to this SP
+    // their metadata MUST be provided in config/metadata as XML file(s)
+    'idpList' => [
+        //'https://x509idp.moonshot.utr.surfcloud.nl/metadata',
+    ],
+];

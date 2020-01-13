@@ -22,40 +22,64 @@
  * SOFTWARE.
  */
 
-namespace fkooman\SAML\SP;
+namespace fkooman\SAML\SP\Web;
 
 use RuntimeException;
 
-class Template
+class Config
 {
-    /** @var string */
-    private $tplDir;
+    /** @var array */
+    private $configData;
 
-    /**
-     * @param string $tplDir
-     */
-    public function __construct($tplDir)
+    public function __construct(array $configData)
     {
-        $this->tplDir = $tplDir;
+        $this->configData = $configData;
     }
 
     /**
-     * @param string $templateName
+     * @param string $k
      *
-     * @return string
+     * @return mixed
      */
-    public function render($templateName, array $templateVariables)
+    public function requireKey($k)
     {
-        $templateFile = \sprintf('%s/%s.php', $this->tplDir, $templateName);
-        \extract($templateVariables);
-        \ob_start();
-        /** @psalm-suppress UnresolvableInclude */
-        include $templateFile;
-
-        if (false === $bufferData = \ob_get_clean()) {
-            throw new RuntimeException('unable to get template data from buffer');
+        if (!\array_key_exists($k, $this->configData)) {
+            return null;
         }
 
-        return \trim($bufferData);
+        return $this->configData[$k];
+    }
+
+    /**
+     * @param string $s
+     *
+     * @return self|null
+     */
+    public function requireSection($s)
+    {
+        if (!\array_key_exists($s, $this->configData)) {
+            return null;
+        }
+
+        if (!\is_array($this->configData[$s])) {
+            return null;
+        }
+
+        return new self($this->configData[$s]);
+    }
+
+    /**
+     * @param string $configFile
+     *
+     * @return self
+     */
+    public static function fromFile($configFile)
+    {
+        $configData = include $configFile;
+        if (!\is_array($configData)) {
+            throw new RuntimeException('invalid configuration file format');
+        }
+
+        return new self($configData);
     }
 }

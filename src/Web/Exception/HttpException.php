@@ -22,40 +22,31 @@
  * SOFTWARE.
  */
 
-namespace fkooman\SAML\SP;
+namespace fkooman\SAML\SP\Web\Exception;
 
-use RuntimeException;
+use Exception;
 
-class Template
+class HttpException extends Exception
 {
-    /** @var string */
-    private $tplDir;
+    /** @var array<string,string> */
+    private $responseHeaders;
 
     /**
-     * @param string $tplDir
+     * @param string               $message
+     * @param int                  $code
+     * @param array<string,string> $responseHeaders
      */
-    public function __construct($tplDir)
+    public function __construct($message, $code, array $responseHeaders = [], Exception $previous = null)
     {
-        $this->tplDir = $tplDir;
+        parent::__construct($message, $code, $previous);
+        $this->responseHeaders = $responseHeaders;
     }
 
     /**
-     * @param string $templateName
-     *
-     * @return string
+     * @return array<string,string>
      */
-    public function render($templateName, array $templateVariables)
+    public function getResponseHeaders()
     {
-        $templateFile = \sprintf('%s/%s.php', $this->tplDir, $templateName);
-        \extract($templateVariables);
-        \ob_start();
-        /** @psalm-suppress UnresolvableInclude */
-        include $templateFile;
-
-        if (false === $bufferData = \ob_get_clean()) {
-            throw new RuntimeException('unable to get template data from buffer');
-        }
-
-        return \trim($bufferData);
+        return $this->responseHeaders;
     }
 }

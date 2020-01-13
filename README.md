@@ -1,17 +1,26 @@
 # Introduction
 
-This library allows adding SAML Service Provider (SP) support to your PHP web
-application and interface with SAML Identity Providers (IdPs).
+A SAML Service Provider (SP) with an easy API to use SAML authentication from
+your existing PHP applications.
 
-**NOTE**: this library did NOT receive a comprehensive security audit. Do 
+It is quite similar to [simpleSAMLphp](https://simplesamlphp.org/), but only 
+focuses on SAML (SP) support.
+
+**NOTE**: this project did NOT receive a comprehensive security audit. Do 
 **NOT** use it in production until there is a 1.0 release!
 
 # Why
 
-I wanted to have a minimal implementation of a SAML SP library. Existing (PHP) 
-software either has a much larger scope, or tries to conform fully to the SAML 
-specification. This library only tries to implement the minimum amount to work 
-with (most) real world deployed IdPs, and be secure at all times.
+There are various options for integrating SAML in your PHP application. 
+However, most are either (very) complicated, include too many (useless) 
+features, have hard requirements on [Apache]() and are not easy to package for 
+server operating systems like CentOS/Fedora and/or Debian.
+
+We only need SAML SP support, so there is no need to include any IdP features, 
+or other (obsolete) authentication protocols.
+
+In addition, we only implement what is actually used "in the field" and that 
+which is secure. So you won't find SHA-1 support or insecure encryption.
 
 # Features
 
@@ -28,7 +37,7 @@ with (most) real world deployed IdPs, and be secure at all times.
 - No dependency on `robrichards/xmlseclibs`
 - Serializes `eduPersonTargetedID` as `idpEntityId!spEntityId!persistentId`, 
   just like Shibboleth;
-- Only supports `urn:oid` SAML attributes, ignores the rest
+- Only supports `urn:oid` SAML attributes from a white list, ignores the rest
 - Verify "scope" of attributes based on `<shibmd:Scope>` metadata element when
   the IdP metadata contains this element
   - Silently removes the attribute (value) when scope does not match
@@ -41,7 +50,13 @@ with (most) real world deployed IdPs, and be secure at all times.
   - [FrkoIdP](https://github.com/fkooman/php-saml-idp/)
   - [AD FS](https://en.wikipedia.org/wiki/Active_Directory_Federation_Services)
   - [Shibboleth IdP](https://www.shibboleth.net/products/identity-provider/)
-- Currently ~1600 SLOC
+- Simple built-in WAYF when more than 1 IdP is configured for the SP
+- Support external discovery services implementing 
+  [Identity Provider Discovery Service Protocol and Profile](https://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-idp-discovery.html)
+- Currently ~2500 SLOC
+
+We _do_ aim to eventually support everything as mentioned in 
+[SAML V2.0 Deployment Profile for Federation Interoperability](https://kantarainitiative.github.io/SAMLprofiles/saml2int.html).
 
 # Requirements
 
@@ -51,15 +66,27 @@ with (most) real world deployed IdPs, and be secure at all times.
 
 # Crypto
 
-This library only supports algorithms that are not currently broken and easy to
-implement. There is no choice, only the below algorithms are supported.
+This project only supports algorithms that are not currently known to be broken 
+and easy to implement. There is no choice, only the below algorithms are 
+supported.
 
 ## Signatures
 
 - Digest: `http://www.w3.org/2001/04/xmlenc#sha256`
 - Signature: `http://www.w3.org/2001/04/xmldsig-more#rsa-sha256`
 
-# X.509
+# Source Code Layout
+
+The `src/` directory contains the SAML SP implementation library. The directory
+`src/Web` contains everything related to the built-in web interface providing 
+the landing page and WAYF. The `src/Api` directory contains everything related
+to the API to use from your PHP application.
+
+# Development
+
+Run [composer](https://getcomposer.org/) to install the dependencies:
+
+    $ /path/to/composer install
 
 Use the following command to create a self-signed certificate for use with the
 SP library. It will be used for signing the `AuthnRequest` and `LogoutRequest`.
@@ -70,28 +97,41 @@ SP library. It will be used for signing the `AuthnRequest` and `LogoutRequest`.
         -x509 \
         -sha256 \
         -newkey rsa:3072 \
-        -keyout "sp.key" \
-        -out "sp.crt" \
+        -keyout "config/sp.key" \
+        -out "config/sp.crt" \
         -days 3650
 
-# Example
+Now copy the configuration template:
 
-An example is provided in the `example/` directory. In order run it:
+    $ cp config/config.php.example config/config.php
 
-    $ /path/to/composer install
-    $ php -S localhost:8081 -t example
+Disable to `Secure` session cookie parameter by setting the `secureCookie` key 
+to `false` in `config/config.php`.
 
-The example performs authentication and shows the attributes received from the 
-IdP. It also supports logout at the IdP if supported by the IdP.
+A neat IdP to use for testing is 
+`https://x509idp.moonshot.utr.surfcloud.nl/metadata`. Add it to `idpList` in 
+`config/config.php` and put the metadata in `config/metadata`:
+
+    'idpList' => [
+        'https://x509idp.moonshot.utr.surfcloud.nl/metadata',
+    ],
+
+Now download the metadata of the IdP as well:
+
+    $ mkdir config/metadata
+    $ curl -L -o config/metadata/x509idp.moonshot.utr.surfcloud.nl.xml https://x509idp.moonshot.utr.surfcloud.nl/metadata
+
+Run the application using PHP's built-in web server:
+
+    $ php -S localhost:8082 -t web
 
 With your browser you can go to 
-[http://localhost:8081/](http://localhost:8081/). The example will redirect 
-immediately to the IdP. The metadata of the SP can be found at this URL: 
-`http://localhost:8081/metadata`
+[http://localhost:8082/](http://localhost:8082) and take it from there!
 
 # IdP Configuration
 
-Make sure:
+In case you want to add / configure your IdP to use with this software, make 
+sure:
 
 - the IdP uses the HTTP-Redirect binding for receiving the `AuthnRequest`;
 - the IdP uses the HTTP-POST binding to provide the `samlp:Response` to the SP;
@@ -99,6 +139,8 @@ Make sure:
 - the IdP verifies the signature on the `samlp:AuthnRequest`;
 - the IdP verifies the signature on the `samlp:LogoutRequest`;
 - the IdP signs the `samlp:LogoutResponse`.
+
+Some of these requirements are also exposed through the SP metadata.
 
 ## simpleSAMLphp
 
@@ -109,18 +151,16 @@ for this SP:
     'sign.logout' => true,
     'validate.logout' => true,
 
+# API 
+
+You can integrate your application using the `SamlAuth()` class. See the 
+`example/` directory for a working example.
+
 # Tests
 
-In order to run the tests:
+In order to run the included test suite:
 
-    $ /path/to/composer install
     $ vendor/bin/phpunit
-
-# Browser Session
-
-You MUST secure your PHP cookie/session settings. See 
-[this](https://paragonie.com/blog/2015/04/fast-track-safe-and-secure-php-sessions) 
-resource.
 
 # Resources
 

@@ -54,7 +54,7 @@ class SPTest extends TestCase
         $spInfo->setSloUrl('http://localhost:8081/slo');
         $this->sp = new TestSP(
             $spInfo,
-            new XmlIdpInfoSource(__DIR__.'/data/metadata/localhost.xml')
+            new XmlIdpInfoSource([__DIR__.'/data/metadata/localhost.xml'])
         );
         $this->sp->setDateTime(new DateTime('2018-01-01 08:00:00'));
         $this->sp->setSession(new TestSession());
@@ -227,6 +227,7 @@ EOF;
         $samlAssertion = new Assertion(
             'http://localhost:8080/metadata.php',
             new DateTime('2019-01-02T20:05:33Z'),
+            new DateTime('2019-01-03T04:05:33Z'),
             'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport',
             [
                 'urn:oid:0.9.2342.19200300.100.1.1' => [

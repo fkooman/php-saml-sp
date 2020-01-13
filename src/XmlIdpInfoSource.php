@@ -30,22 +30,24 @@ use RuntimeException;
 
 class XmlIdpInfoSource implements IdpInfoSourceInterface
 {
-    /** @var XmlDocument */
-    private $xmlDocument;
+    /** @var array<XmlDocument> */
+    private $xmlDocumentList = [];
 
     /**
-     * @param string $metadataFile
-     * @param bool   $validateSchema
+     * @param array<string> $metadataFileList
+     * @param bool          $validateSchema
      *
      * @throws \RuntimeException
      */
-    public function __construct($metadataFile, $validateSchema = true)
+    public function __construct(array $metadataFileList, $validateSchema = true)
     {
-        if (false === $xmlData = \file_get_contents($metadataFile)) {
-            throw new RuntimeException(\sprintf('unable to read file "%s"', $metadataFile));
-        }
+        foreach ($metadataFileList as $metadataFile) {
+            if (false === $xmlData = \file_get_contents($metadataFile)) {
+                throw new RuntimeException(\sprintf('unable to read file "%s"', $metadataFile));
+            }
 
-        $this->xmlDocument = XmlDocument::fromMetadata($xmlData, $validateSchema);
+            $this->xmlDocumentList[] = XmlDocument::fromMetadata($xmlData, $validateSchema);
+        }
     }
 
     /**
@@ -60,7 +62,13 @@ class XmlIdpInfoSource implements IdpInfoSourceInterface
         self::validateEntityId($entityId);
         $xPathQuery = \sprintf('//md:EntityDescriptor[@entityID="%s"]/md:IDPSSODescriptor', $entityId);
 
-        return 1 === $this->xmlDocument->domXPath->query($xPathQuery)->length;
+        foreach ($this->xmlDocumentList as $xmlDocument) {
+            if (1 === $xmlDocument->domXPath->query($xPathQuery)->length) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -73,32 +81,38 @@ class XmlIdpInfoSource implements IdpInfoSourceInterface
     public function get($entityId)
     {
         self::validateEntityId($entityId);
-        if (!$this->has($entityId)) {
-            throw new XmlIdpInfoSourceException(\sprintf('IdP "%s" not available', $entityId));
+        $xPathQuery = \sprintf('//md:EntityDescriptor[@entityID="%s"]/md:IDPSSODescriptor', $entityId);
+
+        foreach ($this->xmlDocumentList as $xmlDocument) {
+            if (false === $domNodeList = $xmlDocument->domXPath->query($xPathQuery)) {
+                continue;
+            }
+            if (1 !== $domNodeList->length) {
+                continue;
+            }
+
+            $domElement = XmlDocument::requireDomElement($domNodeList->item(0));
+
+            return new IdpInfo(
+                $entityId,
+                $this->getSingleSignOnService($xmlDocument, $domElement),
+                $this->getSingleLogoutService($xmlDocument, $domElement),
+                $this->getPublicKeys($xmlDocument, $domElement),
+                $this->getScope($xmlDocument, $domElement)
+            );
         }
 
-        $xPathQuery = \sprintf('//md:EntityDescriptor[@entityID="%s"]/md:IDPSSODescriptor', $entityId);
-        $domElement = XmlDocument::requireDomElement($this->xmlDocument->domXPath->query($xPathQuery)->item(0));
-
-        return new IdpInfo(
-            $entityId,
-            $this->getSingleSignOnService($domElement),
-            $this->getSingleLogoutService($domElement),
-            $this->getPublicKeys($domElement),
-            $this->getScope($domElement)
-        );
+        throw new XmlIdpInfoSourceException(\sprintf('IdP "%s" not available', $entityId));
     }
 
     /**
-     * @param \DOMElement $domElement
-     *
      * @throws \fkooman\SAML\SP\Exception\XmlIdpInfoSourceException
      *
      * @return string
      */
-    private function getSingleSignOnService(DOMElement $domElement)
+    private function getSingleSignOnService(XmlDocument $xmlDocument, DOMElement $domElement)
     {
-        $domNodeList = $this->xmlDocument->domXPath->query('md:SingleSignOnService[@Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"]/@Location', $domElement);
+        $domNodeList = $xmlDocument->domXPath->query('md:SingleSignOnService[@Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"]/@Location', $domElement);
         // return the first one, also if multiple are available
         if (null === $firstNode = $domNodeList->item(0)) {
             throw new XmlIdpInfoSourceException('no "md:SingleSignOnService" available');
@@ -108,13 +122,11 @@ class XmlIdpInfoSource implements IdpInfoSourceInterface
     }
 
     /**
-     * @param \DOMElement $domElement
-     *
      * @return string|null
      */
-    private function getSingleLogoutService(DOMElement $domElement)
+    private function getSingleLogoutService(XmlDocument $xmlDocument, DOMElement $domElement)
     {
-        $domNodeList = $this->xmlDocument->domXPath->query('md:SingleLogoutService[@Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"]/@Location', $domElement);
+        $domNodeList = $xmlDocument->domXPath->query('md:SingleLogoutService[@Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"]/@Location', $domElement);
         // return the first one, also if multiple are available
         if (null === $firstNode = $domNodeList->item(0)) {
             return null;
@@ -124,16 +136,14 @@ class XmlIdpInfoSource implements IdpInfoSourceInterface
     }
 
     /**
-     * @param \DOMElement $domElement
-     *
      * @throws \fkooman\SAML\SP\Exception\XmlIdpInfoSourceException
      *
      * @return array<PublicKey>
      */
-    private function getPublicKeys(DOMElement $domElement)
+    private function getPublicKeys(XmlDocument $xmlDocument, DOMElement $domElement)
     {
         $publicKeys = [];
-        $domNodeList = $this->xmlDocument->domXPath->query('md:KeyDescriptor[not(@use) or @use="signing"]/ds:KeyInfo/ds:X509Data/ds:X509Certificate', $domElement);
+        $domNodeList = $xmlDocument->domXPath->query('md:KeyDescriptor[not(@use) or @use="signing"]/ds:KeyInfo/ds:X509Data/ds:X509Certificate', $domElement);
         if (0 === $domNodeList->length) {
             throw new XmlIdpInfoSourceException('entry MUST have at least one X509Certificate');
         }
@@ -148,14 +158,12 @@ class XmlIdpInfoSource implements IdpInfoSourceInterface
     }
 
     /**
-     * @param \DOMElement $domElement
-     *
      * @return array<string>
      */
-    private function getScope(DOMElement $domElement)
+    private function getScope(XmlDocument $xmlDocument, DOMElement $domElement)
     {
         $scopeList = [];
-        $domNodeList = $this->xmlDocument->domXPath->query('md:Extensions/shibmd:Scope[not(@regexp) or @regexp="false" or @regexp="0"]', $domElement);
+        $domNodeList = $xmlDocument->domXPath->query('md:Extensions/shibmd:Scope[not(@regexp) or @regexp="false" or @regexp="0"]', $domElement);
         foreach ($domNodeList as $domNode) {
             $scopeElement = XmlDocument::requireDomElement($domNode);
             $scopeList[] = $scopeElement->textContent;

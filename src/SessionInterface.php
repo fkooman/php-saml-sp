@@ -27,27 +27,21 @@ namespace fkooman\SAML\SP;
 interface SessionInterface
 {
     /**
-     * @param string $key
-     *
-     * @return bool
+     * @return void
      */
-    public function has($key);
+    public function regenerate();
 
     /**
-     * Return the value of the session key.
-     *
      * @param string $key
      *
-     * @return string
+     * @return string|null
      */
     public function get($key);
 
     /**
-     * Return the value of the session key and delete the key.
-     *
      * @param string $key
      *
-     * @return string
+     * @return string|null
      */
     public function take($key);
 
