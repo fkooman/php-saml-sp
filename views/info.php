@@ -40,6 +40,6 @@
     </table>
 <?php endif; ?>
     <p>
-        <a href="logout"><button>Logout</button></a>
+        <a href="logout?ReturnTo=<?=$returnTo; ?>"><button>Logout</button></a>
     </p>
 <?php $this->stop('content'); ?>

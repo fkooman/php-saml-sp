@@ -73,6 +73,7 @@ class Service
                     $this->tpl->render(
                         'info',
                         [
+                            'returnTo' => $request->getRootUri(),
                             'samlAssertion' => $this->sp->getAssertion(),
                         ]
                     )
@@ -146,7 +147,10 @@ class Service
 
             // user triggered logout
             case '/logout':
-                return new RedirectResponse($this->sp->logout($request->getRootUri()));
+                // XXX validate ReturnTo... should it at least match Origin?!
+                $returnTo = $request->requireQueryParameter('ReturnTo');
+
+                return new RedirectResponse($this->sp->logout($returnTo));
 
             // callback from IdP containing the "SAMLResponse"
             case '/acs':
