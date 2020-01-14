@@ -43,8 +43,11 @@ try {
     if (null === $secureCookie = $config->requireKey('secureCookie')) {
         $secureCookie = true;
     }
+    if (null === $sessionName = $config->requireKey('sessionName')) {
+        $sessionName = 'PHPSESSID';
+    }
     $session = new PhpSession();
-    $session->start($secureCookie);
+    $session->start($sessionName, $secureCookie);
 
     $tpl = new Tpl([$baseDir.'/views']);
     $metadataFileList = \glob($baseDir.'/config/metadata/*.xml');
