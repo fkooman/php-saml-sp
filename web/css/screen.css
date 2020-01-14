@@ -1,5 +1,5 @@
 body {
-    max-width: 60em;
+    max-width: 40em;
     margin: 0 auto;
     padding: 0.5em;
     text-align: inherit;    /* override for bootstrap-reboot */
@@ -16,39 +16,16 @@ main h1 {
 
 button {
     padding: 0.3em;
-    border: 1px solid #ccc;
+    border: 1px solid #d8d8d8;
     outline: none;
     margin: 0.5em 0;
     background-color: #f8f8f8;
 }
 
-button {
-    padding: 0.3em 1em;
-    background-color: #f8f8f8;
-}
-
-table.tbl {
-    border: 1px solid #ccc;
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 1em;
-}
-
-table.tbl thead tr {
-    background-color: #f8f8f8;
-    color: #555;
-}
-
-table.tbl tbody th {
-    vertical-align: top;
-}
-
-table.tbl td, table.tbl th {
-    padding: 0.8em 0.5em;
-}
-
-table.tbl tbody tr:nth-child(even) {
-    background-color: #f8f8f8;
+dd {
+    margin: 0.5em 2em;
+    word-break: break-all;
+    font-size: 85%;
 }
 
 blockquote {
@@ -60,10 +37,16 @@ ul {
     padding: 0;
 }
 
-ul button {
+ul li {
+    margin: 0;
+    padding: 0.1em 0;
+}
+
+ul li button {
     width: 100%;
     text-align: start;
     padding: 1em;
+    margin: 0;
 }
 
 p.warning {

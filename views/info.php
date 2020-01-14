@@ -1,43 +1,39 @@
 <?php $this->layout('base'); ?>
 <?php $this->start('content'); ?>
     <h2>Assertion</h2>
-    <table class="tbl">
-        <tbody>
-        <tr>
-            <th>Issuer</th><td><?=$this->e($samlAssertion->getIssuer()); ?></td>
-        </tr>
+    <dl>
+        <dt>Issuer</dt>
+        <dd><code><?=$this->e($samlAssertion->getIssuer()); ?></code></dd>
+
 <?php if (null !== $nameId = $samlAssertion->getNameId()): ?>
-        <tr>
-            <th>NameID</th><td><?=$this->e($nameId->toXml()); ?></td>
-        </tr>
+        <dt>NameID</dt>
+        <dd><code><?=$this->e($nameId->toXml()); ?></code></dd>
 <?php endif; ?>
-        <tr>
-            <th>AuthnTime</th><td><?=$this->e($samlAssertion->getAuthnInstant()->format(DateTime::ATOM)); ?></td>
-        </tr>
-        <tr>
-            <th>AuthnContext</th><td><?=$this->e($samlAssertion->getAuthnContext()); ?></td>
-        </tr>
-        </tbody>
-    </table>
+
+        <dt>AuthnTime</dt>
+        <dd><code><?=$this->e($samlAssertion->getAuthnInstant()->format(DateTime::ATOM)); ?></code></dd>
+
+        <dt>SessionNotOnOrAfter</dt>
+        <dd><code><?=$this->e($samlAssertion->getSessionNotOnOrAfter()->format(DateTime::ATOM)); ?></code></dd>
+
+        <dt>AuthnContext</dt>
+        <dd><code><?=$this->e($samlAssertion->getAuthnContext()); ?></code></dd>
+    </dl>
 
 <?php if (0 !== \count($samlAssertion->getAttributes())): ?>
-    <h3>Attributes</h3>
-    <table class="tbl">
-        <tbody>
+    <h2>Attributes</h2>
+    <dl>
 <?php foreach ($samlAssertion->getAttributes() as $attributeName => $attributeValueList): ?>
-        <tr>
-            <th><?=$this->e($attributeName); ?></th>
-            <td>
-                <ul>
+        <dt><?=$this->e($attributeName); ?></dt>
+        <dd>
+            <ul>
 <?php foreach ($attributeValueList as $attributeValue): ?>
-                    <li><?=$this->e($attributeValue); ?></li>
+                <li><code><?=$this->e($attributeValue); ?></code></li>
 <?php endforeach; ?>
-                </ul>
-            </td>
-        </tr>
+            </ul>
+        </dd>
 <?php endforeach; ?>
-        </tbody>
-    </table>
+    </dl>
 <?php endif; ?>
     <p>
         <a href="logout?ReturnTo=<?=$returnTo; ?>"><button>Logout</button></a>
