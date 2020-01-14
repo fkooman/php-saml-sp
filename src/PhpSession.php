@@ -42,7 +42,8 @@ class PhpSession implements SessionInterface
         \session_name($sessionName);
         // use ugly hack for old (<= 7.3) versions of PHP to support
         // "SameSite" (idea taken from simpleSAMLphp)
-        \session_set_cookie_params(0, '/; SameSite=None', null, $secureCookie, true);
+        //\session_set_cookie_params(0, '/; SameSite=None', null, $secureCookie, true);
+        \session_set_cookie_params(0, '/', null, $secureCookie, true);
         \session_start();
     }
 
