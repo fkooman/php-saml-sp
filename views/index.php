@@ -2,7 +2,7 @@
 <?php $this->start('content'); ?>
     <h2><?=$this->t('Welcome'); ?></h2>
     <p>
-<?=$this->t('Welcome to the information page of this SAML SP. If you don\'t know what SAML is, you should not have arrived here! :-)'); ?>
+<?=$this->t('This is the information of this SAML SP. If you don\'t know what SAML is, you should not have arrived here! 🤔'); ?>
     </p>
 
     <h2><?=$this->t('Authentication'); ?></h2>
@@ -15,7 +15,7 @@
 
     <h2><?=$this->t('Metadata'); ?></h2>
     <p>
-<?=$this->t('IdPs 😋 SP metadata! Use the URL or the XML below to feed your IdP.'); ?>
+<?=$this->t('IdPs ❤️ SP metadata! Use the URL or the XML below to feed your IdP.'); ?>
     </p>
 
     <blockquote>
