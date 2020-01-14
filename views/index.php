@@ -2,7 +2,7 @@
 <?php $this->start('content'); ?>
     <h2><?=$this->t('Welcome'); ?></h2>
     <p>
-<?=$this->t('This is the information of this SAML SP. If you don\'t know what SAML is, you should not have arrived here! 🤔'); ?>
+<?=$this->t('This is the information page of this SAML SP. If you don\'t know what SAML is, you should not have arrived here! 🤔'); ?>
     </p>
 
     <h2><?=$this->t('Authentication'); ?></h2>
