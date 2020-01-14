@@ -1,14 +1,11 @@
 <?php $this->layout('base'); ?>
 <?php $this->start('content'); ?>
-    <h2>Where are you from?</h2>
+    <h2><?=$this->t('Where are you from?'); ?></h2>
 <?php if (0 === \count($idpInfoList)): ?>
     <p class="warning">
-        No IdPs are currently configured for authenticating to this SP!
+<?=$this->t('No IdP(s) configured for authenticating to this SP!'); ?>
     </p>
 <?php else: ?>
-    <p>
-        Select your organization.
-    </p>
     <form method="get" action="wayf">
         <input type="hidden" name="ReturnTo" value="<?=$this->e($returnTo); ?>">
         <ul>

@@ -1,21 +1,21 @@
 <?php $this->layout('base'); ?>
 <?php $this->start('content'); ?>
-    <h2>Welcome</h2>
+    <h2><?=$this->t('Welcome'); ?></h2>
     <p>
-        Welcome to the information page of this SAML SP. If you don't know what
-        SAML is, you should not have arrived here! :-)
+<?=$this->t('Welcome to the information page of this SAML SP. If you don\'t know what SAML is, you should not have arrived here! :-)'); ?>
     </p>
 
-    <h2>Authentication</h2>
+    <h2><?=$this->t('Authentication'); ?></h2>
     <p>
-        You can perform an <a href="wayf?ReturnTo=<?=$this->e($returnTo); ?>">Authentication Test</a> with the 
-        configured IdP(s).
+        <?=$this->t('You can perform authentication tests here with the configured IdP(s).'); ?>
+    </p>
+    <p>
+        <a href="wayf?ReturnTo=<?=$this->e($returnTo); ?>"><?=$this->t('Test'); ?></a>
     </p>
 
-    <h2>Metadata</h2>
+    <h2><?=$this->t('Metadata'); ?></h2>
     <p>
-        IdPs 😋 SP metadata! Use the URL or the XML below to feed your
-        IdP.
+<?=$this->t('IdPs 😋 SP metadata! Use the URL or the XML below to feed your IdP.'); ?>
     </p>
 
     <blockquote>
@@ -23,7 +23,7 @@
     </blockquote>
 
     <details>
-        <summary>XML</summary>
+        <summary><?=$this->t('XML'); ?></summary>
         <pre><?=$this->e($samlMetadata); ?></pre>
     </details>
 <?php $this->stop('content'); ?>
