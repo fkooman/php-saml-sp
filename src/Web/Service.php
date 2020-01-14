@@ -124,13 +124,20 @@ class Service
 //                        );
 //                    }
 
+                    $idpInfoList = [];
+                    foreach ($availableIdpList as $availableIdp) {
+                        if ($this->sp->getIdpInfoSource()->has($availableIdp)) {
+                            $idpInfoList[] = $this->sp->getIdpInfoSource()->get($availableIdp);
+                        }
+                    }
+
                     // otherwise, show them a simple "WAYF"
                     return new HtmlResponse(
                         $this->tpl->render(
                             'wayf',
                             [
                                 'returnTo' => $returnTo,
-                                'availableIdpList' => $availableIdpList,
+                                'idpInfoList' => $idpInfoList,
                             ]
                         )
                     );

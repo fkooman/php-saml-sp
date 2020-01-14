@@ -33,6 +33,9 @@ class IdpInfo
     private $entityId;
 
     /** @var string */
+    private $displayName;
+
+    /** @var string */
     private $ssoUrl;
 
     /** @var string|null */
@@ -46,14 +49,16 @@ class IdpInfo
 
     /**
      * @param string           $entityId
+     * @param string|null      $displayName
      * @param string           $ssoUrl
      * @param string|null      $sloUrl
      * @param array<PublicKey> $publicKeys
      * @param array<string>    $scopeList
      */
-    public function __construct($entityId, $ssoUrl, $sloUrl, array $publicKeys, array $scopeList)
+    public function __construct($entityId, $displayName, $ssoUrl, $sloUrl, array $publicKeys, array $scopeList)
     {
         $this->entityId = $entityId;
+        $this->displayName = null !== $displayName ? $displayName : $entityId;
         $this->ssoUrl = $ssoUrl;
         $this->sloUrl = $sloUrl;
         $this->publicKeys = $publicKeys;
@@ -66,6 +71,14 @@ class IdpInfo
     public function getEntityId()
     {
         return $this->entityId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDisplayName()
+    {
+        return $this->displayName;
     }
 
     /**

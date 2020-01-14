@@ -300,6 +300,14 @@ class SP
     }
 
     /**
+     * @return IdpInfoSourceInterface
+     */
+    public function getIdpInfoSource()
+    {
+        return $this->idpInfoSource;
+    }
+
+    /**
      * @return Assertion|null
      */
     private function getAndVerifyAssertion()

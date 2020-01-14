@@ -95,6 +95,7 @@ class XmlIdpInfoSource implements IdpInfoSourceInterface
 
             return new IdpInfo(
                 $entityId,
+                $this->getDisplayName($xmlDocument, $domElement),
                 $this->getSingleSignOnService($xmlDocument, $domElement),
                 $this->getSingleLogoutService($xmlDocument, $domElement),
                 $this->getPublicKeys($xmlDocument, $domElement),
@@ -170,6 +171,22 @@ class XmlIdpInfoSource implements IdpInfoSourceInterface
         }
 
         return $scopeList;
+    }
+
+    /**
+     * @return string|null
+     */
+    private function getDisplayName(XmlDocument $xmlDocument, DOMElement $domElement)
+    {
+        $domNodeList = $xmlDocument->domXPath->query('md:Extensions/mdui:UIInfo/mdui:DisplayName[@xml:lang="en"]', $domElement);
+        if (0 === $domNodeList->length) {
+            return null;
+        }
+        if (null === $displayNameNode = $domNodeList->item(0)) {
+            return null;
+        }
+
+        return \trim($displayNameNode->textContent);
     }
 
     /**
