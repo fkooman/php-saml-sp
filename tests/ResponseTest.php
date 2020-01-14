@@ -47,7 +47,7 @@ class ResponseTest extends TestCase
                 PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
                 'http://localhost:8081/acs'
             ),
-            new IdpInfo('http://localhost:8080/metadata.php', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/FrkoIdP.crt')], []),
+            new IdpInfo('http://localhost:8080/metadata.php', 'Test', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/FrkoIdP.crt')], []),
             $samlResponse,
             '_2483d0b8847ccaa5edf203dad685f860',
             []
@@ -92,7 +92,7 @@ class ResponseTest extends TestCase
                 PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
                 'https://labrat.eduvpn.nl/saml/postResponse'
             ),
-            new IdpInfo('https://idp.surfnet.nl', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/SURFconext.crt')], []),
+            new IdpInfo('https://idp.surfnet.nl', 'Test', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/SURFconext.crt')], []),
             $samlResponse,
             '_928BA2C80BB10E7BA8F2C4504E0EB20B',
             []
@@ -163,7 +163,7 @@ class ResponseTest extends TestCase
                     PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
                     'http://localhost:8081/acs'
                 ),
-                new IdpInfo('http://localhost:8080/metadata.php', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/FrkoIdP.crt')], []),
+                new IdpInfo('http://localhost:8080/metadata.php', 'Test', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/FrkoIdP.crt')], []),
                 $samlResponse,
                 '_6f4ccd6d1ced9e0f5ac6333893c64a2010487d289044b6bb4497b716ebc0a067',
                 []
@@ -186,7 +186,7 @@ class ResponseTest extends TestCase
                     PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
                     'http://localhost:8081/acs'
                 ),
-                new IdpInfo('http://localhost:8080/metadata.php', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/simpleSAMLphp.crt')], []),
+                new IdpInfo('http://localhost:8080/metadata.php', 'Test', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/simpleSAMLphp.crt')], []),
                 $samlResponse,
                 '_6f4ccd6d1ced9e0f5ac6333893c64a2010487d289044b6bb4497b716ebc0a067',
                 []
@@ -209,7 +209,7 @@ class ResponseTest extends TestCase
                     PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
                     'http://localhost:8081/acs'
                 ),
-                new IdpInfo('http://localhost:8080/metadata.php', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/FrkoIdP.crt')], []),
+                new IdpInfo('http://localhost:8080/metadata.php', 'Test', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/FrkoIdP.crt')], []),
                 $samlResponse,
                 '_6f4ccd6d1ced9e0f5ac6333893c64a2010487d289044b6bb4497b716ebc0a067',
                 []
@@ -232,7 +232,7 @@ class ResponseTest extends TestCase
                     PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
                     'http://localhost:8081/acs'
                 ),
-                new IdpInfo('http://localhost:8080/metadata.php', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/FrkoIdP.crt')], []),
+                new IdpInfo('http://localhost:8080/metadata.php', 'Test', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/FrkoIdP.crt')], []),
                 $samlResponse,
                 '_6f4ccd6d1ced9e0f5ac6333893c64a2010487d289044b6bb4497b716ebc0a067',
                 []
@@ -255,7 +255,7 @@ class ResponseTest extends TestCase
                     PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
                     'http://localhost:8081/acs'
                 ),
-                new IdpInfo('https://x509idp.moonshot.utr.surfcloud.nl/metadata', 'https://x509idp.moonshot.utr.surfcloud.nl/sso', null, [PublicKey::fromFile(__DIR__.'/data/certs/x509idp.moonshot.utr.surfcloud.nl.crt')], []),
+                new IdpInfo('https://x509idp.moonshot.utr.surfcloud.nl/metadata', 'Test', 'https://x509idp.moonshot.utr.surfcloud.nl/sso', null, [PublicKey::fromFile(__DIR__.'/data/certs/x509idp.moonshot.utr.surfcloud.nl.crt')], []),
                 $samlResponse,
                 '_3c35f56a7156b0805fbccb717cc15194',
                 []
@@ -306,7 +306,7 @@ class ResponseTest extends TestCase
                     PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
                     'https://kluitje.eduvpn.nl/portal/_saml/acs'
                 ),
-                new IdpInfo('https://sa-gw.test.surfconext.nl/authentication/metadata', 'SSO', null, [PublicKey::fromFile(__DIR__.'/data/certs/SURFsecureID.crt')], []),
+                new IdpInfo('https://sa-gw.test.surfconext.nl/authentication/metadata', 'Test', 'SSO', null, [PublicKey::fromFile(__DIR__.'/data/certs/SURFsecureID.crt')], []),
                 $samlResponse,
                 '_6a31edbaec0922414f9a96e5fdb5493e',
                 []
@@ -328,7 +328,7 @@ class ResponseTest extends TestCase
                 PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
                 'https://demo.eduvpn.nl/portal/_saml/acs'
             ),
-            new IdpInfo('https://sa-gw.surfconext.nl/authentication/metadata', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/SURFsecureID_production.crt')], []),
+            new IdpInfo('https://sa-gw.surfconext.nl/authentication/metadata', 'Test', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/SURFsecureID_production.crt')], []),
             $samlResponse,
             '_715f3d18c77d3a0b37a1ad4386b3351851e8876a4d35a57aaee38f33f46edb17',
             []
@@ -351,7 +351,7 @@ class ResponseTest extends TestCase
                 PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
                 'http://localhost:8081/acs'
             ),
-            new IdpInfo('http://localhost:8080/metadata.php', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/FrkoIdP.crt')], ['example.com']),
+            new IdpInfo('http://localhost:8080/metadata.php', 'Test', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/FrkoIdP.crt')], ['example.com']),
             $samlResponse,
             '_d22979c597d8d8956b8d5b2f2bdae9bf',
             []
@@ -401,7 +401,7 @@ class ResponseTest extends TestCase
                 PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
                 'http://localhost:8081/acs'
             ),
-            new IdpInfo('http://localhost:8080/metadata.php', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/FrkoIdP.crt')], ['example.org']),
+            new IdpInfo('http://localhost:8080/metadata.php', 'Test', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/FrkoIdP.crt')], ['example.org']),
             $samlResponse,
             '_d22979c597d8d8956b8d5b2f2bdae9bf',
             []
