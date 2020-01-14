@@ -76,7 +76,7 @@ class Service
     /**
      * @return Response
      */
-    public function runGet(Request $request)
+    private function runGet(Request $request)
     {
         switch ($request->getPathInfo()) {
             // landing page
@@ -119,8 +119,7 @@ class Service
                     }
                 }
 
-                // XXX validate ReturnTo... should it at least match Origin?!
-                $returnTo = $request->requireQueryParameter('ReturnTo');
+                $returnTo = self::verifyReturnToOrigin($request->getOrigin(), $request->requireQueryParameter('ReturnTo'));
 
                 if (null === $idpEntityId) {
                     // we don't know the IdP (yet)
@@ -173,8 +172,7 @@ class Service
                 return new RedirectResponse($this->sp->login($idpEntityId, $returnTo));
             // user triggered logout
             case '/logout':
-                // XXX validate ReturnTo... should it at least match Origin?!
-                $returnTo = $request->requireQueryParameter('ReturnTo');
+                $returnTo = self::verifyReturnToOrigin($request->getOrigin(), $request->requireQueryParameter('ReturnTo'));
 
                 return new RedirectResponse($this->sp->logout($returnTo));
             // exposes the SP metadata for IdP consumption
@@ -195,7 +193,7 @@ class Service
     /**
      * @return Response
      */
-    public function runPost(Request $request)
+    private function runPost(Request $request)
     {
         switch ($request->getPathInfo()) {
             // callback from IdP containing the "SAMLResponse"
@@ -206,5 +204,35 @@ class Service
             default:
                 throw new HttpException(404, 'URL not found: '.$request->getPathInfo());
         }
+    }
+
+    /**
+     * @param string $expectedOrigin
+     * @param string $returnTo
+     *
+     * @return string
+     */
+    private static function verifyReturnToOrigin($expectedOrigin, $returnTo)
+    {
+        // Origin is scheme://host[:port]
+        if (false === \filter_var($returnTo, FILTER_VALIDATE_URL)) {
+            throw new HttpException(400, 'invalid "ReturnTo" provided');
+        }
+        if (false === $parsedUrl = \parse_url($returnTo)) {
+            throw new HttpException(400, 'invalid "ReturnTo" provided');
+        }
+
+        // the filter_var FILTER_VALIDATE_URL make sure scheme and host are
+        // there...
+        $urlConstruction = $parsedUrl['scheme'].'://'.$parsedUrl['host'];
+        if (\array_key_exists('port', $parsedUrl)) {
+            $urlConstruction .= ':'.(string) $parsedUrl['port'];
+        }
+
+        if ($expectedOrigin !== $urlConstruction) {
+            throw new HttpException(400, 'invalid "ReturnTo" provided');
+        }
+
+        return $returnTo;
     }
 }
