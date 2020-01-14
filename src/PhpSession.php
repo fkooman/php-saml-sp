@@ -29,16 +29,17 @@ use fkooman\SAML\SP\Exception\SessionException;
 class PhpSession implements SessionInterface
 {
     /**
-     * @param bool $secureCookie
+     * @param string $sessionName
+     * @param bool   $secureCookie
      *
      * @return void
      */
-    public function start($secureCookie = true)
+    public function start($sessionName, $secureCookie)
     {
         if (PHP_SESSION_ACTIVE === \session_status()) {
             throw new SessionException('session already active');
         }
-
+        \session_name($sessionName);
         // use ugly hack for old (<= 7.3) versions of PHP to support
         // "SameSite" (idea taken from simpleSAMLphp)
         \session_set_cookie_params(0, '/; SameSite=None', null, $secureCookie, true);

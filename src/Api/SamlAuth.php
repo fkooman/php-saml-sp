@@ -56,7 +56,10 @@ class SamlAuth
             if (null === $secureCookie = $this->config->requireKey('secureCookie')) {
                 $secureCookie = true;
             }
-            $session->start($secureCookie);
+            if (null === $sessionName = $this->config->requireKey('sessionName')) {
+                $sessionName = 'PHPSESSID';
+            }
+            $session->start($sessionName, $secureCookie);
         }
         $this->session = $session;
         $this->dateTime = new DateTime();
