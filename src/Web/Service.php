@@ -154,8 +154,6 @@ class Service
                     // listen only for POST HTTP request
                     $returnTo = $this->sp->handleResponse($request->requirePostParameter('SAMLResponse'), $request->requirePostParameter('RelayState'));
 
-                    \error_log('acs returnto: '.$returnTo);
-
                     return new RedirectResponse($returnTo);
                 }
 
