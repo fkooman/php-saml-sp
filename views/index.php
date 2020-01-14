@@ -8,7 +8,7 @@
 
     <h2>Authentication</h2>
     <p>
-        You can perform an <a href="login">Authentication Test</a> with the 
+        You can perform an <a href="wayf?ReturnTo=<?=$this->e($returnTo); ?>">Authentication Test</a> with the 
         configured IdP(s).
     </p>
 

@@ -79,11 +79,7 @@ class SamlAuth
             $returnTo = $this->request->getUri();
         }
 
-        $queryParameters = [
-            'ReturnTo' => $returnTo,
-        ];
-
-        return $this->request->getOrigin().$spPath.'/login'.'?'.\http_build_query($queryParameters);
+        return $this->request->getOrigin().$spPath.'/wayf?ReturnTo='.$returnTo;
     }
 
     /**

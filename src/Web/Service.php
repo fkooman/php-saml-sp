@@ -57,24 +57,28 @@ class Service
                     $this->tpl->render(
                         'index',
                         [
+                            'returnTo' => $request->getRootUri().'info',
                             'metadataUrl' => $request->getRootUri().'metadata',
                             'samlMetadata' => $this->sp->metadata(),
                         ]
                     )
                 );
 
-            case '/login':
-                if ($this->sp->hasAssertion()) {
-                    return new HtmlResponse(
-                        $this->tpl->render(
-                            'auth',
-                            [
-                                'samlAssertion' => $this->sp->getAssertion(),
-                            ]
-                        )
-                    );
+            case '/info':
+                if (!$this->sp->hasAssertion()) {
+                    return new RedirectResponse($request->getRootUri().'wayf?ReturnTo='.$request->getUri());
                 }
 
+                return new HtmlResponse(
+                    $this->tpl->render(
+                        'info',
+                        [
+                            'samlAssertion' => $this->sp->getAssertion(),
+                        ]
+                    )
+                );
+
+            case '/wayf':
                 // get the list of IdPs that can be used
                 if (null === $availableIdpList = $this->config->requireKey('idpList')) {
                     $availableIdpList = [];
@@ -89,37 +93,35 @@ class Service
                 }
 
                 // XXX validate ReturnTo... should it at least match Origin?!
-                if (null === $returnTo = $request->optionalQueryParameter('ReturnTo')) {
-                    $returnTo = $request->getUri();
-                }
+                $returnTo = $request->requireQueryParameter('ReturnTo');
 
                 if (null === $idpEntityId) {
                     // we still don't know which IdP to choose, so allow user
                     // to choose
 
-                    // if a discovery service is specified, use that one
-                    if (null !== $discoUrl = $this->config->requireKey('discoUrl')) {
-                        // XXX maybe we should make ReturnTo required? now this is a bit crazy...
-                        $returnUrl = \sprintf('%s?%s', $request->getRootUri().'login', \http_build_query(['ReturnTo' => $returnTo]));
-                        $discoQuery = \http_build_query(
-                            [
-                                'entityID' => $this->sp->getSpInfo()->getEntityId(),
-                                'returnIDParam' => 'IdP',
-                                'return' => $returnUrl,
-                            ]
-                        );
+//                    // if a discovery service is specified, use that one
+//                    if (null !== $discoUrl = $this->config->requireKey('discoUrl')) {
+//                        // XXX maybe we should make ReturnTo required? now this is a bit crazy...
+//                        $returnUrl = \sprintf('%s?%s', $request->getRootUri().'login', \http_build_query(['ReturnTo' => $returnTo]));
+//                        $discoQuery = \http_build_query(
+//                            [
+//                                'entityID' => $this->sp->getSpInfo()->getEntityId(),
+//                                'returnIDParam' => 'IdP',
+//                                'return' => $returnUrl,
+//                            ]
+//                        );
 
-                        $querySeparator = false === \strpos($discoUrl, '?') ? '?' : '&';
+//                        $querySeparator = false === \strpos($discoUrl, '?') ? '?' : '&';
 
-                        return new RedirectResponse(
-                            \sprintf(
-                                '%s%s%s',
-                                $discoUrl,
-                                $querySeparator,
-                                $discoQuery
-                            )
-                        );
-                    }
+//                        return new RedirectResponse(
+//                            \sprintf(
+//                                '%s%s%s',
+//                                $discoUrl,
+//                                $querySeparator,
+//                                $discoQuery
+//                            )
+//                        );
+//                    }
 
                     // otherwise, show them a simple "WAYF"
                     return new HtmlResponse(
@@ -151,6 +153,8 @@ class Service
                 if ('POST' === $request->getRequestMethod()) {
                     // listen only for POST HTTP request
                     $returnTo = $this->sp->handleResponse($request->requirePostParameter('SAMLResponse'), $request->requirePostParameter('RelayState'));
+
+                    \error_log('acs returnto: '.$returnTo);
 
                     return new RedirectResponse($returnTo);
                 }

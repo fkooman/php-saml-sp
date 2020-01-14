@@ -9,16 +9,15 @@
     <p>
         Select your organization.
     </p>
-    <ul>
+    <form method="get" action="wayf">
+        <input type="hidden" name="ReturnTo" value="<?=$this->e($returnTo); ?>">
+        <ul>
 <?php foreach ($availableIdpList as $entityId): ?>
-        <li>
-            <form method="get" action="login">
-                <input type="hidden" name="ReturnTo" value="<?=$this->e($returnTo); ?>">
-                <input type="hidden" name="IdP" value="<?=$this->e($entityId); ?>">
-                <button type="submit"><?=$this->e($entityId); ?></button>
-            </form>
-        </li>
+            <li>
+                <button name="IdP" type="submit" value="<?=$this->e($entityId); ?>"><?=$this->e($entityId); ?></button>
+            </li>
 <?php endforeach; ?>
-    </ul>
+        </ul>
+    </form>
 <?php endif; ?>
 <?php $this->stop('content'); ?>
