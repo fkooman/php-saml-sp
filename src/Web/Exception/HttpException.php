@@ -32,14 +32,34 @@ class HttpException extends Exception
     private $responseHeaders;
 
     /**
-     * @param string               $message
      * @param int                  $code
+     * @param string               $message
      * @param array<string,string> $responseHeaders
      */
-    public function __construct($message, $code, array $responseHeaders = [], Exception $previous = null)
+    public function __construct($code, $message = '', array $responseHeaders = [], Exception $previous = null)
     {
         parent::__construct($message, $code, $previous);
         $this->responseHeaders = $responseHeaders;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHttpError()
+    {
+        $codeToError = [
+            400 => 'Bad Request',
+            401 => 'Unauthorized',
+            404 => 'Not Found',
+            405 => 'Method Not Allowed',
+            500 => 'Internal Server Error',
+        ];
+
+        if (\array_key_exists($this->code, $codeToError)) {
+            return $codeToError[$this->code];
+        }
+
+        return (string) $this->code;
     }
 
     /**

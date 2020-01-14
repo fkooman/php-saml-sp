@@ -133,10 +133,10 @@ class Request
     public function requireQueryParameter($queryKey)
     {
         if (!\array_key_exists($queryKey, $this->getData)) {
-            throw new HttpException(\sprintf('missing query parameter "%s"', $queryKey), 400);
+            throw new HttpException(400, \sprintf('missing query parameter "%s"', $queryKey));
         }
         if (!\is_string($this->getData[$queryKey])) {
-            throw new HttpException(\sprintf('value of query parameter "%s" MUST be string', $queryKey), 400);
+            throw new HttpException(400, \sprintf('value of query parameter "%s" MUST be string', $queryKey));
         }
 
         return $this->getData[$queryKey];
@@ -164,10 +164,10 @@ class Request
     public function requirePostParameter($postKey)
     {
         if (!\array_key_exists($postKey, $this->postData)) {
-            throw new HttpException(\sprintf('missing post parameter "%s"', $postKey), 400);
+            throw new HttpException(400, \sprintf('missing post parameter "%s"', $postKey));
         }
         if (!\is_string($this->postData[$postKey])) {
-            throw new HttpException(\sprintf('value of post parameter "%s" MUST be string', $postKey), 400);
+            throw new HttpException(400, \sprintf('value of post parameter "%s" MUST be string', $postKey));
         }
 
         return $this->postData[$postKey];
@@ -195,11 +195,11 @@ class Request
     public function requireHeader($headerKey)
     {
         if (!\array_key_exists($headerKey, $this->serverData)) {
-            throw new HttpException(\sprintf('missing request header "%s"', $headerKey), 400);
+            throw new HttpException(400, \sprintf('missing request header "%s"', $headerKey));
         }
 
         if (!\is_string($this->serverData[$headerKey])) {
-            throw new HttpException(\sprintf('value of request header "%s" MUST be string', $headerKey), 400);
+            throw new HttpException(400, \sprintf('value of request header "%s" MUST be string', $headerKey));
         }
 
         return $this->serverData[$headerKey];
@@ -229,7 +229,7 @@ class Request
         }
 
         if (!\in_array($requestScheme, ['http', 'https'], true)) {
-            throw new HttpException('unsupported "REQUEST_SCHEME"', 400);
+            throw new HttpException(400, 'unsupported "REQUEST_SCHEME"');
         }
 
         return $requestScheme;
