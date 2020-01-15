@@ -24,6 +24,7 @@
 
 namespace fkooman\SAML\SP\Web;
 
+use fkooman\SAML\SP\Exception\SamlException;
 use fkooman\SAML\SP\SP;
 use fkooman\SAML\SP\Web\Exception\HttpException;
 
@@ -51,14 +52,19 @@ class Service
     public function run(Request $request)
     {
         try {
-            switch ($request->getRequestMethod()) {
-                case 'HEAD':
-                case 'GET':
-                    return $this->runGet($request);
-                case 'POST':
-                    return $this->runPost($request);
-                default:
-                    throw new HttpException(405, 'Only HTTP POST allowed', ['Allow' => 'GET,HEAD,POST']);
+            try {
+                switch ($request->getRequestMethod()) {
+                    case 'HEAD':
+                    case 'GET':
+                        return $this->runGet($request);
+                    case 'POST':
+                        return $this->runPost($request);
+                    default:
+                        throw new HttpException(405, 'Only GET,HEAD,POST allowed', ['Allow' => 'GET,HEAD,POST']);
+                }
+            } catch (SamlException $e) {
+                // catch all SAML related exceptions
+                throw new HttpException(500, $e->getMessage(), [], $e);
             }
         } catch (HttpException $e) {
             return new HtmlResponse(
