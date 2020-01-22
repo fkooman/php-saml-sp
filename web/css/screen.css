@@ -53,6 +53,7 @@ p.warning {
     border: 1px solid #ffc107;
     padding: 1em;
     width: 100%;
+    color: #ffc107;
 }
 
 p.warning::before {
@@ -63,6 +64,7 @@ p.success {
     border: 1px solid #008000;
     padding: 1em;
     width: 100%;
+    color: #008000;
 }
 
 pre {
