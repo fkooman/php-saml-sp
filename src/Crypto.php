@@ -36,7 +36,13 @@ class Crypto
     const SIGN_ALGO = 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256';
     const SIGN_DIGEST_ALGO = 'http://www.w3.org/2001/04/xmlenc#sha256';
     const SIGN_HASH_ALGO = 'sha256';
+
     const ENCRYPT_KEY_DIGEST_ALGO = 'http://www.w3.org/2000/09/xmldsig#sha1';
+    const ENCRYPT_KEY_TRANSPORT_ALGO = 'http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p';
+    const ENCRYPT_OPENSSL_ALGO = 'aes-256-gcm';
+    const ENCRYPT_IV_LENGTH = 12;
+    const ENCRYPT_TAG_LENGTH = 16;
+    const ENCRYPT_KEY_LENGTH = 32;
 
     /**
      * @param array<PublicKey> $publicKeys
@@ -121,19 +127,11 @@ class Crypto
 
         // make sure we support the encryption algorithm
         $encryptionMethod = XmlDocument::requireNonEmptyString($xmlDocument->domXPath->evaluate('string(xenc:EncryptedData/xenc:EncryptionMethod/@Algorithm)', $domElement));
-        $encryptionParams = self::getEncryptionParams($encryptionMethod);
 
         // make sure we support the key transport encryption algorithm
         $keyEncryptionMethod = XmlDocument::requireNonEmptyString($xmlDocument->domXPath->evaluate('string(xenc:EncryptedData/ds:KeyInfo/xenc:EncryptedKey/xenc:EncryptionMethod/@Algorithm)', $domElement));
-
-        // PHP 5.4 does not support "const" array
-        $encryptKeyAlgoList = [
-            'http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p',
-            'http://www.w3.org/2001/04/xmlenc#rsa-oaep',
-        ];
-
-        if (!\in_array($keyEncryptionMethod, $encryptKeyAlgoList, true)) {
-            throw new CryptoException(\sprintf('only key encryption algorithm(s) "%s" are supported', \implode(',', $encryptKeyAlgoList)));
+        if (self::ENCRYPT_KEY_TRANSPORT_ALGO !== $keyEncryptionMethod) {
+            throw new CryptoException(\sprintf('only key transport algorithm "%s" is supported', self::ENCRYPT_KEY_TRANSPORT_ALGO));
         }
 
         // make sure we support the key transport encryption digest algorithm
@@ -151,7 +149,7 @@ class Crypto
         }
 
         // make sure the obtained key is the exact length we expect
-        if ($encryptionParams['key_length'] !== Binary::safeStrlen($symmetricEncryptionKey)) {
+        if (self::ENCRYPT_KEY_LENGTH !== Binary::safeStrlen($symmetricEncryptionKey)) {
             throw new CryptoException('session key has unexpected length');
         }
 
@@ -159,10 +157,10 @@ class Crypto
         $assertionCipherValue = Base64::decode(XmlDocument::requireNonEmptyString($xmlDocument->domXPath->evaluate('string(xenc:EncryptedData/xenc:CipherData/xenc:CipherValue)', $domElement)));
 
         // @see https://www.w3.org/TR/xmlenc-core1/#sec-AES-GCM
-        $messageIv = Binary::safeSubstr($assertionCipherValue, 0, $encryptionParams['iv_length']);  // IV (first 96 bits)
-        $messageTag = Binary::safeSubstr($assertionCipherValue, Binary::safeStrlen($assertionCipherValue) - $encryptionParams['tag_length']); // Tag (last 128 bits)
-        $cipherText = Binary::safeSubstr($assertionCipherValue, $encryptionParams['iv_length'], -$encryptionParams['tag_length']); // CipherText (between IV and Tag)
-        if (false === $decryptedAssertion = \openssl_decrypt($cipherText, $encryptionParams['openssl_algo'], $symmetricEncryptionKey, OPENSSL_RAW_DATA, $messageIv, $messageTag)) {
+        $messageIv = Binary::safeSubstr($assertionCipherValue, 0, self::ENCRYPT_IV_LENGTH); // IV (first 96 bits)
+        $messageTag = Binary::safeSubstr($assertionCipherValue, Binary::safeStrlen($assertionCipherValue) - self::ENCRYPT_TAG_LENGTH); // Tag (last 128 bits)
+        $cipherText = Binary::safeSubstr($assertionCipherValue, self::ENCRYPT_IV_LENGTH, -self::ENCRYPT_TAG_LENGTH); // CipherText (between IV and Tag)
+        if (false === $decryptedAssertion = \openssl_decrypt($cipherText, self::ENCRYPT_OPENSSL_ALGO, $symmetricEncryptionKey, OPENSSL_RAW_DATA, $messageIv, $messageTag)) {
             throw new CryptoException('unable to decrypt data');
         }
 
@@ -200,42 +198,11 @@ class Crypto
             return false;
         }
 
-        // we need support for AES-128-GCM and AES-256-GCM
-        if (!\in_array('aes-128-gcm', \openssl_get_cipher_methods(), true)) {
-            return false;
-        }
+        // we need support for AES-256-GCM
         if (!\in_array('aes-256-gcm', \openssl_get_cipher_methods(), true)) {
             return false;
         }
 
         return true;
-    }
-
-    /**
-     * @param string $algoNamespace
-     *
-     * @return array
-     */
-    private static function getEncryptionParams($algoNamespace)
-    {
-        // @see https://www.w3.org/TR/xmlenc-core1/#sec-AES-GCM
-        switch ($algoNamespace) {
-            case 'http://www.w3.org/2009/xmlenc11#aes128-gcm':
-                return [
-                    'openssl_algo' => 'aes-128-gcm',
-                    'iv_length' => 12,
-                    'tag_length' => 16,
-                    'key_length' => 16,
-                ];
-            case 'http://www.w3.org/2009/xmlenc11#aes256-gcm':
-                return [
-                    'openssl_algo' => 'aes-256-gcm',
-                    'iv_length' => 12,
-                    'tag_length' => 16,
-                    'key_length' => 32,
-                ];
-            default:
-                throw new CryptoException(\sprintf('unsupported encryption algorithm "%s"', $algoNamespace));
-        }
     }
 }

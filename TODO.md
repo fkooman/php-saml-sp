@@ -3,9 +3,6 @@
 ## 0.3
 
 - add tests for `src/Web` and `src/Api` classes
-- decide on whether to support both AES-256-GCM and AES-128-GCM, or only one...
-  Probably makes sense to only support AES-256-GCM, simplifying the code! It 
-  is exposed through metadata anyway!
 
 ## 1.0
 
