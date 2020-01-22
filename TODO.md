@@ -3,6 +3,7 @@
 ## 0.3
 
 - add tests for `src/Web` and `src/Api` classes
+- only start session when needed, e.g. not for the metadata endpoint
 
 ## 1.0
 
