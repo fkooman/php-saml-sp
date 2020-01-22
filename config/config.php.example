@@ -13,6 +13,10 @@ return [
     // DEFAULT: "PHPSESSID"
     //'sessionName' => 'SID',
 
+    // force the use of <EncryptedAssertion> by the IdP(s)
+    // DEFAULT: false
+    //'requireEncryption' => false,
+
     // SAML discovery service implementing "Identity Provider Discovery Service
     // Protocol and Profile"
     // DEFAULT: built-in minimalist "discovery" if > 1 IdP is available

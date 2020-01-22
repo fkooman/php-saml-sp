@@ -59,13 +59,18 @@ try {
         $spEntityId = $request->getRootUri().'metadata';
     }
 
+    if (null === $requireEncryption = $config->requireKey('requireEncryption')) {
+        $requireEncryption = false;
+    }
+
     // configure the SP
     $spInfo = new SpInfo(
         $spEntityId,
         PrivateKey::fromFile($baseDir.'/config/sp.key'), // used to sign AuthnRequest /
                                         // LogoutRequest
         PublicKey::fromFile($baseDir.'/config/sp.crt'),
-        $request->getRootUri().'acs'
+        $request->getRootUri().'acs',
+        $requireEncryption
     );
     // we also want to support logout
     $spInfo->setSloUrl($request->getRootUri().'slo');

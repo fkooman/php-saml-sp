@@ -33,6 +33,7 @@ use fkooman\SAML\SP\PublicKey;
 use fkooman\SAML\SP\Response;
 use fkooman\SAML\SP\SpInfo;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 class ResponseTest extends TestCase
 {
@@ -45,7 +46,8 @@ class ResponseTest extends TestCase
                 'http://localhost:8081/metadata',
                 PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
                 PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
-                'http://localhost:8081/acs'
+                'http://localhost:8081/acs',
+                false
             ),
             new IdpInfo('http://localhost:8080/metadata.php', 'Test', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/FrkoIdP.crt')], []),
             $samlResponse,
@@ -90,7 +92,8 @@ class ResponseTest extends TestCase
                 'https://labrat.eduvpn.nl/saml',
                 PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
                 PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
-                'https://labrat.eduvpn.nl/saml/postResponse'
+                'https://labrat.eduvpn.nl/saml/postResponse',
+                false
             ),
             new IdpInfo('https://idp.surfnet.nl', 'Test', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/SURFconext.crt')], []),
             $samlResponse,
@@ -130,7 +133,8 @@ class ResponseTest extends TestCase
 //                'https://vpn.tuxed.net/simplesaml/module.php/saml/sp/metadata.php/default-sp',
 //                PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
 //                PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
-//                'https://vpn.tuxed.net/simplesaml/module.php/saml/sp/saml2-acs.php/default-sp'
+//                'https://vpn.tuxed.net/simplesaml/module.php/saml/sp/saml2-acs.php/default-sp',
+//                false
 //            ),
 //            new IdpInfo('https://vpn.tuxed.net/simplesaml/saml2/idp/metadata.php', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/simpleSAMLphp.crt')], []),
 //            $samlResponse,
@@ -161,7 +165,8 @@ class ResponseTest extends TestCase
                     'http://localhost:8081/metadata',
                     PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
                     PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
-                    'http://localhost:8081/acs'
+                    'http://localhost:8081/acs',
+                    false
                 ),
                 new IdpInfo('http://localhost:8080/metadata.php', 'Test', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/FrkoIdP.crt')], []),
                 $samlResponse,
@@ -184,7 +189,8 @@ class ResponseTest extends TestCase
                     'http://localhost:8081/metadata',
                     PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
                     PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
-                    'http://localhost:8081/acs'
+                    'http://localhost:8081/acs',
+                    false
                 ),
                 new IdpInfo('http://localhost:8080/metadata.php', 'Test', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/simpleSAMLphp.crt')], []),
                 $samlResponse,
@@ -207,7 +213,8 @@ class ResponseTest extends TestCase
                     'http://localhost:8081/metadata',
                     PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
                     PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
-                    'http://localhost:8081/acs'
+                    'http://localhost:8081/acs',
+                    false
                 ),
                 new IdpInfo('http://localhost:8080/metadata.php', 'Test', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/FrkoIdP.crt')], []),
                 $samlResponse,
@@ -230,7 +237,8 @@ class ResponseTest extends TestCase
                     'http://localhost:8081/metadata',
                     PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
                     PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
-                    'http://localhost:8081/acs'
+                    'http://localhost:8081/acs',
+                    false
                 ),
                 new IdpInfo('http://localhost:8080/metadata.php', 'Test', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/FrkoIdP.crt')], []),
                 $samlResponse,
@@ -253,7 +261,8 @@ class ResponseTest extends TestCase
                     'http://localhost:8081/metadata',
                     PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
                     PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
-                    'http://localhost:8081/acs'
+                    'http://localhost:8081/acs',
+                    false
                 ),
                 new IdpInfo('https://x509idp.moonshot.utr.surfcloud.nl/metadata', 'Test', 'https://x509idp.moonshot.utr.surfcloud.nl/sso', null, [PublicKey::fromFile(__DIR__.'/data/certs/x509idp.moonshot.utr.surfcloud.nl.crt')], []),
                 $samlResponse,
@@ -276,7 +285,8 @@ class ResponseTest extends TestCase
 //                'https://vpn.tuxed.net/php-saml-sp/example/full.php/metadata',
 //                PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
 //                PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
-//                'https://vpn.tuxed.net/php-saml-sp/example/full.php/acs'
+//                'https://vpn.tuxed.net/php-saml-sp/example/full.php/acs',
+//                false
 //            ),
 //            new IdpInfo('http://fs.tuxed.example/adfs/services/trust', 'SSO', null, [PublicKey::fromFile(__DIR__.'/data/certs/adfs_idp_response.crt')], []),
 //            $samlResponse,
@@ -304,7 +314,8 @@ class ResponseTest extends TestCase
                     'https://kluitje.eduvpn.nl/saml',
                     PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
                     PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
-                    'https://kluitje.eduvpn.nl/portal/_saml/acs'
+                    'https://kluitje.eduvpn.nl/portal/_saml/acs',
+                    false
                 ),
                 new IdpInfo('https://sa-gw.test.surfconext.nl/authentication/metadata', 'Test', 'SSO', null, [PublicKey::fromFile(__DIR__.'/data/certs/SURFsecureID.crt')], []),
                 $samlResponse,
@@ -326,7 +337,8 @@ class ResponseTest extends TestCase
                 'https://demo.eduvpn.nl/saml',
                 PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
                 PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
-                'https://demo.eduvpn.nl/portal/_saml/acs'
+                'https://demo.eduvpn.nl/portal/_saml/acs',
+                false
             ),
             new IdpInfo('https://sa-gw.surfconext.nl/authentication/metadata', 'Test', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/SURFsecureID_production.crt')], []),
             $samlResponse,
@@ -349,7 +361,8 @@ class ResponseTest extends TestCase
                 'http://localhost:8081/metadata',
                 PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
                 PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
-                'http://localhost:8081/acs'
+                'http://localhost:8081/acs',
+                false
             ),
             new IdpInfo('http://localhost:8080/metadata.php', 'Test', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/FrkoIdP.crt')], ['example.com']),
             $samlResponse,
@@ -399,7 +412,8 @@ class ResponseTest extends TestCase
                 'http://localhost:8081/metadata',
                 PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
                 PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
-                'http://localhost:8081/acs'
+                'http://localhost:8081/acs',
+                false
             ),
             new IdpInfo('http://localhost:8080/metadata.php', 'Test', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/FrkoIdP.crt')], ['example.org']),
             $samlResponse,
@@ -436,5 +450,42 @@ class ResponseTest extends TestCase
             ],
             $samlAssertion->getAttributes()
         );
+    }
+
+    public function testShibIdPEnc()
+    {
+        try {
+            $response = new Response(new DateTime('2019-02-28T14:00:08.163Z'));
+            $samlResponse = \file_get_contents(__DIR__.'/data/assertion/ShibIdpEnc.xml');
+            $samlAssertion = $response->verify(
+                new SpInfo(
+                    'https://vpn.tuxed.net/vpn-user-portal/_saml/metadata',
+                    PrivateKey::fromFile(__DIR__.'/data/certs/sp2.key'),
+                    PublicKey::fromFile(__DIR__.'/data/certs/sp2.crt'),
+                    'https://vpn.tuxed.net/vpn-user-portal/_saml/acs',
+                    true
+                ),
+                new IdpInfo('https://testidp3-dev.aai.dfn.de/idp/shibboleth', 'Test', 'SSO', null, [PublicKey::fromFile(__DIR__.'/data/certs/shib_idp.crt')], []),
+                $samlResponse,
+                '_075f2ff7575c50efaead79a1c2a1805c',
+                []
+            );
+            $this->assertSame(
+                [
+                    'urn:oid:1.3.6.1.4.1.5923.1.1.1.10' => [
+                        'https://testidp3-dev.aai.dfn.de/idp/shibboleth!https://vpn.tuxed.net/vpn-user-portal/_saml/metadata!KYzsRqRzQY5qp+bv9T8bHA/AvsI=',
+                    ],
+                    'eduPersonTargetedID' => [
+                        'https://testidp3-dev.aai.dfn.de/idp/shibboleth!https://vpn.tuxed.net/vpn-user-portal/_saml/metadata!KYzsRqRzQY5qp+bv9T8bHA/AvsI=',
+                    ],
+                ],
+                $samlAssertion->getAttributes()
+            );
+        } catch (RuntimeException $e) {
+            // XXX properly mark this as skipped test
+            if ('"EncryptedAssertion" is not supported on this system' !== $e->getMessage()) {
+                $this->fail();
+            }
+        }
     }
 }

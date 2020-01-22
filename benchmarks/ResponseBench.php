@@ -45,7 +45,8 @@ class ResponseBench
                 'http://localhost:8081/metadata',
                 PrivateKey::fromFile(\dirname(__DIR__).'/tests/data/certs/sp.key'),
                 PublicKey::fromFile(\dirname(__DIR__).'/tests/data/certs/sp.crt'),
-                'http://localhost:8081/acs'
+                'http://localhost:8081/acs',
+                false
             ),
             new IdpInfo('http://localhost:8080/metadata.php', 'Test', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(\dirname(__DIR__).'/tests/data/certs/FrkoIdP.crt')], []),
             $samlResponse,

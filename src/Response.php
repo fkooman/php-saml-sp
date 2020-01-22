@@ -52,6 +52,7 @@ class Response
     {
         $responseSigned = false;
         $assertionSigned = false;
+        $assertionEncrypted = false;
 
         $responseDocument = XmlDocument::fromProtocolMessage($samlResponse);
         $responseElement = XmlDocument::requireDomElement($responseDocument->domXPath->query('/samlp:Response')->item(0));
@@ -76,6 +77,28 @@ class Response
             $exceptionMsg = null === $secondLevelStatusCode ? $statusCode : \sprintf('%s (%s)', $statusCode, $secondLevelStatusCode);
 
             throw new ResponseException($exceptionMsg);
+        }
+
+        $domNodeList = $responseDocument->domXPath->query('saml:EncryptedAssertion', $responseElement);
+        if (1 === $domNodeList->length) {
+            // saml:EncryptedAssertion
+            $encryptedAssertionElement = XmlDocument::requireDomElement($domNodeList->item(0));
+            $decryptedAssertion = Crypto::decryptXml($responseDocument, $encryptedAssertionElement, $spInfo->getPrivateKey());
+
+            // create and validate new document for Assertion
+            $assertionDocument = XmlDocument::fromProtocolMessage($decryptedAssertion);
+            $assertionElement = XmlDocument::requireDomElement($assertionDocument->domXPath->query('/saml:Assertion')->item(0));
+
+            // we replace saml:EncryptedAssertion with saml:Assertion in the original document
+            $responseElement->replaceChild(
+                $responseDocument->domDocument->importNode($assertionElement, true),
+                $encryptedAssertionElement
+            );
+            $assertionEncrypted = true;
+        }
+
+        if ($spInfo->getRequireEncryption() && !$assertionEncrypted) {
+            throw new ResponseException('assertion was not encrypted, but encryption is enforced');
         }
 
         // now we MUST have a saml:Assertion

@@ -5,6 +5,12 @@
 <?=$this->t('This is the information page of this SAML SP. If you don\'t know what SAML is, you should not have arrived here! 🤔'); ?>
     </p>
 
+<?php if (!$decryptionSupport): ?>
+    <p class="warning">
+<?=$this->t('Your PHP installation does NOT support AEAD ciphers with OpenSSL. For <code>&lt;EncryptedAssertion&gt;</code> support, upgrade to PHP 7.1 or newer.'); ?>
+    </p>
+<?php endif; ?>
+
     <h2><?=$this->t('Authentication'); ?></h2>
     <p>
         <?=$this->t('You can perform authentication tests here with the configured IdP(s).'); ?>

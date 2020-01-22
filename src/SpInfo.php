@@ -44,16 +44,21 @@ class SpInfo
     /** @var string|null */
     private $sloUrl = null;
 
+    /** @var bool */
+    private $requireEncryption;
+
     /**
-     * @param string $entityId SP entityID
-     * @param string $acsUrl   AssertionConsumerService URL
+     * @param string $entityId          SP entityID
+     * @param string $acsUrl            AssertionConsumerService URL
+     * @param bool   $requireEncryption
      */
-    public function __construct($entityId, PrivateKey $privateKey, PublicKey $publicKey, $acsUrl)
+    public function __construct($entityId, PrivateKey $privateKey, PublicKey $publicKey, $acsUrl, $requireEncryption)
     {
         $this->entityId = $entityId;
         $this->privateKey = $privateKey;
         $this->publicKey = $publicKey;
         $this->acsUrl = $acsUrl;
+        $this->requireEncryption = $requireEncryption;
     }
 
     /**
@@ -110,5 +115,13 @@ class SpInfo
     public function getSloUrl()
     {
         return $this->sloUrl;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getRequireEncryption()
+    {
+        return $this->requireEncryption;
     }
 }

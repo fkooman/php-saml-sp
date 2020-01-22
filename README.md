@@ -55,25 +55,29 @@ which is secure. So you won't find SHA-1 support or insecure encryption.
   [Identity Provider Discovery Service Protocol and Profile](https://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-idp-discovery.html)
 - Currently ~2500 SLOC
 
+## SAML V2.0 Deployment Profile for Federation Interoperability 
+
 We _do_ aim to eventually support everything as mentioned in 
 [SAML V2.0 Deployment Profile for Federation Interoperability](https://kantarainitiative.github.io/SAMLprofiles/saml2int.html).
+
+### Cryptographic Algorithms
+
+| Type                 | Algorithm(s)                                          | Supported | 
+| -------------------- | ----------------------------------------------------- | --------- |
+| Digest               | `http://www.w3.org/2001/04/xmlenc#sha256`             | Yes       |
+| Signature            | `http://www.w3.org/2001/04/xmldsig-more#rsa-sha256`   | Yes       |
+|                      | `http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256` | No        |
+| Block Encryption     | `http://www.w3.org/2009/xmlenc11#aes128-gcm`          | Yes       |
+|                      | `http://www.w3.org/2009/xmlenc11#aes256-gcm`          | Yes       |
+| Key Transport        | `http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p`     | Yes       |
+| Key Transport Digest | `http://www.w3.org/2000/09/xmldsig#sha1`              | Yes       |
 
 # Requirements
 
 - PHP >= 5.4
+  - For block encryption support, PHP >= 7.1
 - `php-openssl`
 - See `composer.json` for other dependencies
-
-# Crypto
-
-This project only supports algorithms that are not currently known to be broken 
-and easy to implement. There is no choice, only the below algorithms are 
-supported.
-
-## Signatures
-
-- Digest: `http://www.w3.org/2001/04/xmlenc#sha256`
-- Signature: `http://www.w3.org/2001/04/xmldsig-more#rsa-sha256`
 
 # Source Code Layout
 
