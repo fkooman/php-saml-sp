@@ -50,10 +50,10 @@ ul li button {
 }
 
 p.warning {
-    border: 1px solid #ffc107;
+    border: 1px solid orange;
     padding: 1em;
     width: 100%;
-    color: #ffc107;
+    color: orange;
 }
 
 p.warning::before {
@@ -61,10 +61,14 @@ p.warning::before {
 }
 
 p.success {
-    border: 1px solid #008000;
+    border: 1px solid darkgreen;
     padding: 1em;
     width: 100%;
-    color: #008000;
+    color: darkgreen;
+}
+
+p.success::before {
+    content: "✔️"
 }
 
 pre {
