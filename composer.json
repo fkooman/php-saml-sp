@@ -23,7 +23,7 @@
     },
     "description": "SAML Service Provider library",
     "license": "MIT",
-    "name": "fkooman/php-saml-sp",
+    "name": "fkooman/saml-sp",
     "require": {
         "ext-date": "*",
         "ext-dom": "*",
