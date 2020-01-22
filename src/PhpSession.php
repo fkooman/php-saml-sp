@@ -28,22 +28,32 @@ use fkooman\SAML\SP\Exception\SessionException;
 
 class PhpSession implements SessionInterface
 {
+    /** @var bool */
+    private $secureCookie;
+
+    /** @var string */
+    private $sessionName;
+
     /**
-     * @param string $sessionName
      * @param bool   $secureCookie
-     *
+     * @param string $sessionName
+     */
+    public function __construct($secureCookie, $sessionName)
+    {
+        $this->secureCookie = $secureCookie;
+        $this->sessionName = $sessionName;
+    }
+
+    /**
      * @return void
      */
-    public function start($sessionName, $secureCookie)
+    public function start()
     {
-        if (PHP_SESSION_ACTIVE === \session_status()) {
-            throw new SessionException('session already active');
-        }
-        \session_name($sessionName);
+        \session_name($this->sessionName);
         // use ugly hack for old (<= 7.3) versions of PHP to support
         // "SameSite" (idea taken from simpleSAMLphp)
         //\session_set_cookie_params(0, '/; SameSite=None', null, $secureCookie, true);
-        \session_set_cookie_params(0, '/', null, $secureCookie, true);
+        \session_set_cookie_params(0, '/', null, $this->secureCookie, true);
         \session_start();
     }
 
@@ -79,7 +89,7 @@ class PhpSession implements SessionInterface
     public function take($key)
     {
         $sessionValue = $this->get($key);
-        $this->delete($key);
+        $this->remove($key);
 
         return $sessionValue;
     }
@@ -101,7 +111,7 @@ class PhpSession implements SessionInterface
      *
      * @return void
      */
-    public function delete($key)
+    public function remove($key)
     {
         self::requireSession();
         unset($_SESSION[$key]);

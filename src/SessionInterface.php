@@ -58,5 +58,5 @@ interface SessionInterface
      *
      * @return void
      */
-    public function delete($key);
+    public function remove($key);
 }

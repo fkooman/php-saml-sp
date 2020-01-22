@@ -42,24 +42,24 @@ class SP
     /** @var RandomInterface */
     protected $random;
 
+    /** @var SessionInterface */
+    protected $session;
+
     /** @var SpInfo */
     private $spInfo;
 
     /** @var IdpInfoSourceInterface */
     private $idpInfoSource;
 
-    /** @var SessionInterface */
-    private $session;
-
     /** @var Template */
     private $tpl;
 
-    public function __construct(SpInfo $spInfo, IdpInfoSourceInterface $idpInfoSource)
+    public function __construct(SpInfo $spInfo, IdpInfoSourceInterface $idpInfoSource, SessionInterface $session)
     {
         $this->spInfo = $spInfo;
         $this->idpInfoSource = $idpInfoSource;
+        $this->session = $session;
         $this->dateTime = new DateTime();
-        $this->session = new PhpSession();
         $this->random = new Random();
         $this->tpl = new Template(__DIR__.'/tpl');
     }
@@ -70,14 +70,6 @@ class SP
     public function getSpInfo()
     {
         return $this->spInfo;
-    }
-
-    /**
-     * @return void
-     */
-    public function setSession(SessionInterface $session)
-    {
-        $this->session = $session;
     }
 
     /**
@@ -182,7 +174,7 @@ class SP
 
         // delete the assertion from the session, so we are no longer
         // authenticated...
-        $this->session->delete(self::SESSION_KEY_PREFIX.'assertion');
+        $this->session->remove(self::SESSION_KEY_PREFIX.'assertion');
 
         $idpEntityId = $samlAssertion->getIssuer();
         if (!$this->idpInfoSource->has($idpEntityId)) {
@@ -318,7 +310,7 @@ class SP
         $samlAssertion = \unserialize($sessionValue);
         if (!($samlAssertion instanceof Assertion)) {
             // we are unable to unserialize the Assertion
-            $this->session->delete(self::SESSION_KEY_PREFIX.'assertion');
+            $this->session->remove(self::SESSION_KEY_PREFIX.'assertion');
 
             return null;
         }
@@ -326,7 +318,7 @@ class SP
         // make sure the SAML session is still valid
         $sessionNotOnOrAfter = $samlAssertion->getSessionNotOnOrAfter();
         if ($sessionNotOnOrAfter <= $this->dateTime) {
-            $this->session->delete(self::SESSION_KEY_PREFIX.'assertion');
+            $this->session->remove(self::SESSION_KEY_PREFIX.'assertion');
 
             return null;
         }

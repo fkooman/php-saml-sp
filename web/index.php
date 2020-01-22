@@ -46,8 +46,8 @@ try {
     if (null === $sessionName = $config->requireKey('sessionName')) {
         $sessionName = 'PHPSESSID';
     }
-    $session = new PhpSession();
-    $session->start($sessionName, $secureCookie);
+    $session = new PhpSession($secureCookie, $sessionName);
+    $session->start();
 
     $tpl = new Tpl([$baseDir.'/views']);
     $metadataFileList = \glob($baseDir.'/config/metadata/*.xml');
@@ -66,16 +66,14 @@ try {
     // configure the SP
     $spInfo = new SpInfo(
         $spEntityId,
-        PrivateKey::fromFile($baseDir.'/config/sp.key'), // used to sign AuthnRequest /
-                                        // LogoutRequest
+        // AuthnRequest / LogoutRequest / Decryption <EncryptedAssertion>
+        PrivateKey::fromFile($baseDir.'/config/sp.key'),
         PublicKey::fromFile($baseDir.'/config/sp.crt'),
         $request->getRootUri().'acs',
         $requireEncryption
     );
-    // we also want to support logout
     $spInfo->setSloUrl($request->getRootUri().'slo');
-    $sp = new SP($spInfo, $idpInfoSource);
-    $sp->setSession($session);
+    $sp = new SP($spInfo, $idpInfoSource, $session);
     $service = new Service($config, $tpl, $sp);
     $request = new Request($_SERVER, $_GET, $_POST);
     $service->run($request)->send();

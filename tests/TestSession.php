@@ -75,7 +75,7 @@ class TestSession implements SessionInterface
     public function take($key)
     {
         $sessionValue = $this->get($key);
-        $this->delete($key);
+        $this->remove($key);
 
         return $sessionValue;
     }
@@ -96,7 +96,7 @@ class TestSession implements SessionInterface
      *
      * @return void
      */
-    public function delete($key)
+    public function remove($key)
     {
         unset($this->sessionData[$key]);
     }

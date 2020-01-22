@@ -5,12 +5,6 @@
             "name": "Fran\u00e7ois Kooman"
         }
     ],
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://git.tuxed.net/fkooman/php-secookie"
-        }
-    ],
     "autoload": {
         "psr-4": {
             "fkooman\\SAML\\SP\\": "src/"

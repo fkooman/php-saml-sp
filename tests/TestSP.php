@@ -26,6 +26,7 @@ namespace fkooman\SAML\SP\Tests;
 
 use DateTime;
 use fkooman\SAML\SP\RandomInterface;
+use fkooman\SAML\SP\SessionInterface;
 use fkooman\SAML\SP\SP;
 
 class TestSP extends SP
@@ -44,5 +45,13 @@ class TestSP extends SP
     public function setDateTime(DateTime $dateTime)
     {
         $this->dateTime = $dateTime;
+    }
+
+    /**
+     * @return void
+     */
+    public function setSession(SessionInterface $session)
+    {
+        $this->session = $session;
     }
 }

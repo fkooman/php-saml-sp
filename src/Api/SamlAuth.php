@@ -28,7 +28,6 @@ use DateTime;
 use fkooman\SAML\SP\Api\Exception\AuthException;
 use fkooman\SAML\SP\Assertion;
 use fkooman\SAML\SP\PhpSession;
-use fkooman\SAML\SP\SessionInterface;
 use fkooman\SAML\SP\SP;
 use fkooman\SAML\SP\Web\Config;
 use fkooman\SAML\SP\Web\Request;
@@ -47,21 +46,18 @@ class SamlAuth
     /** @var \DateTime */
     private $dateTime;
 
-    public function __construct(SessionInterface $session = null)
+    public function __construct()
     {
         $this->config = Config::fromFile(\dirname(\dirname(__DIR__)).'/config/config.php');
         $this->request = new Request($_SERVER, $_GET, $_POST);
-        if (null === $session) {
-            $session = new PhpSession();
-            if (null === $secureCookie = $this->config->requireKey('secureCookie')) {
-                $secureCookie = true;
-            }
-            if (null === $sessionName = $this->config->requireKey('sessionName')) {
-                $sessionName = 'PHPSESSID';
-            }
-            $session->start($sessionName, $secureCookie);
+        if (null === $secureCookie = $this->config->requireKey('secureCookie')) {
+            $secureCookie = true;
         }
-        $this->session = $session;
+        if (null === $sessionName = $this->config->requireKey('sessionName')) {
+            $sessionName = 'PHPSESSID';
+        }
+        $this->session = new PhpSession($secureCookie, $sessionName);
+        $this->session->start();
         $this->dateTime = new DateTime();
     }
 
@@ -116,7 +112,7 @@ class SamlAuth
         $samlAssertion = \unserialize($sessionValue);
         if (!($samlAssertion instanceof Assertion)) {
             // we are unable to unserialize the Assertion
-            $this->session->delete(SP::SESSION_KEY_PREFIX.'assertion');
+            $this->session->remove(SP::SESSION_KEY_PREFIX.'assertion');
 
             return null;
         }
@@ -124,7 +120,7 @@ class SamlAuth
         // make sure the SAML session is still valid
         $sessionNotOnOrAfter = $samlAssertion->getSessionNotOnOrAfter();
         if ($sessionNotOnOrAfter <= $this->dateTime) {
-            $this->session->delete(SP::SESSION_KEY_PREFIX.'assertion');
+            $this->session->remove(SP::SESSION_KEY_PREFIX.'assertion');
 
             return null;
         }
