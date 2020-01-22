@@ -9,6 +9,7 @@
 
 ## 1.0
 
+- think about implementing caching for eduGAIN purpose with 2k+ IdPs
 - input validation on ALL (public) methods
 - make absolutely sure we verify the assertion with the right public key as to
   avoid allowing one IdP to pretend to be another IdP
