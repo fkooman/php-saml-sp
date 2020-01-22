@@ -7,7 +7,7 @@
 
 <?php if (!$decryptionSupport): ?>
     <p class="warning">
-<?=$this->t('This PHP installation does NOT support AEAD ciphers. For <code>&lt;EncryptedAssertion&gt;</code> support, PHP >= 7.1, with <code>ext-openssl</code> support is required.'); ?>
+<?=$this->t('This PHP installation does NOT support AEAD ciphers. For <code>&lt;EncryptedAssertion&gt;</code> support, PHP >= 7.1, with <code>ext-openssl</code> is required.'); ?>
     </p>
 <?php endif; ?>
 
