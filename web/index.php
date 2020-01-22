@@ -24,9 +24,9 @@
 
 require_once \dirname(__DIR__).'/vendor/autoload.php';
 
-use fkooman\SAML\SP\PhpSession;
 use fkooman\SAML\SP\PrivateKey;
 use fkooman\SAML\SP\PublicKey;
+use fkooman\SAML\SP\SeSession;
 use fkooman\SAML\SP\SP;
 use fkooman\SAML\SP\SpInfo;
 use fkooman\SAML\SP\Web\Config;
@@ -43,10 +43,7 @@ try {
     if (null === $secureCookie = $config->requireKey('secureCookie')) {
         $secureCookie = true;
     }
-    if (null === $sessionName = $config->requireKey('sessionName')) {
-        $sessionName = 'PHPSESSID';
-    }
-    $session = new PhpSession($secureCookie, $sessionName);
+    $session = new SeSession($secureCookie);
     $session->start();
 
     $tpl = new Tpl([$baseDir.'/views']);

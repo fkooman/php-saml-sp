@@ -27,7 +27,7 @@ namespace fkooman\SAML\SP\Api;
 use DateTime;
 use fkooman\SAML\SP\Api\Exception\AuthException;
 use fkooman\SAML\SP\Assertion;
-use fkooman\SAML\SP\PhpSession;
+use fkooman\SAML\SP\SeSession;
 use fkooman\SAML\SP\SP;
 use fkooman\SAML\SP\Web\Config;
 use fkooman\SAML\SP\Web\Request;
@@ -53,10 +53,7 @@ class SamlAuth
         if (null === $secureCookie = $this->config->requireKey('secureCookie')) {
             $secureCookie = true;
         }
-        if (null === $sessionName = $this->config->requireKey('sessionName')) {
-            $sessionName = 'PHPSESSID';
-        }
-        $this->session = new PhpSession($secureCookie, $sessionName);
+        $this->session = new SeSession($secureCookie);
         $this->session->start();
         $this->dateTime = new DateTime();
     }

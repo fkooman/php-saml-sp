@@ -9,10 +9,6 @@ return [
     // DEFAULT: "/php-saml-sp"
     //'spPath' => '/php-saml-sp',
 
-    // the session name to use (this MUST match your application)
-    // DEFAULT: "PHPSESSID"
-    //'sessionName' => 'SID',
-
     // force the use of <EncryptedAssertion> by the IdP(s)
     // DEFAULT: false
     //'requireEncryption' => false,

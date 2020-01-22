@@ -24,24 +24,27 @@
 
 namespace fkooman\SAML\SP;
 
-use fkooman\SAML\SP\Exception\SessionException;
+use fkooman\SeCookie\Cookie;
+use fkooman\SeCookie\CookieOptions;
+use fkooman\SeCookie\Session;
+use fkooman\SeCookie\SessionOptions;
 
-class PhpSession implements SessionInterface
+class SeSession implements SessionInterface
 {
-    /** @var bool */
-    private $secureCookie;
-
-    /** @var string */
-    private $sessionName;
+    /** @var \fkooman\SeCookie\Session */
+    private $session;
 
     /**
-     * @param bool   $secureCookie
-     * @param string $sessionName
+     * @param bool $secureCookie
      */
-    public function __construct($secureCookie, $sessionName)
+    public function __construct($secureCookie)
     {
-        $this->secureCookie = $secureCookie;
-        $this->sessionName = $sessionName;
+        $this->session = new Session(
+            SessionOptions::init()->setName('PSSSID'),
+            new Cookie(
+                CookieOptions::init()->setSecure($secureCookie)->setPath('/')->setSameSite(null)
+            )
+        );
     }
 
     /**
@@ -49,12 +52,7 @@ class PhpSession implements SessionInterface
      */
     public function start()
     {
-        \session_name($this->sessionName);
-        // use ugly hack for old (<= 7.3) versions of PHP to support
-        // "SameSite" (idea taken from simpleSAMLphp)
-        //\session_set_cookie_params(0, '/; SameSite=None', null, $secureCookie, true);
-        \session_set_cookie_params(0, '/', null, $this->secureCookie, true);
-        \session_start();
+        $this->session->start();
     }
 
     /**
@@ -62,8 +60,7 @@ class PhpSession implements SessionInterface
      */
     public function regenerate()
     {
-        self::requireSession();
-        \session_regenerate_id(true);
+        $this->session->regenerate();
     }
 
     /**
@@ -73,12 +70,7 @@ class PhpSession implements SessionInterface
      */
     public function get($key)
     {
-        self::requireSession();
-        if (!\array_key_exists($key, $_SESSION)) {
-            return null;
-        }
-
-        return $_SESSION[$key];
+        return $this->session->get($key);
     }
 
     /**
@@ -88,8 +80,8 @@ class PhpSession implements SessionInterface
      */
     public function take($key)
     {
-        $sessionValue = $this->get($key);
-        $this->remove($key);
+        $sessionValue = $this->session->get($key);
+        $this->session->remove($key);
 
         return $sessionValue;
     }
@@ -102,8 +94,7 @@ class PhpSession implements SessionInterface
      */
     public function set($key, $value)
     {
-        self::requireSession();
-        $_SESSION[$key] = $value;
+        $this->session->set($key, $value);
     }
 
     /**
@@ -113,18 +104,6 @@ class PhpSession implements SessionInterface
      */
     public function remove($key)
     {
-        self::requireSession();
-        unset($_SESSION[$key]);
-    }
-
-    /**
-     * @return void
-     */
-    private static function requireSession()
-    {
-        if (PHP_SESSION_ACTIVE !== \session_status()) {
-            // we MUST have an active session
-            throw new SessionException('no active session');
-        }
+        $this->session->remove($key);
     }
 }
