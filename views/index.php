@@ -11,6 +11,12 @@
     </p>
 <?php endif; ?>
 
+<?php if (!$secureCookie): ?>
+    <p class="warning">
+<?=$this->t('Secure Cookies are disabled. This is ONLY appropriate for development!'); ?>
+    </p>
+<?php endif; ?>
+
     <h2><?=$this->t('Authentication'); ?></h2>
     <p>
         <?=$this->t('You can perform authentication tests here with the configured IdP(s).'); ?>
