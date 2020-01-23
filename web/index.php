@@ -48,6 +48,11 @@ try {
     }
     $session = new PhpSession($secureCookie, $sessionName);
     $tpl = new Tpl([$baseDir.'/views']);
+    $tpl->addDefault(
+        [
+            'secureCookie' => $secureCookie,
+        ]
+    );
     $metadataFileList = \glob($baseDir.'/config/metadata/*.xml');
     $idpInfoSource = new XmlIdpInfoSource($metadataFileList);
     $request = new Request($_SERVER, $_GET, $_POST);
