@@ -47,8 +47,6 @@ try {
         $sessionName = 'PHPSESSID';
     }
     $session = new PhpSession($secureCookie, $sessionName);
-    $session->start();
-
     $tpl = new Tpl([$baseDir.'/views']);
     $metadataFileList = \glob($baseDir.'/config/metadata/*.xml');
     $idpInfoSource = new XmlIdpInfoSource($metadataFileList);

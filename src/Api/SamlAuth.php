@@ -57,7 +57,6 @@ class SamlAuth
             $sessionName = 'PHPSESSID';
         }
         $this->session = new PhpSession($secureCookie, $sessionName);
-        $this->session->start();
         $this->dateTime = new DateTime();
     }
 

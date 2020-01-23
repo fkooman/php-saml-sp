@@ -24,8 +24,6 @@
 
 namespace fkooman\SAML\SP;
 
-use fkooman\SAML\SP\Exception\SessionException;
-
 class PhpSession implements SessionInterface
 {
     /** @var bool */
@@ -47,22 +45,9 @@ class PhpSession implements SessionInterface
     /**
      * @return void
      */
-    public function start()
-    {
-        \session_name($this->sessionName);
-        // use ugly hack for old (<= 7.3) versions of PHP to support
-        // "SameSite" (idea taken from simpleSAMLphp)
-        //\session_set_cookie_params(0, '/; SameSite=None', null, $secureCookie, true);
-        \session_set_cookie_params(0, '/', null, $this->secureCookie, true);
-        \session_start();
-    }
-
-    /**
-     * @return void
-     */
     public function regenerate()
     {
-        self::requireSession();
+        $this->requireSession();
         \session_regenerate_id(true);
     }
 
@@ -73,7 +58,7 @@ class PhpSession implements SessionInterface
      */
     public function get($key)
     {
-        self::requireSession();
+        $this->requireSession();
         if (!\array_key_exists($key, $_SESSION)) {
             return null;
         }
@@ -102,7 +87,7 @@ class PhpSession implements SessionInterface
      */
     public function set($key, $value)
     {
-        self::requireSession();
+        $this->requireSession();
         $_SESSION[$key] = $value;
     }
 
@@ -113,18 +98,23 @@ class PhpSession implements SessionInterface
      */
     public function remove($key)
     {
-        self::requireSession();
+        $this->requireSession();
         unset($_SESSION[$key]);
     }
 
     /**
      * @return void
      */
-    private static function requireSession()
+    private function requireSession()
     {
+        // start session if it is not yet started
         if (PHP_SESSION_ACTIVE !== \session_status()) {
-            // we MUST have an active session
-            throw new SessionException('no active session');
+            \session_name($this->sessionName);
+            // use ugly hack for old (<= 7.3) versions of PHP to support
+            // "SameSite" (idea taken from simpleSAMLphp)
+            //\session_set_cookie_params(0, '/; SameSite=None', null, $secureCookie, true);
+            \session_set_cookie_params(0, '/', null, $this->secureCookie, true);
+            \session_start();
         }
     }
 }
