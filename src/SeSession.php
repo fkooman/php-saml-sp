@@ -24,7 +24,6 @@
 
 namespace fkooman\SAML\SP;
 
-use fkooman\SeCookie\Cookie;
 use fkooman\SeCookie\CookieOptions;
 use fkooman\SeCookie\Session;
 use fkooman\SeCookie\SessionOptions;
@@ -41,9 +40,7 @@ class SeSession implements SessionInterface
     {
         $this->session = new Session(
             SessionOptions::init()->setName('PSSSID'),
-            new Cookie(
-                CookieOptions::init()->setSecure($secureCookie)->setPath('/')->setSameSite(null)
-            )
+            CookieOptions::init()->setSecure($secureCookie)->setPath('/')->setSameSite(null)
         );
     }
 
@@ -64,6 +61,7 @@ class SeSession implements SessionInterface
     public function get($key)
     {
         $this->session->start();
+
         return $this->session->get($key);
     }
 
