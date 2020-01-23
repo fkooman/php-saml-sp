@@ -44,8 +44,6 @@ try {
         $secureCookie = true;
     }
     $session = new SeSession($secureCookie);
-    $session->start();
-
     $tpl = new Tpl([$baseDir.'/views']);
     $metadataFileList = \glob($baseDir.'/config/metadata/*.xml');
     $idpInfoSource = new XmlIdpInfoSource($metadataFileList);

@@ -54,7 +54,6 @@ class SamlAuth
             $secureCookie = true;
         }
         $this->session = new SeSession($secureCookie);
-        $this->session->start();
         $this->dateTime = new DateTime();
     }
 

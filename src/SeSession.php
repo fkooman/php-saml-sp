@@ -50,16 +50,9 @@ class SeSession implements SessionInterface
     /**
      * @return void
      */
-    public function start()
-    {
-        $this->session->start();
-    }
-
-    /**
-     * @return void
-     */
     public function regenerate()
     {
+        $this->session->start();
         $this->session->regenerate();
     }
 
@@ -70,6 +63,7 @@ class SeSession implements SessionInterface
      */
     public function get($key)
     {
+        $this->session->start();
         return $this->session->get($key);
     }
 
@@ -80,6 +74,7 @@ class SeSession implements SessionInterface
      */
     public function take($key)
     {
+        $this->session->start();
         $sessionValue = $this->session->get($key);
         $this->session->remove($key);
 
@@ -94,6 +89,7 @@ class SeSession implements SessionInterface
      */
     public function set($key, $value)
     {
+        $this->session->start();
         $this->session->set($key, $value);
     }
 
@@ -104,6 +100,7 @@ class SeSession implements SessionInterface
      */
     public function remove($key)
     {
+        $this->session->start();
         $this->session->remove($key);
     }
 }
