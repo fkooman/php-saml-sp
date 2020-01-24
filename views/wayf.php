@@ -1,6 +1,9 @@
 <?php $this->layout('base'); ?>
 <?php $this->start('content'); ?>
-    <h2><?=$this->t('Where are you from?'); ?></h2>
+<h2><?=$this->t('Where are you from?'); ?></h2>
+<p>
+<?=$this->t('Select your organization from the list below to continue the login process.'); ?>
+</p>
 <?php if (0 === \count($idpInfoList)): ?>
     <p class="warning">
 <?=$this->t('No IdP(s) configured for authenticating to this SP!'); ?>
