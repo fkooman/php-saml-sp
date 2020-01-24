@@ -41,7 +41,7 @@ class Config
      *
      * @return mixed
      */
-    public function requireKey($k)
+    public function get($k)
     {
         if (!\array_key_exists($k, $this->configData)) {
             return null;
@@ -55,7 +55,7 @@ class Config
      *
      * @return self|null
      */
-    public function requireSection($s)
+    public function getSection($s)
     {
         if (!\array_key_exists($s, $this->configData)) {
             return null;

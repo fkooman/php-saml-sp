@@ -50,7 +50,7 @@ class SamlAuth
     {
         $this->config = Config::fromFile(\dirname(\dirname(__DIR__)).'/config/config.php');
         $this->request = new Request($_SERVER, $_GET, $_POST);
-        if (null === $secureCookie = $this->config->requireKey('secureCookie')) {
+        if (null === $secureCookie = $this->config->get('secureCookie')) {
             $secureCookie = true;
         }
         $this->session = new SeSession($secureCookie);
@@ -66,7 +66,7 @@ class SamlAuth
             $authOptions = new AuthOptions();
         }
 
-        if (null === $spPath = $this->config->requireKey('spPath')) {
+        if (null === $spPath = $this->config->get('spPath')) {
             $spPath = '/php-saml-sp';
         }
 

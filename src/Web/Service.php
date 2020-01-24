@@ -116,7 +116,7 @@ class Service
                 );
             case '/wayf':
                 // get the list of IdPs that can be used
-                if (null === $availableIdpList = $this->config->requireKey('idpList')) {
+                if (null === $availableIdpList = $this->config->get('idpList')) {
                     $availableIdpList = [];
                 }
 
@@ -132,7 +132,7 @@ class Service
 
                 if (null === $idpEntityId) {
                     // we don't know the IdP (yet)
-                    if (null !== $discoUrl = $this->config->requireKey('discoUrl')) {
+                    if (null !== $discoUrl = $this->config->get('discoUrl')) {
                         // use external discovery service
                         $discoQuery = \http_build_query(
                             [

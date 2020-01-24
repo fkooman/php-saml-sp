@@ -40,7 +40,7 @@ $baseDir = \dirname(__DIR__);
 
 try {
     $config = Config::fromFile($baseDir.'/config/config.php');
-    if (null === $secureCookie = $config->requireKey('secureCookie')) {
+    if (null === $secureCookie = $config->get('secureCookie')) {
         $secureCookie = true;
     }
     $session = new SeSession($secureCookie);
@@ -55,11 +55,11 @@ try {
     $request = new Request($_SERVER, $_GET, $_POST);
 
     // have a default entityID, but allow overriding from config
-    if (null === $spEntityId = $config->requireKey('entityId')) {
+    if (null === $spEntityId = $config->get('entityId')) {
         $spEntityId = $request->getRootUri().'metadata';
     }
 
-    if (null === $requireEncryption = $config->requireKey('requireEncryption')) {
+    if (null === $requireEncryption = $config->get('requireEncryption')) {
         $requireEncryption = false;
     }
 
