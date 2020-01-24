@@ -39,8 +39,9 @@ class SeSession implements SessionInterface
     public function __construct($secureCookie)
     {
         $this->session = new Session(
-            SessionOptions::init()->setName('PSSSID'),
-            CookieOptions::init()->setSecure($secureCookie)->setPath('/')->setSameSite(null)
+            SessionOptions::init(
+                CookieOptions::init()->setSecure($secureCookie)->setPath('/')->setSameSite(null)
+            )->setName('PSSSID')
         );
     }
 
