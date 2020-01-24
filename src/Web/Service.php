@@ -26,6 +26,7 @@ namespace fkooman\SAML\SP\Web;
 
 use fkooman\SAML\SP\Crypto;
 use fkooman\SAML\SP\Exception\SamlException;
+use fkooman\SAML\SP\IdpInfo;
 use fkooman\SAML\SP\SP;
 use fkooman\SAML\SP\Web\Exception\HttpException;
 
@@ -158,6 +159,11 @@ class Service
                             $idpInfoList[] = $this->sp->getIdpInfoSource()->get($availableIdp);
                         }
                     }
+
+                    // sort the IdPs by display name
+                    \usort($idpInfoList, function (IdpInfo $a, IdpInfo $b) {
+                        return \strcasecmp($a->getDisplayName(), $b->getDisplayName());
+                    });
 
                     return new HtmlResponse(
                         $this->tpl->render(
