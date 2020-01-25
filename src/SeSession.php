@@ -40,6 +40,9 @@ class SeSession implements SessionInterface
     {
         $this->session = new Session(
             SessionOptions::init()->setName('PSSSID'),
+            // SameSite 'None' would be better, but breaks some browsers
+            // @see https://www.chromium.org/updates/same-site/incompatible-clients
+            // @see https://www.chromium.org/updates/same-site?pli=1#20191101
             CookieOptions::init()->setSecure($secureCookie)->setPath('/')->setSameSite(null)
         );
     }
