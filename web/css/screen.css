@@ -71,6 +71,10 @@ p.success::before {
     content: "✔️"
 }
 
+summary {
+    margin-bottom: 1em;
+}
+
 pre {
     background-color: #eee;
     padding: 0.5em;

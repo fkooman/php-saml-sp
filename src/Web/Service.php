@@ -173,6 +173,7 @@ class Service
                     $lastChosenIdpInfo = null;
                     if (null !== $lastChosenIdp = $this->cookie->get('lastChosenIdp')) {
                         $lastChosenIdpInfo = $idpInfoList[$lastChosenIdp];
+                        unset($idpInfoList[$lastChosenIdp]);
                     }
 
                     return new HtmlResponse(
