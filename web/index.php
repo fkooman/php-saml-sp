@@ -47,12 +47,14 @@ try {
 
     $seCookie = new SeCookie($secureCookie);
     $seSession = new SeSession($secureCookie);
-    $tpl = new Tpl([$baseDir.'/views']);
-    $tpl->addDefault(
-        [
-            'secureCookie' => $secureCookie,
-        ]
-    );
+
+    $templateDirs = [$baseDir.'/views'];
+    if (null !== $styleName = $config->get('styleName')) {
+        $templateDirs[] = $baseDir.'/views/'.$styleName;
+    }
+    $tpl = new Tpl($templateDirs);
+    $tpl->addDefault(['secureCookie' => $secureCookie]);
+
     $metadataFileList = \glob($baseDir.'/config/metadata/*.xml');
     $idpInfoSource = new XmlIdpInfoSource($metadataFileList);
     $request = new Request($_SERVER, $_GET, $_POST);
