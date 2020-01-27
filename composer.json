@@ -27,11 +27,11 @@
     "require": {
         "ext-date": "*",
         "ext-dom": "*",
+        "ext-filter": "*",
         "ext-hash": "*",
         "ext-libxml": "*",
         "ext-openssl": "*",
         "ext-pcre": "*",
-        "ext-session": "*",
         "ext-spl": "*",
         "ext-zlib": "*",
         "fkooman/secookie": "^3",
