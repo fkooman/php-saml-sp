@@ -38,7 +38,7 @@ class SeCookie implements CookieInterface
     public function __construct($secureCookie)
     {
         $this->cookie = new Cookie(
-            CookieOptions::init()->setSecure($secureCookie)
+            CookieOptions::init()->setSecure($secureCookie)->setMaxAge(90 * 60 * 60 * 24)
         );
     }
 
