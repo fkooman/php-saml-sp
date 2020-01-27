@@ -19,15 +19,15 @@
         </ul>
     </form>
 	<details>
-		<summary><?=$this->t('Select Other...'); ?></summary>
+		<summary><?=$this->t('Other...'); ?></summary>
 		    <form method="get" action="wayf">
 		        <input type="hidden" name="ReturnTo" value="<?=$this->e($returnTo); ?>">
 		        <ul>
-		<?php foreach ($idpInfoList as $idpInfo): ?>
+<?php foreach ($idpInfoList as $idpInfo): ?>
 		            <li>
 		                <button name="IdP" type="submit" value="<?=$this->e($idpInfo->getEntityId()); ?>"><?=$this->e($idpInfo->getDisplayName()); ?></button>
 		            </li>
-		<?php endforeach; ?>
+<?php endforeach; ?>
 		        </ul>
 		    </form>
 	</details>
