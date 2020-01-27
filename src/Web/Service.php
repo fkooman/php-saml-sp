@@ -32,6 +32,8 @@ use fkooman\SAML\SP\Web\Exception\HttpException;
 
 class Service
 {
+    /** @var string */
+    const LAST_CHOSEN_COOKIE_NAME = 'IDP';
     /** @var Config */
     private $config;
 
@@ -171,7 +173,7 @@ class Service
                     });
 
                     $lastChosenIdpInfo = null;
-                    if (null !== $lastChosenIdp = $this->cookie->get('lastChosenIdp')) {
+                    if (null !== $lastChosenIdp = $this->cookie->get(self::LAST_CHOSEN_COOKIE_NAME)) {
                         $lastChosenIdpInfo = $idpInfoList[$lastChosenIdp];
                         unset($idpInfoList[$lastChosenIdp]);
                     }
@@ -197,7 +199,7 @@ class Service
                 if (1 < \count($availableIdpList) && null === $discoUrl) {
                     // store the chosen IdP in case >= 1 is available and we
                     // use our own discovery
-                    $this->cookie->set('lastChosenIdp', $idpEntityId);
+                    $this->cookie->set(self::LAST_CHOSEN_COOKIE_NAME, $idpEntityId);
                 }
 
                 // we know which IdP to go to!
