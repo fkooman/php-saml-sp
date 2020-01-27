@@ -32,6 +32,7 @@ use fkooman\SAML\SP\SpInfo;
 use fkooman\SAML\SP\Web\Config;
 use fkooman\SAML\SP\Web\Request;
 use fkooman\SAML\SP\Web\Response;
+use fkooman\SAML\SP\Web\SeCookie;
 use fkooman\SAML\SP\Web\Service;
 use fkooman\SAML\SP\Web\Tpl;
 use fkooman\SAML\SP\XmlIdpInfoSource;
@@ -43,7 +44,9 @@ try {
     if (null === $secureCookie = $config->get('secureCookie')) {
         $secureCookie = true;
     }
-    $session = new SeSession($secureCookie);
+
+    $seCookie = new SeCookie($secureCookie);
+    $seSession = new SeSession($secureCookie);
     $tpl = new Tpl([$baseDir.'/views']);
     $tpl->addDefault(
         [
@@ -73,8 +76,8 @@ try {
         $requireEncryption
     );
     $spInfo->setSloUrl($request->getRootUri().'slo');
-    $sp = new SP($spInfo, $idpInfoSource, $session);
-    $service = new Service($config, $tpl, $sp);
+    $sp = new SP($spInfo, $idpInfoSource, $seSession);
+    $service = new Service($config, $tpl, $sp, $seCookie);
     $request = new Request($_SERVER, $_GET, $_POST);
     $service->run($request)->send();
 } catch (Exception $e) {

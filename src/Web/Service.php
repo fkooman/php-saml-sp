@@ -41,11 +41,15 @@ class Service
     /** @var \fkooman\SAML\SP\SP */
     private $sp;
 
-    public function __construct(Config $config, Tpl $tpl, SP $sp)
+    /** @var CookieInterface */
+    private $cookie;
+
+    public function __construct(Config $config, Tpl $tpl, SP $sp, CookieInterface $cookie)
     {
         $this->config = $config;
         $this->tpl = $tpl;
         $this->sp = $sp;
+        $this->cookie = $cookie;
     }
 
     /**
@@ -130,9 +134,10 @@ class Service
 
                 $returnTo = self::verifyReturnToOrigin($request->getOrigin(), $request->requireQueryParameter('ReturnTo'));
 
+                $discoUrl = $this->config->get('discoUrl');
                 if (null === $idpEntityId) {
                     // we don't know the IdP (yet)
-                    if (null !== $discoUrl = $this->config->get('discoUrl')) {
+                    if (null !== $discoUrl) {
                         // use external discovery service
                         $discoQuery = \http_build_query(
                             [
@@ -156,19 +161,25 @@ class Service
                     $idpInfoList = [];
                     foreach ($availableIdpList as $availableIdp) {
                         if ($this->sp->getIdpInfoSource()->has($availableIdp)) {
-                            $idpInfoList[] = $this->sp->getIdpInfoSource()->get($availableIdp);
+                            $idpInfoList[$availableIdp] = $this->sp->getIdpInfoSource()->get($availableIdp);
                         }
                     }
 
                     // sort the IdPs by display name
-                    \usort($idpInfoList, function (IdpInfo $a, IdpInfo $b) {
+                    \uasort($idpInfoList, function (IdpInfo $a, IdpInfo $b) {
                         return \strcasecmp($a->getDisplayName(), $b->getDisplayName());
                     });
+
+                    $lastChosenIdpInfo = null;
+                    if (null !== $lastChosenIdp = $this->cookie->get('lastChosenIdp')) {
+                        $lastChosenIdpInfo = $idpInfoList[$lastChosenIdp];
+                    }
 
                     return new HtmlResponse(
                         $this->tpl->render(
                             'wayf',
                             [
+                                'lastChosenIdpInfo' => $lastChosenIdpInfo,
                                 'returnTo' => $returnTo,
                                 'idpInfoList' => $idpInfoList,
                             ]
@@ -180,6 +191,12 @@ class Service
                 // XXX does sp->login take care of this as well?!
                 if (!\in_array($idpEntityId, $availableIdpList, true)) {
                     throw new HttpException(400, 'IdP does not exist');
+                }
+
+                if (1 < \count($availableIdpList) && null === $discoUrl) {
+                    // store the chosen IdP in case >= 1 is available and we
+                    // use our own discovery
+                    $this->cookie->set('lastChosenIdp', $idpEntityId);
                 }
 
                 // we know which IdP to go to!
