@@ -34,7 +34,7 @@
         "ext-session": "*",
         "ext-spl": "*",
         "ext-zlib": "*",
-        "fkooman/secookie": "dev-master",
+        "fkooman/secookie": "^3",
         "paragonie/constant_time_encoding": "^1|^2",
         "paragonie/random_compat": ">=1",
         "php": ">=5.4",
