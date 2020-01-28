@@ -26,7 +26,7 @@ return [
     'Authentication' => 'Authenticatie',
     'Error' => 'Fout',
     'Error Message' => 'Foutmelding',
-    'IdPs ❤️ SP metadata! Use the URL or the XML below to feed your IdP.' => 'IdPs ❤️ SP metadata! Gbruik de URL of de XML hieronder om de IdP te voeren.',
+    'IdPs ❤️ SP metadata! Use the URL or the XML below to feed your IdP.' => 'IdPs ❤️ SP metadata! Gebruik de URL of de XML hieronder om de IdP te voeren.',
     'Metadata' => 'Metadata',
     'No IdP(s) configured for authenticating to this SP!' => 'Geen IdP(s) geconfigureerd om te authenticeren met deze SP!',
     'Other...' => 'Andere...',
