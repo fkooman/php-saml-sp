@@ -9,6 +9,16 @@
     <link href="css/screen.css" media="screen" rel="stylesheet">
 </head>
 <body>
+    <header>
+<?php if (1 < \count($supportedUiLanguages)): ?>
+        <form method="post" action="setUiLanguage">
+<?php foreach ($supportedUiLanguages as $uiLanguage): ?>
+            <button type="submit" name="uiLanguage" value="<?=$this->e($uiLanguage); ?>"><?=$this->e($uiLanguage); ?></button>
+<?php endforeach; ?>
+        </form>
+<?php endif; ?>
+    </header>
+
     <main>
         <h1>SAML SP</h1>
         <?=$this->section('content'); ?>

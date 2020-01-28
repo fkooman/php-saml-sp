@@ -235,6 +235,18 @@ class Service
                 $returnTo = $this->sp->handleResponse($request->requirePostParameter('SAMLResponse'), $request->requirePostParameter('RelayState'));
 
                 return new RedirectResponse($returnTo);
+            case '/setUiLanguage':
+                $uiLanguage = $request->requirePostParameter('uiLanguage');
+                if (null === $supportedUiLanguages = $this->config->get('supportedUiLanguages')) {
+                    $supportedUiLanguages = ['en-US'];
+                }
+                if (!\in_array($uiLanguage, $supportedUiLanguages, true)) {
+                    $uiLanguage = 'en-US';
+                }
+                $this->cookie->set('L', $uiLanguage);
+                $returnTo = self::verifyReturnToOrigin($request->getOrigin(), $request->requireHeader('HTTP_REFERER'));
+
+                return new RedirectResponse($returnTo);
             default:
                 throw new HttpException(404, 'URL not found: '.$request->getPathInfo());
         }

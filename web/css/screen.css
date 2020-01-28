@@ -5,6 +5,11 @@ body {
     text-align: inherit;    /* override for bootstrap-reboot */
 }
 
+header {
+    text-align: end;
+    font-size: 75%;
+}
+
 main {
     padding: 0 0.5em;
 }

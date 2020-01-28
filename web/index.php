@@ -48,12 +48,31 @@ try {
     $seCookie = new SeCookie($secureCookie);
     $seSession = new SeSession($secureCookie);
 
+    // determine whether we want to use a different style
     $templateDirs = [$baseDir.'/views'];
     if (null !== $styleName = $config->get('styleName')) {
         $templateDirs[] = $baseDir.'/views/'.$styleName;
     }
-    $tpl = new Tpl($templateDirs);
-    $tpl->addDefault(['secureCookie' => $secureCookie]);
+    // determine whether or not we want to use another language for the UI
+    // XXX could this *be* any more code? Haha!
+    if (null === $defaultLanguage = $config->get('defaultLanguage')) {
+        $defaultLanguage = 'en-US';
+    }
+    if (null === $uiLanguage = $seCookie->get('L')) {
+        $uiLanguage = $defaultLanguage;
+    }
+    if (null === $supportedUiLanguages = $config->get('supportedUiLanguages')) {
+        $supportedUiLanguages = ['en-US'];
+    }
+    if (!\in_array($uiLanguage, $supportedUiLanguages, true)) {
+        $uiLanguage = $defaultLanguage;
+    }
+    $translationFileList = [];
+    if ('en-US' !== $uiLanguage) {
+        $translationFileList[] = $baseDir.'/locale/'.$uiLanguage.'.php';
+    }
+    $tpl = new Tpl($templateDirs, $translationFileList);
+    $tpl->addDefault(['secureCookie' => $secureCookie, 'supportedUiLanguages' => $supportedUiLanguages]);
 
     $metadataFileList = \glob($baseDir.'/config/metadata/*.xml');
     $idpInfoSource = new XmlIdpInfoSource($metadataFileList);

@@ -13,6 +13,14 @@ return [
     // DEFAULT: false
     //'requireEncryption' => false,
 
+    // the default language of the UI
+    // DEFAULT: en-US
+    //'defaultUiLanguage' => 'en-US',
+
+    // the supported UI languages
+    // DEFAULT: ['en-US']
+    //'supportedUiLanguages' => ['en-US', 'nl-NL'],
+
     // SAML discovery service implementing "Identity Provider Discovery Service
     // Protocol and Profile"
     // DEFAULT: built-in minimalist "discovery" if > 1 IdP is available
