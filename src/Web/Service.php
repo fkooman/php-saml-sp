@@ -235,15 +235,11 @@ class Service
                 $returnTo = $this->sp->handleResponse($request->requirePostParameter('SAMLResponse'), $request->requirePostParameter('RelayState'));
 
                 return new RedirectResponse($returnTo);
-            case '/setUiLanguage':
-                $uiLanguage = $request->requirePostParameter('uiLanguage');
-                if (null === $supportedUiLanguages = $this->config->get('supportedUiLanguages')) {
-                    $supportedUiLanguages = ['en-US'];
-                }
-                if (!\in_array($uiLanguage, $supportedUiLanguages, true)) {
-                    $uiLanguage = 'en-US';
-                }
-                $this->cookie->set('L', $uiLanguage);
+            case '/setLanguage':
+                // we don't care what uiLanguage is, it can be anything, it
+                // will be verified by Tpl::setLanguage. User can provide any
+                // cookie value anyway!
+                $this->cookie->set('L', $request->requirePostParameter('uiLanguage'));
                 $returnTo = self::verifyReturnToOrigin($request->getOrigin(), $request->requireHeader('HTTP_REFERER'));
 
                 return new RedirectResponse($returnTo);

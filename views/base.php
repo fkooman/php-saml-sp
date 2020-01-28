@@ -10,9 +10,9 @@
 </head>
 <body>
     <header>
-<?php if (1 < \count($supportedLanguages)): ?>
-        <form method="post" action="setUiLanguage">
-<?php foreach ($supportedLanguages as $uiLanguage): ?>
+<?php if (1 < \count($enabledLanguages)): ?>
+        <form method="post" action="setLanguage">
+<?php foreach ($enabledLanguages as $uiLanguage): ?>
             <button type="submit" name="uiLanguage" value="<?=$this->e($uiLanguage); ?>"><?=$this->e($uiLanguage); ?></button>
 <?php endforeach; ?>
         </form>

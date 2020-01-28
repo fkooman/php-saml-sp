@@ -57,14 +57,12 @@ try {
     }
     // determine whether or not we want to use another language for the UI
     if (null === $uiLanguage = $seCookie->get('L')) {
-        if (null === $uiLanguage = $config->get('defaultLanguage')) {
-            $uiLanguage = 'en-US';
-        }
+        $uiLanguage = $config->get('defaultLanguage');
     }
-    $supportedLanguages = null !== $config->get('supportedLanguages') ? $config->get('supportedLanguages') : ['en-US'];
+    $enabledLanguages = null !== $config->get('enabledLanguages') ? $config->get('enabledLanguages') : [];
     $tpl = new Tpl($templateDirs, $translationDirs);
     $tpl->setLanguage($uiLanguage);
-    $tpl->addDefault(['secureCookie' => $secureCookie, 'supportedLanguages' => $supportedLanguages]);
+    $tpl->addDefault(['secureCookie' => $secureCookie, 'enabledLanguages' => $enabledLanguages]);
 
     $metadataFileList = \glob($baseDir.'/config/metadata/*.xml');
     $idpInfoSource = new XmlIdpInfoSource($metadataFileList);

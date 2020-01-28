@@ -19,7 +19,7 @@ return [
 
     // the supported UI languages
     // DEFAULT: ['en-US']
-    //'supportedLanguages' => ['en-US', 'nl-NL'],
+    //'enabledLanguages' => ['en-US', 'nl-NL'],
 
     // SAML discovery service implementing "Identity Provider Discovery Service
     // Protocol and Profile"
