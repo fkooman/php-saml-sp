@@ -75,6 +75,9 @@ class Config
      */
     public static function fromFile($configFile)
     {
+        if (!\file_exists($configFile) || !\is_readable($configFile)) {
+            throw new RuntimeException('unable to read configuration file');
+        }
         $configData = include $configFile;
         if (!\is_array($configData)) {
             throw new RuntimeException('invalid configuration file format');

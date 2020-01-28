@@ -50,29 +50,21 @@ try {
 
     // determine whether we want to use a different style
     $templateDirs = [$baseDir.'/views'];
+    $translationDirs = [$baseDir.'/locale'];
     if (null !== $styleName = $config->get('styleName')) {
         $templateDirs[] = $baseDir.'/views/'.$styleName;
+        $translationDirs[] = $baseDir.'/locale/'.$styleName;
     }
     // determine whether or not we want to use another language for the UI
-    // XXX could this *be* any more code? Haha!
-    if (null === $defaultLanguage = $config->get('defaultLanguage')) {
-        $defaultLanguage = 'en-US';
-    }
     if (null === $uiLanguage = $seCookie->get('L')) {
-        $uiLanguage = $defaultLanguage;
+        if (null === $uiLanguage = $config->get('defaultLanguage')) {
+            $uiLanguage = 'en-US';
+        }
     }
-    if (null === $supportedUiLanguages = $config->get('supportedUiLanguages')) {
-        $supportedUiLanguages = ['en-US'];
-    }
-    if (!\in_array($uiLanguage, $supportedUiLanguages, true)) {
-        $uiLanguage = $defaultLanguage;
-    }
-    $translationFileList = [];
-    if ('en-US' !== $uiLanguage) {
-        $translationFileList[] = $baseDir.'/locale/'.$uiLanguage.'.php';
-    }
-    $tpl = new Tpl($templateDirs, $translationFileList);
-    $tpl->addDefault(['secureCookie' => $secureCookie, 'supportedUiLanguages' => $supportedUiLanguages]);
+    $supportedLanguages = null !== $config->get('supportedLanguages') ? $config->get('supportedLanguages') : ['en-US'];
+    $tpl = new Tpl($templateDirs, $translationDirs);
+    $tpl->setLanguage($uiLanguage);
+    $tpl->addDefault(['secureCookie' => $secureCookie, 'supportedLanguages' => $supportedLanguages]);
 
     $metadataFileList = \glob($baseDir.'/config/metadata/*.xml');
     $idpInfoSource = new XmlIdpInfoSource($metadataFileList);

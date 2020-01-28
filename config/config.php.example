@@ -15,11 +15,11 @@ return [
 
     // the default language of the UI
     // DEFAULT: en-US
-    //'defaultUiLanguage' => 'en-US',
+    //'defaultLanguage' => 'en-US',
 
     // the supported UI languages
     // DEFAULT: ['en-US']
-    //'supportedUiLanguages' => ['en-US', 'nl-NL'],
+    //'supportedLanguages' => ['en-US', 'nl-NL'],
 
     // SAML discovery service implementing "Identity Provider Discovery Service
     // Protocol and Profile"

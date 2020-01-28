@@ -34,7 +34,7 @@ class Tpl
     private $templateFolderList;
 
     /** @var array<string> */
-    private $translationFileList;
+    private $translationFolderList;
 
     /** @var string|null */
     private $activeSectionName = null;
@@ -51,14 +51,43 @@ class Tpl
     /** @var array<string,callable> */
     private $callbackList = [];
 
+    /** @var string */
+    private $uiLanguage = 'en-US';
+
     /**
      * @param array<string> $templateFolderList
-     * @param array<string> $translationFileList
+     * @param array<string> $translationFolderList
      */
-    public function __construct(array $templateFolderList, array $translationFileList = [])
+    public function __construct(array $templateFolderList, array $translationFolderList = [])
     {
         $this->templateFolderList = $templateFolderList;
-        $this->translationFileList = $translationFileList;
+        $this->translationFolderList = $translationFolderList;
+    }
+
+    /**
+     * @param string $uiLanguage
+     *
+     * @return void
+     */
+    public function setLanguage($uiLanguage)
+    {
+        // verify whether we have this translation file available
+        // NOTE: we first fetch a list of supported languages and *then* only
+        // check if the requested language is available to avoid needing to
+        // use crazy regexp to match language codes
+        $availableLanguages = ['en-US'];
+        foreach ($this->translationFolderList as $translationFolder) {
+            foreach (\glob($translationFolder.'/*.php') as $translationFile) {
+                $supportedLanguage = \basename($translationFile, '.php');
+                if (!\in_array($supportedLanguage, $availableLanguages, true)) {
+                    $availableLanguages[] = $supportedLanguage;
+                }
+            }
+        }
+
+        if (\in_array($uiLanguage, $availableLanguages, true)) {
+            $this->uiLanguage = $uiLanguage;
+        }
     }
 
     /**
@@ -245,15 +274,18 @@ class Tpl
     {
         // use original, unless it is found in any of the translation files...
         $translatedText = $v;
-        foreach ($this->translationFileList as $translationFile) {
-            // XXX should we make sure the file exists?
-            /** @psalm-suppress UnresolvableInclude */
+        foreach ($this->translationFolderList as $translationFolder) {
+            $translationFile = $translationFolder.'/'.$this->uiLanguage.'.php';
+            if (!\file_exists($translationFile)) {
+                continue;
+            }
+            /** @var array<string,string> $translationData */
             $translationData = include $translationFile;
             if (\array_key_exists($v, $translationData)) {
-                // translation found!
+                // translation found, run with it, we don't care if we find
+                // it in other file(s) as well!
                 $translatedText = $translationData[$v];
-                // XXX do we want to loop over all of them?! take the first,
-                // or the last?
+
                 break;
             }
         }
