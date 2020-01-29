@@ -36,7 +36,6 @@ return [
     'This PHP installation does NOT support AEAD ciphers. For <code>&lt;EncryptedAssertion&gt;</code> support, PHP >= 7.1, with <code>ext-openssl</code> is required.' => 'Deze PHP installatie ondersteunt geen AEAD ciphers. For ondersteunen van <code>&lt;EncryptedAssertion&gt;</code>, PHP >= 7.1 met <code>ext-openssl</code> is vereist.',
     'This is the information page of this SAML SP. If you don\'t know what SAML is, you should not have arrived here! 🤔' => 'Dit is de informatiepagina van deze SAML SP. Als je niet weet wat SAML is, zou je hier niet moeten belanden! 🤔',
     'Welcome' => 'Welkom',
-    'Where are you from?' => 'Waar kom je vandaan?',
     'XML' => 'XML',
     'You can perform authentication tests here with the configured IdP(s).' => 'Je kunt hier een authenticatietest doen met de geconfigureerde IdP(s).',
 ];

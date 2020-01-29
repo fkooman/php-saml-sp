@@ -28,6 +28,12 @@ use RuntimeException;
 
 class Config
 {
+    /** @var string */
+    const DEFAULT_SERVICE_NAME = '🤷';
+
+    /** @var string */
+    const DEFAULT_LANGUAGE = 'en-US';
+
     /** @var array */
     private $configData;
 
@@ -84,5 +90,29 @@ class Config
         }
 
         return new self($configData);
+    }
+
+    /**
+     * @param string|null $uiLanguage
+     *
+     * @return string
+     */
+    public function getServiceName($uiLanguage)
+    {
+        if (null === $serviceNameList = $this->get('serviceName')) {
+            return self::DEFAULT_SERVICE_NAME;
+        }
+
+        if (null === $uiLanguage) {
+            if (null === $uiLanguage = $this->get('defaultLanguage')) {
+                return $this->getServiceName(self::DEFAULT_LANGUAGE);
+            }
+        }
+
+        if (\array_key_exists($uiLanguage, $serviceNameList)) {
+            return $serviceNameList[$uiLanguage];
+        }
+
+        return self::DEFAULT_LANGUAGE === $uiLanguage ? self::DEFAULT_SERVICE_NAME : $this->getServiceName(self::DEFAULT_LANGUAGE);
     }
 }

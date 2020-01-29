@@ -6,7 +6,7 @@ return [
     //'entityId' => 'https://sp.example.org/saml',
 
     // override the location the SAML SP can be found at
-    // DEFAULT: "/php-saml-sp"
+    // DEFAULT: '/php-saml-sp'
     //'spPath' => '/php-saml-sp',
 
     // force the use of <EncryptedAssertion> by the IdP(s)
@@ -14,12 +14,19 @@ return [
     //'requireEncryption' => false,
 
     // the default language of the UI
-    // DEFAULT: en-US
+    // DEFAULT: 'en-US'
     //'defaultLanguage' => 'en-US',
 
     // the supported UI languages
     // DEFAULT: ['en-US']
     //'enabledLanguages' => ['en-US', 'nl-NL'],
+
+    // the name of the service
+    // DEFAULT: '🤷'
+    'serviceName' => [
+        'en-US' => 'My SAML SP',
+        'nl-NL' => 'Mijn SAML SP',
+    ],
 
     // SAML discovery service implementing "Identity Provider Discovery Service
     // Protocol and Profile"

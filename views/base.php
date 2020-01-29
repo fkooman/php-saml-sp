@@ -4,12 +4,13 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>SAML SP</title>
+    <title><?=$this->e($serviceName); ?></title>
     <link href="css/bootstrap-reboot.min.css" media="screen" rel="stylesheet">
     <link href="css/screen.css" media="screen" rel="stylesheet">
 </head>
 <body>
     <header>
+        <h1><?=$this->e($serviceName); ?></h1>
 <?php if (1 < \count($enabledLanguages)): ?>
         <form method="post" action="setLanguage">
 <?php foreach ($enabledLanguages as $uiLanguage): ?>
@@ -18,9 +19,7 @@
         </form>
 <?php endif; ?>
     </header>
-
     <main>
-        <h1>SAML SP</h1>
         <?=$this->section('content'); ?>
     </main>
     <footer>

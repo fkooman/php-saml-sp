@@ -6,17 +6,19 @@ body {
 }
 
 header {
-    text-align: end;
+    padding: 0 0.5em;
+    display: grid;
+    grid-template-columns: auto 2fr;
+}
+
+header form {
     font-size: 75%;
+    text-align: end;
 }
 
 main {
+    margin-top: 1em;
     padding: 0 0.5em;
-}
-
-main h1 {
-    text-align: center;
-	margin-bottom: 0.5em;
 }
 
 button {

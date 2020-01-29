@@ -62,8 +62,7 @@ try {
     $enabledLanguages = null !== $config->get('enabledLanguages') ? $config->get('enabledLanguages') : [];
     $tpl = new Tpl($templateDirs, $translationDirs);
     $tpl->setLanguage($uiLanguage);
-    $tpl->addDefault(['secureCookie' => $secureCookie, 'enabledLanguages' => $enabledLanguages]);
-
+    $tpl->addDefault(['secureCookie' => $secureCookie, 'enabledLanguages' => $enabledLanguages, 'serviceName' => $config->getServiceName($uiLanguage)]);
     $metadataFileList = \glob($baseDir.'/config/metadata/*.xml');
     $idpInfoSource = new XmlIdpInfoSource($metadataFileList);
     $request = new Request($_SERVER, $_GET, $_POST);

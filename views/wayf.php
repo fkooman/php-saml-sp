@@ -1,6 +1,5 @@
 <?php $this->layout('base'); ?>
 <?php $this->start('content'); ?>
-<h2><?=$this->t('Where are you from?'); ?></h2>
 <p>
 <?=$this->t('Select your organization to continue the login process.'); ?>
 </p>
