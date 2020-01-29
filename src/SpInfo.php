@@ -47,18 +47,23 @@ class SpInfo
     /** @var bool */
     private $requireEncryption;
 
+    /** @var array<string,string> */
+    private $displayNameList;
+
     /**
-     * @param string $entityId          SP entityID
-     * @param string $acsUrl            AssertionConsumerService URL
-     * @param bool   $requireEncryption
+     * @param string               $entityId          SP entityID
+     * @param string               $acsUrl            AssertionConsumerService URL
+     * @param bool                 $requireEncryption
+     * @param array<string,string> $displayNameList
      */
-    public function __construct($entityId, PrivateKey $privateKey, PublicKey $publicKey, $acsUrl, $requireEncryption)
+    public function __construct($entityId, PrivateKey $privateKey, PublicKey $publicKey, $acsUrl, $requireEncryption, array $displayNameList)
     {
         $this->entityId = $entityId;
         $this->privateKey = $privateKey;
         $this->publicKey = $publicKey;
         $this->acsUrl = $acsUrl;
         $this->requireEncryption = $requireEncryption;
+        $this->displayNameList = $displayNameList;
     }
 
     /**
@@ -123,5 +128,13 @@ class SpInfo
     public function getRequireEncryption()
     {
         return $this->requireEncryption;
+    }
+
+    /**
+     * @return array<string,string>
+     */
+    public function getDisplayNameList()
+    {
+        return $this->displayNameList;
     }
 }

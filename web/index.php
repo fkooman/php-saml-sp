@@ -83,7 +83,8 @@ try {
         PrivateKey::fromFile($baseDir.'/config/sp.key'),
         PublicKey::fromFile($baseDir.'/config/sp.crt'),
         $request->getRootUri().'acs',
-        $requireEncryption
+        $requireEncryption,
+        $config->getServiceNames()
     );
     $spInfo->setSloUrl($request->getRootUri().'slo');
     $sp = new SP($spInfo, $idpInfoSource, $seSession);

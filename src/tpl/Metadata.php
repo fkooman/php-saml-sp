@@ -1,5 +1,10 @@
 <md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:alg="urn:oasis:names:tc:SAML:metadata:algsupport" xmlns:mdui="urn:oasis:names:tc:SAML:metadata:ui" entityID="<?=$spInfo->getEntityId(); ?>">
   <md:Extensions>
+    <mdui:UIInfo>
+<?php foreach ($spInfo->getDisplayNameList() as $langKey => $langText): ?>
+      <mdui:DisplayName xml:lang="<?=$langKey; ?>"><?=$langText; ?></mdui:DisplayName>
+<?php endforeach; ?>
+    </mdui:UIInfo>
     <alg:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
     <alg:SigningMethod MinKeySize="2048" Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
   </md:Extensions>

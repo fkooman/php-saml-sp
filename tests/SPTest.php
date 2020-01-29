@@ -50,7 +50,8 @@ class SPTest extends TestCase
             PrivateKey::fromFile(__DIR__.'/data/sp.key'),
             PublicKey::fromFile(__DIR__.'/data/sp.crt'),
             'http://localhost:8081/acs',
-            false
+            false,
+            ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
         );
         $spInfo->setSloUrl('http://localhost:8081/slo');
         $this->sp = new TestSP(
@@ -130,6 +131,10 @@ EOF;
         $metadataResponse = <<< EOF
 <md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:alg="urn:oasis:names:tc:SAML:metadata:algsupport" xmlns:mdui="urn:oasis:names:tc:SAML:metadata:ui" entityID="http://localhost:8081/metadata">
   <md:Extensions>
+    <mdui:UIInfo>
+      <mdui:DisplayName xml:lang="en-US">My SP</mdui:DisplayName>
+      <mdui:DisplayName xml:lang="nl-NL">Mijn SP</mdui:DisplayName>
+    </mdui:UIInfo>
     <alg:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
     <alg:SigningMethod MinKeySize="2048" Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
   </md:Extensions>

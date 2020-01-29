@@ -115,4 +115,16 @@ class Config
 
         return self::DEFAULT_LANGUAGE === $uiLanguage ? self::DEFAULT_SERVICE_NAME : $this->getServiceName(self::DEFAULT_LANGUAGE);
     }
+
+    /**
+     * @return array<string,string>
+     */
+    public function getServiceNames()
+    {
+        if (null === $serviceNameList = $this->get('serviceName')) {
+            return [self::DEFAULT_LANGUAGE => self::DEFAULT_SERVICE_NAME];
+        }
+
+        return $serviceNameList;
+    }
 }
