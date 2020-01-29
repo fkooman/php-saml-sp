@@ -190,12 +190,6 @@ class Service
                     );
                 }
 
-                // make sure the provided IdP exists
-                // XXX does sp->login take care of this as well?!
-                if (!\in_array($idpEntityId, $availableIdpList, true)) {
-                    throw new HttpException(400, 'IdP does not exist');
-                }
-
                 if (1 < \count($availableIdpList) && null === $discoUrl) {
                     // store the chosen IdP in case >= 1 is available and we
                     // use our own discovery
