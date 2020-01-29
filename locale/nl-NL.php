@@ -23,10 +23,14 @@
  */
 
 return [
+    'Assertion' => 'Assertion',
+    'Attributes' => 'Attributen',
     'Authentication' => 'Authenticatie',
     'Error' => 'Fout',
     'Error Message' => 'Foutmelding',
     'IdPs ❤️ SP metadata! Use the URL or the XML below to feed your IdP.' => 'IdPs ❤️ SP metadata! Gebruik de URL of de XML hieronder om de IdP te voeren.',
+    'Issuer' => 'Uitgever',
+    'Logout' => 'Uitloggen',
     'Metadata' => 'Metadata',
     'No IdP(s) configured for authenticating to this SP!' => 'Geen IdP(s) geconfigureerd om te authenticeren met deze SP!',
     'Other...' => 'Andere...',
@@ -34,8 +38,8 @@ return [
     'Select your organization to continue the login process.' => 'Selecteer je organizatie om verder te gaan met het loginproces.',
     'Test' => 'Test',
     'This PHP installation does NOT support AEAD ciphers. For <code>&lt;EncryptedAssertion&gt;</code> support, PHP >= 7.1, with <code>ext-openssl</code> is required.' => 'Deze PHP installatie ondersteunt geen AEAD ciphers. For ondersteunen van <code>&lt;EncryptedAssertion&gt;</code>, PHP >= 7.1 met <code>ext-openssl</code> is vereist.',
-    'This is the information page of this SAML SP. If you don\'t know what SAML is, you should not have arrived here! 🤔' => 'Dit is de informatiepagina van deze SAML SP. Als je niet weet wat SAML is, zou je hier niet moeten belanden! 🤔',
     'Welcome' => 'Welkom',
     'XML' => 'XML',
     'You can perform authentication tests here with the configured IdP(s).' => 'Je kunt hier een authenticatietest doen met de geconfigureerde IdP(s).',
+    'This is the information page of this SAML SP. If you don\'t know what SAML is, you should not have arrived here! 🤔' => 'Dit is de informatiepagina van deze SAML SP. Als je niet weet wat SAML is, zou je hier niet moeten belanden! 🤔',
 ];

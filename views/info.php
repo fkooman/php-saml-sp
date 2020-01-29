@@ -1,8 +1,8 @@
 <?php $this->layout('base'); ?>
 <?php $this->start('content'); ?>
-    <h2>Assertion</h2>
+    <h2><?=$this->t('Assertion'); ?></h2>
     <dl>
-        <dt>Issuer</dt>
+        <dt><?=$this->t('Issuer'); ?></dt>
         <dd><code><?=$this->e($samlAssertion->getIssuer()); ?></code></dd>
 
 <?php if (null !== $nameId = $samlAssertion->getNameId()): ?>
@@ -21,7 +21,7 @@
     </dl>
 
 <?php if (0 !== \count($samlAssertion->getAttributes())): ?>
-    <h2>Attributes</h2>
+    <h2><?=$this->t('Attributes'); ?></h2>
     <dl>
 <?php foreach ($samlAssertion->getAttributes() as $attributeName => $attributeValueList): ?>
         <dt><?=$this->e($attributeName); ?></dt>
@@ -36,6 +36,6 @@
     </dl>
 <?php endif; ?>
     <p>
-        <a href="logout?ReturnTo=<?=$returnTo; ?>"><button>Logout</button></a>
+        <a href="logout?ReturnTo=<?=$returnTo; ?>"><button><?=$this->t('Logout'); ?></button></a>
     </p>
 <?php $this->stop('content'); ?>
