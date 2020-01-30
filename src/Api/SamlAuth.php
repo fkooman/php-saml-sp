@@ -50,10 +50,7 @@ class SamlAuth
     {
         $this->config = Config::fromFile(\dirname(\dirname(__DIR__)).'/config/config.php');
         $this->request = new Request($_SERVER, $_GET, $_POST);
-        if (null === $secureCookie = $this->config->get('secureCookie')) {
-            $secureCookie = true;
-        }
-        $this->session = new SeSession($secureCookie);
+        $this->session = new SeSession($this->config->getSecureCookie());
         $this->dateTime = new DateTime();
     }
 

@@ -130,10 +130,7 @@ class Service
                 );
             case '/wayf':
                 // get the list of IdPs that can be used
-                if (null === $availableIdpList = $this->config->get('idpList')) {
-                    $availableIdpList = [];
-                }
-
+                $availableIdpList = $this->config->getIdpList();
                 if (null === $idpEntityId = $request->optionalQueryParameter('IdP')) {
                     // check whether we have exactly 1 configured IdP, then use
                     // that one!
@@ -142,7 +139,7 @@ class Service
                     }
                 }
 
-                $discoUrl = $this->config->get('discoUrl');
+                $discoUrl = $this->config->getDiscoUrl();
                 if (null === $idpEntityId) {
                     // we don't know the IdP (yet)
                     if (null !== $discoUrl) {

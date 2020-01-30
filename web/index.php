@@ -41,9 +41,7 @@ $baseDir = \dirname(__DIR__);
 
 try {
     $config = Config::fromFile($baseDir.'/config/config.php');
-    if (null === $secureCookie = $config->get('secureCookie')) {
-        $secureCookie = true;
-    }
+    $secureCookie = $config->getSecureCookie();
 
     $seCookie = new SeCookie($secureCookie);
     $seSession = new SeSession($secureCookie);
@@ -51,29 +49,24 @@ try {
     // determine whether we want to use a different style
     $templateDirs = [$baseDir.'/views'];
     $translationDirs = [$baseDir.'/locale'];
-    if (null !== $styleName = $config->get('styleName')) {
+    if (null !== $styleName = $config->getStyleName()) {
         $templateDirs[] = $baseDir.'/views/'.$styleName;
         $translationDirs[] = $baseDir.'/locale/'.$styleName;
     }
     // determine whether or not we want to use another language for the UI
     if (null === $uiLanguage = $seCookie->get('L')) {
-        $uiLanguage = $config->get('defaultLanguage');
+        $uiLanguage = $config->getDefaultLanguage();
     }
-    $enabledLanguages = null !== $config->get('enabledLanguages') ? $config->get('enabledLanguages') : [];
     $tpl = new Tpl($templateDirs, $translationDirs);
     $tpl->setLanguage($uiLanguage);
-    $tpl->addDefault(['secureCookie' => $secureCookie, 'enabledLanguages' => $enabledLanguages, 'serviceName' => $config->getServiceName($uiLanguage)]);
+    $tpl->addDefault(['secureCookie' => $secureCookie, 'enabledLanguages' => $config->getEnabledLanguages(), 'serviceName' => $config->getServiceName($uiLanguage)]);
     $metadataFileList = \glob($baseDir.'/config/metadata/*.xml');
     $idpInfoSource = new XmlIdpInfoSource($metadataFileList);
     $request = new Request($_SERVER, $_GET, $_POST);
 
     // have a default entityID, but allow overriding from config
-    if (null === $spEntityId = $config->get('entityId')) {
+    if (null === $spEntityId = $config->getEntityId()) {
         $spEntityId = $request->getRootUri().'metadata';
-    }
-
-    if (null === $requireEncryption = $config->get('requireEncryption')) {
-        $requireEncryption = false;
     }
 
     // configure the SP
@@ -83,7 +76,7 @@ try {
         PrivateKey::fromFile($baseDir.'/config/sp.key'),
         PublicKey::fromFile($baseDir.'/config/sp.crt'),
         $request->getRootUri().'acs',
-        $requireEncryption,
+        $config->getRequireEncryption(),
         $config->getServiceNames()
     );
     $spInfo->setSloUrl($request->getRootUri().'slo');

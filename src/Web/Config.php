@@ -43,35 +43,47 @@ class Config
     }
 
     /**
-     * @param string $k
-     *
-     * @return mixed
+     * @return string
      */
-    public function get($k)
+    public function getDefaultLanguage()
     {
-        if (!\array_key_exists($k, $this->configData)) {
-            return null;
+        if (null === $defaultLanguage = $this->get('defaultLanguage')) {
+            return 'en-US';
         }
 
-        return $this->configData[$k];
+        return $defaultLanguage;
     }
 
     /**
-     * @param string $s
-     *
-     * @return self|null
+     * @return array<string>
      */
-    public function getSection($s)
+    public function getEnabledLanguages()
     {
-        if (!\array_key_exists($s, $this->configData)) {
-            return null;
+        if (null === $enabledLanguages = $this->get('enabledLanguages')) {
+            return ['en-US'];
         }
 
-        if (!\is_array($this->configData[$s])) {
-            return null;
+        return $enabledLanguages;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getEntityId()
+    {
+        return $this->get('entityId');
+    }
+
+    /**
+     * @return bool
+     */
+    public function getRequireEncryption()
+    {
+        if (null === $requireEncryption = $this->get('requireEncryption')) {
+            return false;
         }
 
-        return new self($this->configData[$s]);
+        return $requireEncryption;
     }
 
     /**
@@ -90,6 +102,46 @@ class Config
         }
 
         return new self($configData);
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getDiscoUrl()
+    {
+        return $this->get('discoUrl');
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getStyleName()
+    {
+        return $this->get('styleName');
+    }
+
+    /**
+     * @return array<string>
+     */
+    public function getIdpList()
+    {
+        if (null === $idpList = $this->get('idpList')) {
+            return [];
+        }
+
+        return $idpList;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getSecureCookie()
+    {
+        if (null === $secureCookie = $this->get('secureCookie')) {
+            return true;
+        }
+
+        return $secureCookie;
     }
 
     /**
@@ -138,5 +190,37 @@ class Config
         }
 
         return $serviceNameList;
+    }
+
+    /**
+     * @param string $k
+     *
+     * @return mixed
+     */
+    private function get($k)
+    {
+        if (!\array_key_exists($k, $this->configData)) {
+            return null;
+        }
+
+        return $this->configData[$k];
+    }
+
+    /**
+     * @param string $s
+     *
+     * @return self|null
+     */
+    private function getSection($s)
+    {
+        if (!\array_key_exists($s, $this->configData)) {
+            return null;
+        }
+
+        if (!\is_array($this->configData[$s])) {
+            return null;
+        }
+
+        return new self($this->configData[$s]);
     }
 }
