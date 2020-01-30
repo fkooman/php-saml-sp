@@ -29,8 +29,26 @@ class AuthOptions
     /** @var array<string> */
     private $authnContextClassRef = [];
 
-    /** @var string|null */
-    private $returnTo = null;
+    /** @var string */
+    private $returnTo;
+
+    /**
+     * @param string $returnTo
+     */
+    public function __construct($returnTo)
+    {
+        $this->returnTo = $returnTo;
+    }
+
+    /**
+     * @param string $returnTo
+     *
+     * @return self
+     */
+    public static function init($returnTo)
+    {
+        return new self($returnTo);
+    }
 
     /**
      * @param array<string> $authnContextClassRef
@@ -53,19 +71,7 @@ class AuthOptions
     }
 
     /**
-     * @param string $returnTo
-     *
-     * @return self
-     */
-    public function setReturnTo($returnTo)
-    {
-        $this->returnTo = $returnTo;
-
-        return $this;
-    }
-
-    /**
-     * @return string|null
+     * @return string
      */
     public function getReturnTo()
     {

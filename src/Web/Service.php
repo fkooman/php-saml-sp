@@ -24,9 +24,12 @@
 
 namespace fkooman\SAML\SP\Web;
 
+use fkooman\SAML\SP\Api\AuthOptions; // XXX move AuthOptions to SP namespace?
+use fkooman\SAML\SP\Api\SamlAuth;
 use fkooman\SAML\SP\Crypto;
 use fkooman\SAML\SP\Exception\SamlException;
 use fkooman\SAML\SP\IdpInfo;
+use fkooman\SAML\SP\SessionInterface;
 use fkooman\SAML\SP\SP;
 use fkooman\SAML\SP\Web\Exception\HttpException;
 
@@ -34,6 +37,7 @@ class Service
 {
     /** @var string */
     const LAST_CHOSEN_COOKIE_NAME = 'IDP';
+
     /** @var Config */
     private $config;
 
@@ -46,12 +50,16 @@ class Service
     /** @var CookieInterface */
     private $cookie;
 
-    public function __construct(Config $config, Tpl $tpl, SP $sp, CookieInterface $cookie)
+    /** @var \fkooman\SAML\SP\SessionInterface */
+    private $session;
+
+    public function __construct(Config $config, Tpl $tpl, SP $sp, CookieInterface $cookie, SessionInterface $session)
     {
         $this->config = $config;
         $this->tpl = $tpl;
         $this->sp = $sp;
         $this->cookie = $cookie;
+        $this->session = $session;
     }
 
     /**
@@ -99,7 +107,6 @@ class Service
                     $this->tpl->render(
                         'index',
                         [
-                            'returnTo' => $request->getRootUri().'info',
                             'metadataUrl' => $request->getRootUri().'metadata',
                             'samlMetadata' => $this->sp->metadata(),
                             'decryptionSupport' => Crypto::hasDecryptionSupport(),
@@ -107,16 +114,17 @@ class Service
                     )
                 );
             case '/info':
-                if (!$this->sp->hasAssertion()) {
-                    return new RedirectResponse($request->getRootUri().'wayf?ReturnTo='.$request->getUri());
+                $samlAuth = new SamlAuth();
+                if (!$samlAuth->isAuthenticated()) {
+                    return new RedirectResponse($samlAuth->getLoginURL());
                 }
 
                 return new HtmlResponse(
                     $this->tpl->render(
                         'info',
                         [
-                            'returnTo' => $request->getRootUri(),
-                            'samlAssertion' => $this->sp->getAssertion(),
+                            'logoutReturnTo' => $request->getRootUri(),
+                            'samlAssertion' => $samlAuth->getAssertion(),
                         ]
                     )
                 );
@@ -133,8 +141,6 @@ class Service
                         $idpEntityId = $availableIdpList[0];
                     }
                 }
-
-                $returnTo = self::verifyReturnToOrigin($request->getOrigin(), $request->requireQueryParameter('ReturnTo'));
 
                 $discoUrl = $this->config->get('discoUrl');
                 if (null === $idpEntityId) {
@@ -183,7 +189,7 @@ class Service
                             'wayf',
                             [
                                 'lastChosenIdpInfo' => $lastChosenIdpInfo,
-                                'returnTo' => $returnTo,
+                                'returnTo' => $request->getUri(),
                                 'idpInfoList' => $idpInfoList,
                             ]
                         )
@@ -196,8 +202,19 @@ class Service
                     $this->cookie->set(self::LAST_CHOSEN_COOKIE_NAME, $idpEntityId);
                 }
 
+                // we require an AuthOptions stored in the session
+                if (null === $authOptionsStr = $this->session->take(SP::SESSION_KEY_PREFIX.'auth_options')) {
+                    throw new HttpException(400, 'SamlAuth API must be used');
+                }
+                $authOptions = \unserialize($authOptionsStr);
+                if (!($authOptions instanceof AuthOptions)) {
+                    throw new HttpException(500, 'expected "AuthOptions" in session data');
+                }
+
+                $returnTo = self::verifyReturnToOrigin($request->getOrigin(), $authOptions->getReturnTo());
+
                 // we know which IdP to go to!
-                return new RedirectResponse($this->sp->login($idpEntityId, $returnTo));
+                return new RedirectResponse($this->sp->login($idpEntityId, $returnTo, $authOptions->getAuthnContextClassRef()));
             // user triggered logout
             case '/logout':
                 $returnTo = self::verifyReturnToOrigin($request->getOrigin(), $request->requireQueryParameter('ReturnTo'));

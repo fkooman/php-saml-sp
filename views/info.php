@@ -36,6 +36,6 @@
     </dl>
 <?php endif; ?>
     <p>
-        <a href="logout?ReturnTo=<?=$returnTo; ?>"><button><?=$this->t('Logout'); ?></button></a>
+        <a href="logout?ReturnTo=<?=$logoutReturnTo; ?>"><button><?=$this->t('Logout'); ?></button></a>
     </p>
 <?php $this->stop('content'); ?>

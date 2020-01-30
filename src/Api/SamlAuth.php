@@ -63,18 +63,16 @@ class SamlAuth
     public function getLoginURL(AuthOptions $authOptions = null)
     {
         if (null === $authOptions) {
-            $authOptions = new AuthOptions();
+            $authOptions = new AuthOptions($this->request->getUri());
         }
 
         if (null === $spPath = $this->config->get('spPath')) {
             $spPath = '/php-saml-sp';
         }
 
-        if (null === $returnTo = $authOptions->getReturnTo()) {
-            $returnTo = $this->request->getUri();
-        }
+        $this->session->set(SP::SESSION_KEY_PREFIX.'auth_options', \serialize($authOptions));
 
-        return $this->request->getOrigin().$spPath.'/wayf?ReturnTo='.$returnTo;
+        return $this->request->getOrigin().$spPath.'wayf';
     }
 
     /**

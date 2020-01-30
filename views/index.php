@@ -22,7 +22,7 @@
         <?=$this->t('You can perform authentication tests here with the configured IdP(s).'); ?>
     </p>
     <p>
-        <a href="wayf?ReturnTo=<?=$this->e($returnTo); ?>"><?=$this->t('Test'); ?></a>
+        <a href="info"><?=$this->t('Test'); ?></a>
     </p>
 
     <h2><?=$this->t('Metadata'); ?></h2>
