@@ -29,7 +29,7 @@ use RuntimeException;
 class Config
 {
     /** @var string */
-    const DEFAULT_SERVICE_NAME = '🤷';
+    const DEFAULT_SERVICE_NAME = 'SAML SP';
 
     /** @var string */
     const DEFAULT_LANGUAGE = 'en-US';
