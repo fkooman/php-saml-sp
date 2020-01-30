@@ -66,13 +66,9 @@ class SamlAuth
             $authOptions = new AuthOptions($this->request->getUri());
         }
 
-        if (null === $spPath = $this->config->get('spPath')) {
-            $spPath = '/php-saml-sp';
-        }
-
         $this->session->set(SP::SESSION_KEY_PREFIX.'auth_options', \serialize($authOptions));
 
-        return $this->request->getOrigin().$spPath.'wayf';
+        return $this->request->getOrigin().$this->config->getSpPath().'/wayf';
     }
 
     /**

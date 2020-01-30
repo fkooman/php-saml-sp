@@ -93,6 +93,18 @@ class Config
     }
 
     /**
+     * @return string
+     */
+    public function getSpPath()
+    {
+        if (null === $spPath = $this->get('spPath')) {
+            $spPath = '/php-saml-sp';
+        }
+        // remove trailing slash(es) from spPath iff necessary
+        return \rtrim($spPath, '/');
+    }
+
+    /**
      * @param string|null $uiLanguage
      *
      * @return string
