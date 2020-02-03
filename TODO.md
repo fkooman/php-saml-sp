@@ -7,8 +7,6 @@
 
 ## 1.0
 
-- multi language support, `Tpl` is already there, so should be easy! We only
-  need a language changer and a cookie for storing the language choice
 - think about implementing caching for eduGAIN purpose with 2k+ IdPs
 - input validation on ALL (public) methods
 - make absolutely sure we verify the assertion with the right public key as to
