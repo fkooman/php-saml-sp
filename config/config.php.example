@@ -22,7 +22,7 @@ return [
     //'enabledLanguages' => ['en-US', 'nl-NL'],
 
     // the name of the service
-    // DEFAULT: '🤷'
+    // DEFAULT: 'SAML SP'
     'serviceName' => [
         'en-US' => 'My SAML SP',
         'nl-NL' => 'Mijn SAML SP',
@@ -30,7 +30,7 @@ return [
 
     // SAML discovery service implementing "Identity Provider Discovery Service
     // Protocol and Profile"
-    // DEFAULT: built-in minimalist "discovery" if > 1 IdP is available
+    // DEFAULT: built-in minimalistic "discovery" if > 1 IdP is available
     //'discoUrl' => 'https://discovery.example.org/',
 
     // list of IdP entityIDs that are allowed for authentication to this SP

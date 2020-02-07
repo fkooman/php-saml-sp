@@ -4,6 +4,8 @@
 
 - add tests for `src/Web` and `src/Api` classes
 - only start session when needed, e.g. not for the metadata endpoint
+- include DomNode/Element in error message so we know where the problem is in
+  the XML
 
 ## 1.0
 
