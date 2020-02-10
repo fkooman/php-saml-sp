@@ -2,10 +2,16 @@
 
 ## 0.3.0 (...)
 - small API update for `XmlIdpInfoSource` now taking array in contructor to
-  allow specifying multiple metdata files 
+  allow specifying multiple metadata files 
 - initial support for "Web", i.e. run fkooman/saml-sp as an app on your server
   next to the application(s) you want to use SAML authentication with
-- support `<EncryptedAssertion>` with AES-256-GCM
+- support `<EncryptedAssertion>` with AES-256-GCM on PHP >= 7.1
+- update (C)
+- source formatting
+- `IdpInfo` now can also have a "display name" now
+- `SpInfo` can now contains display name(s)
+- `SpInfo` can now enforce `<EncryptedAssertion>` from IdP(s)
+- SP Metadata now exposes "DisplayName" and supported encryption algorithms
 
 ## 0.2.2 (2019-08-06)
 - do not throw error when attribute `saml:AuthnStatement/@SessionNotOnOrAfter`
