@@ -28,7 +28,6 @@ use DOMElement;
 use fkooman\SAML\SP\Exception\CryptoException;
 use ParagonIE\ConstantTime\Base64;
 use ParagonIE\ConstantTime\Binary;
-use RuntimeException;
 
 class Crypto
 {
@@ -122,7 +121,7 @@ class Crypto
     public static function decryptXml(XmlDocument $xmlDocument, DOMElement $domElement, PrivateKey $privateKey)
     {
         if (!self::hasDecryptionSupport()) {
-            throw new RuntimeException('"EncryptedAssertion" is not supported on this system');
+            throw new CryptoException('"<EncryptedAssertion>" is not supported on this system');
         }
 
         // make sure we support the encryption algorithm

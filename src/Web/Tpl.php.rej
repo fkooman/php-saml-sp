@@ -1,0 +1,37 @@
+--- Tpl.php
++++ Tpl.php
+@@ -303,19 +303,21 @@ class Tpl
+     {
+         // use original, unless it is found in any of the translation files...
+         $translatedText = $v;
+-        foreach ($this->translationFolderList as $translationFolder) {
+-            $translationFile = $translationFolder.'/'.$this->uiLanguage.'.php';
+-            if (!file_exists($translationFile)) {
+-                continue;
+-            }
+-            /** @var array<string,string> $translationData */
+-            $translationData = include $translationFile;
+-            if (\array_key_exists($v, $translationData)) {
+-                // translation found, run with it, we don't care if we find
+-                // it in other file(s) as well!
+-                $translatedText = $translationData[$v];
+-
+-                break;
++        if (null !== $uiLanguage = $this->uiLanguage) {
++            foreach ($this->translationFolderList as $translationFolder) {
++                $translationFile = $translationFolder.'/'.$uiLanguage.'.php';
++                if (!file_exists($translationFile)) {
++                    continue;
++                }
++                /** @var array<string,string> $translationData */
++                $translationData = include $translationFile;
++                if (\array_key_exists($v, $translationData)) {
++                    // translation found, run with it, we don't care if we find
++                    // it in other file(s) as well!
++                    $translatedText = $translationData[$v];
++
++                    break;
++                }
+             }
+         }
+ 

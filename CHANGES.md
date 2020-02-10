@@ -5,6 +5,7 @@
   allow specifying multiple metdata files 
 - initial support for "Web", i.e. run fkooman/saml-sp as an app on your server
   next to the application(s) you want to use SAML authentication with
+- support `<EncryptedAssertion>` with AES-256-GCM
 
 ## 0.2.2 (2019-08-06)
 - do not throw error when attribute `saml:AuthnStatement/@SessionNotOnOrAfter`
