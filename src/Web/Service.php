@@ -172,7 +172,14 @@ class Service
 
                     // sort the IdPs by display name
                     \uasort($idpInfoList, function (IdpInfo $a, IdpInfo $b) {
-                        return \strcasecmp($a->getDisplayName(), $b->getDisplayName());
+                        if (null === $displayNameOne = $a->getDisplayName()) {
+                            $displayNameOne = $a->getEntityId();
+                        }
+                        if (null === $displayNameTwo = $b->getDisplayName()) {
+                            $displayNameTwo = $b->getEntityId();
+                        }
+
+                        return \strcasecmp($displayNameOne, $displayNameTwo);
                     });
 
                     $lastChosenIdpInfo = null;
