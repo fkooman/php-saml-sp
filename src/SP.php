@@ -108,7 +108,7 @@ class SP
         $authnRequestState = new AuthnRequestState($requestId, $idpEntityId, $authnContextClassRef, $returnTo);
         $this->session->set(self::SESSION_KEY_PREFIX.$relayState, \serialize($authnRequestState));
 
-        return self::prepareRequestUrl($ssoUrl, $authnRequest, $relayState, $this->spInfo->getPrivateKey());
+        return self::prepareRequestUrl($ssoUrl, $authnRequest, $relayState, $this->spInfo->getCryptoKeys()->getSigningPrivateKey());
     }
 
     /**
@@ -213,7 +213,7 @@ class SP
         $logoutRequestState = new LogoutRequestState($requestId, $idpEntityId, $returnTo);
         $this->session->set(self::SESSION_KEY_PREFIX.$relayState, \serialize($logoutRequestState));
 
-        return self::prepareRequestUrl($idpSloUrl, $logoutRequest, $relayState, $this->spInfo->getPrivateKey());
+        return self::prepareRequestUrl($idpSloUrl, $logoutRequest, $relayState, $this->spInfo->getCryptoKeys()->getSigningPrivateKey());
     }
 
     /**

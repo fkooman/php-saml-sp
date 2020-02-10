@@ -93,17 +93,11 @@ Run [composer](https://getcomposer.org/) to install the dependencies:
     $ /path/to/composer install
 
 Use the following command to create a self-signed certificate for use with the
-SP library. It will be used for signing the `AuthnRequest` and `LogoutRequest`.
+SP library. It will be used for signing the `<AuthnRequest>` and 
+`<LogoutRequest>` and for decryption of `<EncryptedAssertion>`.
 
-    $ openssl req \
-        -nodes \
-        -subj "/CN=SAML SP" \
-        -x509 \
-        -sha256 \
-        -newkey rsa:3072 \
-        -keyout "config/sp.key" \
-        -out "config/sp.crt" \
-        -days 3650
+    $ cd keys
+    $ ./generate_keys.sh
 
 Now copy the configuration template:
 

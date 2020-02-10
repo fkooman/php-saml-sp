@@ -29,11 +29,11 @@ use DOMDocument;
 use fkooman\SAML\SP\Assertion;
 use fkooman\SAML\SP\AuthnRequestState;
 use fkooman\SAML\SP\Crypto;
+use fkooman\SAML\SP\CryptoKeys;
 use fkooman\SAML\SP\Exception\ResponseException;
 use fkooman\SAML\SP\LogoutRequestState;
 use fkooman\SAML\SP\NameId;
 use fkooman\SAML\SP\PrivateKey;
-use fkooman\SAML\SP\PublicKey;
 use fkooman\SAML\SP\SpInfo;
 use fkooman\SAML\SP\XmlIdpInfoSource;
 use PHPUnit\Framework\TestCase;
@@ -47,8 +47,7 @@ class SPTest extends TestCase
     {
         $spInfo = new SpInfo(
             'http://localhost:8081/metadata',
-            PrivateKey::fromFile(__DIR__.'/data/sp.key'),
-            PublicKey::fromFile(__DIR__.'/data/sp.crt'),
+            CryptoKeys::load(__DIR__.'/data'),
             'http://localhost:8081/acs',
             false,
             ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
@@ -87,7 +86,7 @@ EOF;
                 'SigAlg' => 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256',
             ]
         );
-        $signatureQuery = \http_build_query(['Signature' => \base64_encode(Crypto::sign($httpQuery, PrivateKey::fromFile(__DIR__.'/data/sp.key')))]);
+        $signatureQuery = \http_build_query(['Signature' => \base64_encode(Crypto::sign($httpQuery, PrivateKey::fromFile(__DIR__.'/data/signing.key')))]);
         $this->assertSame(\sprintf('http://localhost:8080/sso.php?%s&%s', $httpQuery, $signatureQuery), $ssoUrl);
 
         $authnRequestState = \unserialize($session->get(TestSP::SESSION_KEY_PREFIX.''.$relayState));
@@ -122,7 +121,7 @@ EOF;
                 'SigAlg' => 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256',
             ]
         );
-        $signatureQuery = \http_build_query(['Signature' => \base64_encode(Crypto::sign($httpQuery, PrivateKey::fromFile(__DIR__.'/data/sp.key')))]);
+        $signatureQuery = \http_build_query(['Signature' => \base64_encode(Crypto::sign($httpQuery, PrivateKey::fromFile(__DIR__.'/data/signing.key')))]);
         $this->assertSame(\sprintf('http://localhost:8080/sso.php?%s&%s', $httpQuery, $signatureQuery), $ssoUrl);
     }
 
@@ -312,7 +311,7 @@ EOF;
             ]
         );
 
-        $signatureQuery = \http_build_query(['Signature' => \base64_encode(Crypto::sign($httpQuery, PrivateKey::fromFile(__DIR__.'/data/sp.key')))]);
+        $signatureQuery = \http_build_query(['Signature' => \base64_encode(Crypto::sign($httpQuery, PrivateKey::fromFile(__DIR__.'/data/signing.key')))]);
         $this->assertSame(\sprintf('http://localhost:8080/slo.php?%s&%s', $httpQuery, $signatureQuery), $sloUrl);
     }
 

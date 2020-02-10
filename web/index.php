@@ -24,8 +24,7 @@
 
 require_once \dirname(__DIR__).'/vendor/autoload.php';
 
-use fkooman\SAML\SP\PrivateKey;
-use fkooman\SAML\SP\PublicKey;
+use fkooman\SAML\SP\CryptoKeys;
 use fkooman\SAML\SP\SeSession;
 use fkooman\SAML\SP\SP;
 use fkooman\SAML\SP\SpInfo;
@@ -73,8 +72,7 @@ try {
     $spInfo = new SpInfo(
         $spEntityId,
         // AuthnRequest / LogoutRequest / Decryption <EncryptedAssertion>
-        PrivateKey::fromFile($baseDir.'/config/sp.key'),
-        PublicKey::fromFile($baseDir.'/config/sp.crt'),
+        CryptoKeys::load($baseDir.'/keys'),
         $request->getRootUri().'acs',
         $config->getRequireEncryption(),
         $config->getServiceNames()

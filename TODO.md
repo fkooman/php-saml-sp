@@ -1,5 +1,9 @@
 # TODO
 
+## 0.3
+
+- displayname is not fixed in wayf template yet :(
+
 ## 0.4
 
 - make IdpInfo also support multi-language display names so we can use those
@@ -7,7 +11,6 @@
 - add tests for `src/Web` and `src/Api` classes
 - include DomNode/Element in error message so we know where the problem is in
   the XML
-- use separate keys for encryption / signing
 
 ## 1.0
 

@@ -12,7 +12,7 @@
     <md:KeyDescriptor use="signing">
       <ds:KeyInfo>
         <ds:X509Data>
-          <ds:X509Certificate><?=$spInfo->getPublicKey()->toEncodedString(); ?></ds:X509Certificate>
+          <ds:X509Certificate><?=$spInfo->getCryptoKeys()->getSigningPublicKey()->toEncodedString(); ?></ds:X509Certificate>
         </ds:X509Data>
       </ds:KeyInfo>
     </md:KeyDescriptor>
@@ -20,7 +20,7 @@
     <md:KeyDescriptor use="encryption">
       <ds:KeyInfo>
         <ds:X509Data>
-          <ds:X509Certificate><?=$spInfo->getPublicKey()->toEncodedString(); ?></ds:X509Certificate>
+          <ds:X509Certificate><?=$spInfo->getCryptoKeys()->getEncryptionPublicKey()->toEncodedString(); ?></ds:X509Certificate>
         </ds:X509Data>
       </ds:KeyInfo>
       <md:EncryptionMethod Algorithm="http://www.w3.org/2009/xmlenc11#aes256-gcm"/>

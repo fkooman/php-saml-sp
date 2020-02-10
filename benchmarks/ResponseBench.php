@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
+use fkooman\SAML\SP\CryptoKeys;
 use fkooman\SAML\SP\IdpInfo;
-use fkooman\SAML\SP\PrivateKey;
 use fkooman\SAML\SP\PublicKey;
 use fkooman\SAML\SP\Response;
 use fkooman\SAML\SP\SpInfo;
@@ -43,8 +43,7 @@ class ResponseBench
         $samlAssertion = $response->verify(
             new SpInfo(
                 'http://localhost:8081/metadata',
-                PrivateKey::fromFile(\dirname(__DIR__).'/tests/data/certs/sp.key'),
-                PublicKey::fromFile(\dirname(__DIR__).'/tests/data/certs/sp.crt'),
+                CryptoKeys::load(\dirname(__DIR__).'/tests/data/certs'),
                 'http://localhost:8081/acs',
                 false,
                 ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']

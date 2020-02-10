@@ -26,10 +26,10 @@ namespace fkooman\SAML\SP\Tests;
 
 use DateTime;
 use fkooman\SAML\SP\Crypto;
+use fkooman\SAML\SP\CryptoKeys;
 use fkooman\SAML\SP\Exception\CryptoException;
 use fkooman\SAML\SP\Exception\ResponseException;
 use fkooman\SAML\SP\IdpInfo;
-use fkooman\SAML\SP\PrivateKey;
 use fkooman\SAML\SP\PublicKey;
 use fkooman\SAML\SP\Response;
 use fkooman\SAML\SP\SpInfo;
@@ -44,8 +44,7 @@ class ResponseTest extends TestCase
         $samlAssertion = $response->verify(
             new SpInfo(
                 'http://localhost:8081/metadata',
-                PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
-                PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
+                CryptoKeys::load(__DIR__.'/data/certs'),
                 'http://localhost:8081/acs',
                 false,
                 ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
@@ -91,8 +90,7 @@ class ResponseTest extends TestCase
         $samlAssertion = $response->verify(
             new SpInfo(
                 'https://labrat.eduvpn.nl/saml',
-                PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
-                PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
+                CryptoKeys::load(__DIR__.'/data/certs'),
                 'https://labrat.eduvpn.nl/saml/postResponse',
                 false,
                 ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
@@ -133,8 +131,7 @@ class ResponseTest extends TestCase
 //        $samlAssertion = $response->verify(
 //            new SpInfo(
 //                'https://vpn.tuxed.net/simplesaml/module.php/saml/sp/metadata.php/default-sp',
-//                PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
-//                PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
+//                CryptoKeys::load(__DIR__.'/data/certs'),
 //                'https://vpn.tuxed.net/simplesaml/module.php/saml/sp/saml2-acs.php/default-sp',
 //                false
 //            ),
@@ -165,8 +162,7 @@ class ResponseTest extends TestCase
             $response->verify(
                 new SpInfo(
                     'http://localhost:8081/metadata',
-                    PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
-                    PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
+                    CryptoKeys::load(__DIR__.'/data/certs'),
                     'http://localhost:8081/acs',
                     false,
                     ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
@@ -190,8 +186,7 @@ class ResponseTest extends TestCase
             $response->verify(
                 new SpInfo(
                     'http://localhost:8081/metadata',
-                    PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
-                    PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
+                    CryptoKeys::load(__DIR__.'/data/certs'),
                     'http://localhost:8081/acs',
                     false,
                     ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
@@ -215,8 +210,7 @@ class ResponseTest extends TestCase
             $response->verify(
                 new SpInfo(
                     'http://localhost:8081/metadata',
-                    PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
-                    PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
+                    CryptoKeys::load(__DIR__.'/data/certs'),
                     'http://localhost:8081/acs',
                     false,
                     ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
@@ -240,8 +234,7 @@ class ResponseTest extends TestCase
             $response->verify(
                 new SpInfo(
                     'http://localhost:8081/metadata',
-                    PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
-                    PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
+                    CryptoKeys::load(__DIR__.'/data/certs'),
                     'http://localhost:8081/acs',
                     false,
                     ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
@@ -265,8 +258,7 @@ class ResponseTest extends TestCase
             $response->verify(
                 new SpInfo(
                     'http://localhost:8081/metadata',
-                    PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
-                    PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
+                    CryptoKeys::load(__DIR__.'/data/certs'),
                     'http://localhost:8081/acs',
                     false,
                     ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
@@ -290,8 +282,7 @@ class ResponseTest extends TestCase
 //        $samlAssertion = $response->verify(
 //            new SpInfo(
 //                'https://vpn.tuxed.net/php-saml-sp/example/full.php/metadata',
-//                PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
-//                PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
+//                CryptoKeys::load(__DIR__.'/data/certs'),
 //                'https://vpn.tuxed.net/php-saml-sp/example/full.php/acs',
 //                false
 //            ),
@@ -319,8 +310,7 @@ class ResponseTest extends TestCase
             $response->verify(
                 new SpInfo(
                     'https://kluitje.eduvpn.nl/saml',
-                    PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
-                    PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
+                    CryptoKeys::load(__DIR__.'/data/certs'),
                     'https://kluitje.eduvpn.nl/portal/_saml/acs',
                     false,
                     ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
@@ -343,8 +333,7 @@ class ResponseTest extends TestCase
         $samlAssertion = $response->verify(
             new SpInfo(
                 'https://demo.eduvpn.nl/saml',
-                PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
-                PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
+                CryptoKeys::load(__DIR__.'/data/certs'),
                 'https://demo.eduvpn.nl/portal/_saml/acs',
                 false,
                 ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
@@ -368,8 +357,7 @@ class ResponseTest extends TestCase
         $samlAssertion = $response->verify(
             new SpInfo(
                 'http://localhost:8081/metadata',
-                PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
-                PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
+                CryptoKeys::load(__DIR__.'/data/certs'),
                 'http://localhost:8081/acs',
                 false,
                 ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
@@ -420,8 +408,7 @@ class ResponseTest extends TestCase
         $samlAssertion = $response->verify(
             new SpInfo(
                 'http://localhost:8081/metadata',
-                PrivateKey::fromFile(__DIR__.'/data/certs/sp.key'),
-                PublicKey::fromFile(__DIR__.'/data/certs/sp.crt'),
+                CryptoKeys::load(__DIR__.'/data/certs'),
                 'http://localhost:8081/acs',
                 false,
                 ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
@@ -476,8 +463,7 @@ class ResponseTest extends TestCase
         $samlAssertion = $response->verify(
             new SpInfo(
                 'https://vpn.tuxed.net/vpn-user-portal/_saml/metadata',
-                PrivateKey::fromFile(__DIR__.'/data/certs/sp2.key'),
-                PublicKey::fromFile(__DIR__.'/data/certs/sp2.crt'),
+                CryptoKeys::load(__DIR__.'/data/certs2'),
                 'https://vpn.tuxed.net/vpn-user-portal/_saml/acs',
                 true,
                 ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
