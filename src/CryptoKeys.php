@@ -90,11 +90,21 @@ class CryptoKeys
             $publicKeyPath = $privateKeyPath;
         }
 
-        $signingPrivateKey = PrivateKey::fromFile($privateKeyPath.'/signing.key');
-        $signingPublicKey = PublicKey::fromFile($publicKeyPath.'/signing.crt');
-        $encryptionPrivateKey = PrivateKey::fromFile($privateKeyPath.'/encryption.key');
-        $encryptionPublicKey = PublicKey::fromFile($publicKeyPath.'/encryption.crt');
+        // support legacy "sp.key" and "sp.crt" for both singing and encryption
+        if (\file_exists($privateKeyPath.'/sp.key')) {
+            return new self(
+                PrivateKey::fromFile($privateKeyPath.'/sp.key'),
+                PublicKey::fromFile($publicKeyPath.'/sp.crt'),
+                PrivateKey::fromFile($privateKeyPath.'/sp.key'),
+                PublicKey::fromFile($publicKeyPath.'/sp.crt')
+            );
+        }
 
-        return new self($signingPrivateKey, $signingPublicKey, $encryptionPrivateKey, $encryptionPublicKey);
+        return new self(
+            PrivateKey::fromFile($privateKeyPath.'/signing.key'),
+            PublicKey::fromFile($publicKeyPath.'/signing.crt'),
+            PrivateKey::fromFile($privateKeyPath.'/encryption.key'),
+            PublicKey::fromFile($publicKeyPath.'/encryption.crt')
+        );
     }
 }

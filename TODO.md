@@ -2,7 +2,7 @@
 
 ## 0.3
 
-- displayname is not fixed in wayf template yet :(
+- displayname is not (yet) fixed in wayf template yet :(
 
 ## 0.4
 
@@ -24,8 +24,7 @@
   signature
 - Expose `AuthenticatingAuthority` as well, next to `AuthnContextClassRef`?
 - Implement a way to have multiple certificates
-  - 1 for signing, 1 for encryption, 1 for signed metadata?
-  - key rollover
+  - key rollover?
 - `ForceAuthn` in `AuthnRequest` (is anyone actually using this?)
 
 ## 2.0
