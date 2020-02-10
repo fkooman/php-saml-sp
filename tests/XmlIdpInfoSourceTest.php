@@ -71,4 +71,13 @@ class XmlIdpInfoSourceTest extends TestCase
             $this->assertSame('invalid entityID', $e->getMessage());
         }
     }
+
+    /**
+     * @return void
+     */
+    public function testAdfsMd()
+    {
+        $xmlIdpInfoSource = new XmlIdpInfoSource([__DIR__.'/data/metadata/sts.stc-r.nl.xml']);
+        $xmlIdpInfoSource->get('http://sts.stc-r.nl/adfs/services/trust');
+    }
 }

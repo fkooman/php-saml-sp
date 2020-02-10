@@ -49,6 +49,12 @@ class XmlDocument
         $this->domXPath->registerNamespace('ds', 'http://www.w3.org/2000/09/xmldsig#');
         $this->domXPath->registerNameSpace('xenc', 'http://www.w3.org/2001/04/xmlenc#');
         $this->domXPath->registerNameSpace('shibmd', 'urn:mace:shibboleth:metadata:1.0');
+        // specifically for ADFS metadata
+        $this->domXPath->registerNameSpace('xs', 'http://www.w3.org/2001/XMLSchema');
+        $this->domXPath->registerNameSpace('xsi', 'http://www.w3.org/2001/XMLSchema-instance');
+////        $this->domXPath->registerNameSpace('fed', 'http://docs.oasis-open.org/wsfed/federation/200706');
+//        $this->domXPath->registerNameSpace('auth', 'http://docs.oasis-open.org/wsfed/authorization/200706');
+        $this->domXPath->registerNameSpace('wsx', 'http://schemas.xmlsoap.org/ws/2004/09/mex');
     }
 
     /**
@@ -69,9 +75,19 @@ class XmlDocument
      */
     public static function fromMetadata($metadataStr, $validateSchema)
     {
+        $schemaFiles = [
+            'saml-schema-metadata-2.0.xsd', 
+            'sstc-saml-metadata-ui-v1.0.xsd', 
+            'sstc-saml-metadata-algsupport-v1.0.xsd', 
+            'saml-subject-id-attr-v1.0.xsd',
+//            'ws-federation.xsd',
+//            'ws-authorization.xsd',
+            'MetadataExchange.xsd',
+        ];
+
         return self::loadStr(
             $metadataStr,
-            $validateSchema ? ['saml-schema-metadata-2.0.xsd', 'sstc-saml-metadata-ui-v1.0.xsd', 'sstc-saml-metadata-algsupport-v1.0.xsd', 'saml-subject-id-attr-v1.0.xsd'] : []
+            $validateSchema ? $schemaFiles : []
         );
     }
 
