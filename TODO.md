@@ -2,10 +2,9 @@
 
 ## 0.3
 
-- displayname is not (yet) fixed in wayf template yet :(
-
 ## 0.4
 
+- expose requested attributes through SP metadata
 - make IdpInfo also support multi-language display names so we can use those
   in the WAYF as well instead of just English
 - add tests for `src/Web` and `src/Api` classes

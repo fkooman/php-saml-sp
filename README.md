@@ -3,24 +3,25 @@
 A SAML Service Provider (SP) with an easy API to use SAML authentication from
 your existing PHP applications.
 
-It is quite similar to [simpleSAMLphp](https://simplesamlphp.org/), but only 
-focuses on SAML (SP) support.
+It is quite to [simpleSAMLphp](https://simplesamlphp.org/) in how to use it, 
+but only focuses on SAML (SP) support.
 
-**NOTE**: this project did NOT receive a comprehensive security audit. Do 
-**NOT** use it in production until there is a 1.0 release!
+**NOTE**: this project did NOT receive a comprehensive security audit yet. Do 
+**NOT** use it in production until there is a 1.0.0 release!
 
 # Why
 
 There are various options for integrating SAML in your PHP application. 
 However, most are either (very) complicated, include too many (useless) 
-features, have hard requirements on [Apache]() and are not easy to package for 
-server operating systems like CentOS/Fedora and/or Debian.
+features, have hard requirements on [Apache](https://httpd.apache.org/) and are 
+not easy to package for server operating systems like CentOS/Fedora and/or 
+Debian.
 
 We only need SAML SP support, so there is no need to include any IdP features, 
 or other (obsolete) authentication protocols.
 
-In addition, we only implement what is actually used "in the field" and that 
-which is secure. So you won't find SHA-1 support or insecure encryption.
+In addition, we only implement what is actually used "in the field" *and* that 
+which is secure. So you won't find SHA1 support or insecure encryption.
 
 # Features
 
@@ -75,7 +76,7 @@ We _do_ aim to eventually support everything as mentioned in
 # Requirements
 
 - PHP >= 5.4
-  - For block encryption support, PHP >= 7.1
+  - For encryption (`<EncryptedAssertion>`) support, PHP >= 7.1
 - `php-openssl`
 - See `composer.json` for other dependencies
 
@@ -92,9 +93,10 @@ Run [composer](https://getcomposer.org/) to install the dependencies:
 
     $ /path/to/composer install
 
-Use the following command to create a self-signed certificate for use with the
+Use the following command to create self-signed certificates for use with the
 SP library. It will be used for signing the `<AuthnRequest>` and 
-`<LogoutRequest>` and for decryption of `<EncryptedAssertion>`.
+`<LogoutRequest>`. Another set will be used for decryption of 
+`<EncryptedAssertion>`.
 
     $ cd keys
     $ ./generate_keys.sh
@@ -134,6 +136,7 @@ sure:
 - the IdP uses the HTTP-Redirect binding for receiving the `AuthnRequest`;
 - the IdP uses the HTTP-POST binding to provide the `samlp:Response` to the SP;
 - the IdP signs the `saml:Assertion` and/or the `samlp:Response`;
+- the IdP (optionally) encrypts the `saml:Assertion`;
 - the IdP verifies the signature on the `samlp:AuthnRequest`;
 - the IdP verifies the signature on the `samlp:LogoutRequest`;
 - the IdP signs the `samlp:LogoutResponse`.
