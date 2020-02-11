@@ -74,10 +74,14 @@ class IdpInfo
     }
 
     /**
-     * @return string|null
+     * @return string
      */
     public function getDisplayName()
     {
+        if (null === $this->displayName) {
+            return $this->entityId;
+        }
+
         return $this->displayName;
     }
 
