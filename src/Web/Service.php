@@ -200,7 +200,7 @@ class Service
                 }
 
                 // we require an AuthOptions stored in the session
-                if (null === $authOptionsStr = $this->session->take(SP::SESSION_KEY_PREFIX.'auth_options')) {
+                if (null === $authOptionsStr = $this->session->get(SP::SESSION_KEY_PREFIX.'auth_options')) {
                     throw new HttpException(400, 'SamlAuth API must be used');
                 }
                 $authOptions = \unserialize($authOptionsStr);
@@ -241,6 +241,9 @@ class Service
             // callback from IdP containing the "SAMLResponse"
             case '/acs':
                 $returnTo = $this->sp->handleResponse($request->requirePostParameter('SAMLResponse'), $request->requirePostParameter('RelayState'));
+
+                // authentication finished, remove the auth_options as set by the API
+                $this->session->remove(SP::SESSION_KEY_PREFIX.'auth_options');
 
                 return new RedirectResponse($returnTo);
             case '/setLanguage':
