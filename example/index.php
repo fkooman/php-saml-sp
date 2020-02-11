@@ -39,4 +39,6 @@ if (!$samlAuth->isAuthenticated()) {
 }
 $samlAssertion = $samlAuth->getAssertion();
 echo \htmlentities($samlAssertion->getIssuer()).'<br>';
-echo \htmlentities($samlAssertion->getNameId()->toXml()).'<br>';
+if (null !== $nameId = $samlAssertion->getNameId()) {
+    echo \htmlentities($nameId->toXml()).'<br>';
+}
