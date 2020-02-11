@@ -273,7 +273,10 @@ class Service
         }
 
         // the filter_var FILTER_VALIDATE_URL make sure scheme and host are
-        // there...
+        // there, but just to make absolutely sure...
+        if (!\array_key_exists('scheme', $parsedUrl) || !\array_key_exists('host', $parsedUrl)) {
+            throw new HttpException(400, 'invalid "ReturnTo" provided');
+        }
         $urlConstruction = $parsedUrl['scheme'].'://'.$parsedUrl['host'];
         if (\array_key_exists('port', $parsedUrl)) {
             $urlConstruction .= ':'.(string) $parsedUrl['port'];
