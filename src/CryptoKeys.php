@@ -91,6 +91,8 @@ class CryptoKeys
         }
 
         // support legacy "sp.key" and "sp.crt" for both singing and encryption
+        // we can remove this when we no longer offer php-fkooman-saml-sp aka
+        // fkooman/saml-sp as a library...
         if (\file_exists($privateKeyPath.'/sp.key')) {
             return new self(
                 PrivateKey::fromFile($privateKeyPath.'/sp.key'),
