@@ -1,6 +1,6 @@
 # ChangeLog
 
-## 0.3.0 (...)
+## 0.3.0 (2020-02-12)
 - small API update for `XmlIdpInfoSource` now taking array in contructor to
   allow specifying multiple metadata files 
 - initial support for "Web", i.e. run fkooman/saml-sp as an app on your server
@@ -8,8 +8,8 @@
 - support `<EncryptedAssertion>` with AES-256-GCM on PHP >= 7.1
 - update (C)
 - source formatting
-- `IdpInfo` now can also have a "display name" now
-- `SpInfo` can now contains display name(s)
+- `IdpInfo` supports "DisplayName"
+- `SpInfo` supports "DisplayName"
 - `SpInfo` can now enforce `<EncryptedAssertion>` from IdP(s)
 - SP Metadata now exposes "DisplayName" and supported encryption algorithms
 
