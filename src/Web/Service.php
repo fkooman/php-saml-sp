@@ -24,7 +24,7 @@
 
 namespace fkooman\SAML\SP\Web;
 
-use fkooman\SAML\SP\Api\AuthOptions; // XXX move AuthOptions to SP namespace?
+use fkooman\SAML\SP\Api\AuthOptions;
 use fkooman\SAML\SP\Api\SamlAuth;
 use fkooman\SAML\SP\Crypto;
 use fkooman\SAML\SP\Exception\SamlException;
