@@ -37,7 +37,7 @@ return [
     'Secure Cookies are disabled. This is ONLY appropriate for development!' => 'Secure Cookies zijn uitgeschakeld. Dit is ALLEEN acceptabel voor ontwikkelomgevingen!',
     'Select your organization to continue the login process.' => 'Selecteer je organisatie om verder te gaan met het inlog-proces.',
     'Test' => 'Test',
-    'This PHP installation does NOT support AEAD ciphers. For <code>&lt;EncryptedAssertion&gt;</code> support, PHP >= 7.1, with <code>ext-openssl</code> is required.' => 'Deze PHP installatie ondersteunt geen AEAD ciphers. Voor ondersteuning van <code>&lt;EncryptedAssertion&gt;</code>, PHP >= 7.1 met <code>ext-openssl</code> is vereist.',
+    'PHP >= 7.1 is required <code>&lt;EncryptedAssertion&gt;</code> support.' => 'PHP >= 7.1 is benodigd voor <code>&lt;EncryptedAssertion&gt;</code> ondersteuning.',
     'Welcome' => 'Welkom',
     'XML' => 'XML',
     'You can perform authentication tests here with the configured IdP(s).' => 'Je kunt hier een authenticatietest doen met de geconfigureerde IdP(s).',
