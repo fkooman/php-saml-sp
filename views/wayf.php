@@ -13,7 +13,7 @@
         <input type="hidden" name="ReturnTo" value="<?=$this->e($returnTo); ?>">
         <ul>
             <li>
-                <button name="IdP" type="submit" value="<?=$this->e($lastChosenIdpInfo->getEntityId()); ?>"><?=$this->e($lastChosenIdpInfo->getDisplayName()); ?></button>
+                <button autofocus="autofocus" name="IdP" type="submit" value="<?=$this->e($lastChosenIdpInfo->getEntityId()); ?>"><?=$this->e($lastChosenIdpInfo->getDisplayName()); ?></button>
             </li>
         </ul>
     </form>

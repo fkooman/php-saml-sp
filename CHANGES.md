@@ -1,5 +1,9 @@
 # ChangeLog
 
+## 0.3.1 (...)
+- use `autofocus` element on the previously selected IdP in the WAYF, so enter
+  can be used to continue to that IdP immediately
+
 ## 0.3.0 (2020-02-12)
 - small API update for `XmlIdpInfoSource` now taking array in contructor to
   allow specifying multiple metadata files 
