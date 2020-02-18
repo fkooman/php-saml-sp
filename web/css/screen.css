@@ -11,15 +11,13 @@ main, header {
 
 header {
     text-align: end;
-    font-size: 80%;
-}
-
-header form {
 }
 
 header button {
     border: 0;
+    font-size: 85%;
     margin: 0;
+    padding: 0 0.5em;
     background-color: #fff;
 }
 
@@ -29,6 +27,7 @@ button {
     outline: none;
     margin: 0.5em 0;
     background-color: #f8f8f8;
+    color: #777;
 }
 
 dd {
