@@ -14,7 +14,7 @@
 <?php if (1 < \count($enabledLanguages)): ?>
         <form method="post" action="setLanguage">
 <?php foreach ($enabledLanguages as $uiLanguage): ?>
-            <button type="submit" name="uiLanguage" value="<?=$this->e($uiLanguage); ?>"><?=$this->e($uiLanguage); ?></button>
+            <button type="submit" name="uiLanguage" value="<?=$this->e($uiLanguage); ?>"><?=$this->e($uiLanguage, 'language_code_to_human'); ?></button>
 <?php endforeach; ?>
         </form>
 <?php endif; ?>

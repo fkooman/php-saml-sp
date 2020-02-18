@@ -62,6 +62,7 @@ class Tpl
     {
         $this->templateFolderList = $templateFolderList;
         $this->translationFolderList = $translationFolderList;
+        $this->addCallback('language_code_to_human', [__CLASS__, 'languageCodeToHuman']);
     }
 
     /**
@@ -94,6 +95,24 @@ class Tpl
         if (\in_array($uiLanguage, $availableLanguages, true)) {
             $this->uiLanguage = $uiLanguage;
         }
+    }
+
+    /**
+     * @param string $languageCode
+     *
+     * @return string
+     */
+    public function languageCodeToHuman($languageCode)
+    {
+        $uiLangMapping = [
+            'en-US' => 'English',
+            'nl-NL' => 'Nederlands',
+        ];
+        if (!\array_key_exists($languageCode, $uiLangMapping)) {
+            return $languageCode;
+        }
+
+        return $uiLangMapping[$languageCode];
     }
 
     /**
