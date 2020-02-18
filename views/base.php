@@ -10,7 +10,6 @@
 </head>
 <body>
     <header>
-        <h1><?=$this->e($serviceName); ?></h1>
 <?php if (1 < \count($enabledLanguages)): ?>
         <form method="post" action="setLanguage">
 <?php foreach ($enabledLanguages as $uiLanguage): ?>

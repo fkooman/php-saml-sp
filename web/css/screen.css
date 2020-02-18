@@ -5,20 +5,22 @@ body {
     text-align: inherit;    /* override for bootstrap-reboot */
 }
 
-header {
+main, header {
     padding: 0 0.5em;
-    display: grid;
-    grid-template-columns: auto 2fr;
+}
+
+header {
+    text-align: end;
+    font-size: 80%;
 }
 
 header form {
-    font-size: 75%;
-    text-align: end;
 }
 
-main {
-    margin-top: 1em;
-    padding: 0 0.5em;
+header button {
+    border: 0;
+    margin: 0;
+    background-color: #fff;
 }
 
 button {
@@ -91,7 +93,7 @@ pre {
 }
 
 footer {
-	margin-top: 2em;
-	font-size: 75%;
-	text-align: center;
+    margin-top: 2em;
+    font-size: 75%;
+    text-align: center;
 }
