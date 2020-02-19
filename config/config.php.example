@@ -22,11 +22,11 @@ return [
     //'enabledLanguages' => ['en-US', 'nl-NL'],
 
     // the name of the service
-    // DEFAULT: 'SAML SP'
-    'serviceName' => [
-        'en-US' => 'My SAML SP',
-        'nl-NL' => 'Mijn SAML SP',
-    ],
+    // DEFAULT: ['en-US' => 'SAML SP']
+    //'serviceName' => [
+    //    'en-US' => 'My SAML SP',
+    //    'nl-NL' => 'Mijn SAML SP',
+    //],
 
     // SAML discovery service implementing "Identity Provider Discovery Service
     // Protocol and Profile"
