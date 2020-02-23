@@ -1,6 +1,6 @@
 # ChangeLog
 
-## 0.3.1 (...)
+## 0.3.1 (2020-02-23)
 - use `autofocus` element on the previously selected IdP in the WAYF, so enter
   can be used to continue to that IdP immediately
 - translate language code to human readable language for display in UI
