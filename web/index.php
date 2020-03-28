@@ -53,12 +53,12 @@ try {
         $translationDirs[] = $baseDir.'/locale/'.$styleName;
     }
     // determine whether or not we want to use another language for the UI
-    if (null === $uiLanguage = $seCookie->get('L')) {
-        $uiLanguage = $config->getDefaultLanguage();
+    if (null === $languageCode = $seCookie->get('L')) {
+        $languageCode = $config->getDefaultLanguage();
     }
     $tpl = new Tpl($templateDirs, $translationDirs);
-    $tpl->setLanguage($uiLanguage);
-    $tpl->addDefault(['secureCookie' => $secureCookie, 'enabledLanguages' => $config->getEnabledLanguages(), 'serviceName' => $config->getServiceName($uiLanguage)]);
+    $tpl->setLanguageCode($languageCode);
+    $tpl->addDefault(['secureCookie' => $secureCookie, 'enabledLanguages' => $config->getEnabledLanguages(), 'serviceName' => $config->getServiceName($languageCode)]);
     $metadataFileList = \glob($baseDir.'/config/metadata/*.xml');
     $idpInfoSource = new XmlIdpInfoSource($metadataFileList);
     $request = new Request($_SERVER, $_GET, $_POST);

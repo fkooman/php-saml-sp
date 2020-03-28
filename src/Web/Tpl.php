@@ -66,53 +66,16 @@ class Tpl
     }
 
     /**
-     * @param string|null $uiLanguage
+     * @param string $languageCode
      *
      * @return void
      */
-    public function setLanguage($uiLanguage)
+    public function setLanguageCode($languageCode)
     {
-        if (null === $uiLanguage) {
-            $this->uiLanguage = null;
-
-            return;
+        $implementedLocales = self::getImplementedLocales();
+        if (\in_array($languageCode, \array_keys($implementedLocales), true)) {
+            $this->uiLanguage = $languageCode;
         }
-
-        // verify whether we have this translation file available
-        // NOTE: we first fetch a list of supported languages and *then* only
-        // check if the requested language is available to avoid needing to
-        // use crazy regexp to match language codes
-        $availableLanguages = [];
-        foreach ($this->translationFolderList as $translationFolder) {
-            foreach (\glob($translationFolder.'/*.php') as $translationFile) {
-                $supportedLanguage = \basename($translationFile, '.php');
-                if (!\in_array($supportedLanguage, $availableLanguages, true)) {
-                    $availableLanguages[] = $supportedLanguage;
-                }
-            }
-        }
-
-        if (\in_array($uiLanguage, $availableLanguages, true)) {
-            $this->uiLanguage = $uiLanguage;
-        }
-    }
-
-    /**
-     * @param string $languageCode
-     *
-     * @return string
-     */
-    public function languageCodeToHuman($languageCode)
-    {
-        $uiLangMapping = [
-            'en-US' => 'English',
-            'nl-NL' => 'Nederlands',
-        ];
-        if (!\array_key_exists($languageCode, $uiLangMapping)) {
-            return $languageCode;
-        }
-
-        return $uiLangMapping[$languageCode];
     }
 
     /**
@@ -160,6 +123,32 @@ class Tpl
         }
 
         return $templateStr;
+    }
+
+    /**
+     * @param string $languageCode
+     *
+     * @return string
+     */
+    private static function languageCodeToHuman($languageCode)
+    {
+        $implementedLocales = self::getImplementedLocales();
+        if (!\array_key_exists($languageCode, $implementedLocales)) {
+            return $languageCode;
+        }
+
+        return $implementedLocales[$languageCode];
+    }
+
+    /**
+     * @return array<string,string>
+     */
+    private static function getImplementedLocales()
+    {
+        return [
+            'en-US' => 'English',
+            'nl-NL' => 'Nederlands',
+        ];
     }
 
     /**
