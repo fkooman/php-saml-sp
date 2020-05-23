@@ -1,5 +1,10 @@
 # ChangeLog
 
+## 0.3.2 (2020-05-23)
+- implement JS search for WAYF (only if browser has JS enabled)
+- update bootstrap-reboot CSS
+- cleanup language handling / template
+
 ## 0.3.1 (2020-02-23)
 - use `autofocus` element on the previously selected IdP in the WAYF, so enter
   can be used to continue to that IdP immediately
