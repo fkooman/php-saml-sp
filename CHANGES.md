@@ -1,5 +1,8 @@
 # ChangeLog
 
+## 0.3.3 (2020-05-23)
+- update `nl-NL` translation files
+
 ## 0.3.2 (2020-05-23)
 - implement JS search for WAYF (only if browser has JS enabled)
 - update bootstrap-reboot CSS
