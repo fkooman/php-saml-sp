@@ -96,3 +96,21 @@ footer {
     font-size: 75%;
     text-align: center;
 }
+
+form#searchBox {
+    margin-bottom: 0.5em;
+    display: none;
+}
+
+span#noResults {
+    display: none;
+    color: orange;
+    text-align: center;
+}
+
+form#searchBox input {
+    width: 100%;
+    text-align: start;
+    padding: 0.75em;
+    margin: 0;
+}

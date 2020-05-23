@@ -7,6 +7,7 @@
     <title><?=$this->e($serviceName); ?></title>
     <link href="css/bootstrap-reboot.min.css" media="screen" rel="stylesheet">
     <link href="css/screen.css" media="screen" rel="stylesheet">
+    <script src="js/search.js"></script>
 </head>
 <body>
     <header>
