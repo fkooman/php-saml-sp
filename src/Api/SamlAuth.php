@@ -145,15 +145,21 @@ class SamlAuth
     private function prepareQueryParameters(AuthOptions $authOptions = null)
     {
         if (null === $authOptions) {
-            $authOptions = AuthOptions::init()->withReturnTo($this->request->getUri());
+            $authOptions = new AuthOptions();
+        }
+
+        if(null === $returnTo = $authOptions->getReturnTo()) {
+            $returnTo = $this->request->getUri();
         }
         $queryParameters = [
-            'ReturnTo' => $authOptions->getReturnTo(),
+            'ReturnTo' => $returnTo,
         ];
+
         $authnContextClassRef = $authOptions->getAuthnContextClassRef();
         if (0 !== \count($authnContextClassRef)) {
             $queryParameters['AuthnContextClassRef'] = \implode(' ', $authnContextClassRef);
         }
+
         if (null !== $idpEntityId = $authOptions->getIdp()) {
             $queryParameters['IdP'] = $idpEntityId;
         }
