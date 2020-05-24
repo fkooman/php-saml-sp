@@ -1,5 +1,13 @@
 # ChangeLog
 
+## 0.4.0 (...)
+- use `/login` endpoint instead of `/wayf` (issue #4)
+- support `ReturnTo` as a query parameter on `/login` (issue #5)
+- support `AuthnContextClassRef` as a query parameter on `/login`
+- support `IdP` as a query parameter on `/login`
+- add (optional) `AuthOptions` parameter to the `SamlAuth` methods for getting
+  and verifying the assertion instead of having to do this manually
+
 ## 0.3.3 (2020-05-23)
 - update `nl-NL` translation files
 

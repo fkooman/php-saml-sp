@@ -79,7 +79,7 @@ try {
     );
     $spInfo->setSloUrl($request->getRootUri().'slo');
     $sp = new SP($spInfo, $idpInfoSource, $seSession);
-    $service = new Service($config, $tpl, $sp, $seCookie, $seSession);
+    $service = new Service($config, $tpl, $sp, $seCookie);
     $request = new Request($_SERVER, $_GET, $_POST);
     $service->run($request)->send();
 } catch (Exception $e) {

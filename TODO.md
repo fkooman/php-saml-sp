@@ -1,6 +1,6 @@
 # TODO
 
-## 0.4
+## 0.5
 
 - make sure the transforms are exactly as we expect them to be
 
@@ -12,9 +12,6 @@
 ```
 - use separate session cookie to remember which idp was chosen in the session
   and don't ask again until browser is restarted? Or 8 hours? or?
-- `SamlAuth::isAuthenticated` should consider AuthOptions, at least 
-  authncontext (API change) so we can't accept a logged in user if they have
-  the wrong authnconext from a previous authentication...
 - expose requested attributes through SP metadata
 - make IdpInfo also support multi-language display names so we can use those
   in the WAYF as well instead of just English (also requires a language 

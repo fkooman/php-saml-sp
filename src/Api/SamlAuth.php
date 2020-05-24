@@ -59,21 +59,15 @@ class SamlAuth
      */
     public function getLoginURL(AuthOptions $authOptions = null)
     {
-        if (null === $authOptions) {
-            $authOptions = new AuthOptions($this->request->getUri());
-        }
-
-        $this->session->set(SP::SESSION_KEY_PREFIX.'auth_options', \serialize($authOptions));
-
-        return $this->request->getOrigin().$this->config->getSpPath().'/wayf';
+        return $this->request->getOrigin().$this->config->getSpPath().'/login?'.$this->prepareQueryParameters($authOptions);
     }
 
     /**
      * @return \fkooman\SAML\SP\Assertion
      */
-    public function getAssertion()
+    public function getAssertion(AuthOptions $authOptions = null)
     {
-        if (null === $samlAssertion = $this->getAndVerifyAssertion()) {
+        if (null === $samlAssertion = $this->getAndVerifyAssertion($authOptions)) {
             throw new AuthException('not authenticated');
         }
 
@@ -83,23 +77,25 @@ class SamlAuth
     /**
      * @return bool
      */
-    public function isAuthenticated()
+    public function isAuthenticated(AuthOptions $authOptions = null)
     {
-        return null !== $this->getAndVerifyAssertion();
+        return null !== $this->getAndVerifyAssertion($authOptions);
     }
 
     /**
      * @return \fkooman\SAML\SP\Assertion|null
      */
-    public function getAndVerifyAssertion()
+    public function getAndVerifyAssertion(AuthOptions $authOptions = null)
     {
-        if (null === $sessionValue = $this->session->get(SP::SESSION_KEY_PREFIX.'assertion')) {
+        if (null === $assertionStr = $this->session->get(SP::SESSION_KEY_PREFIX.'assertion')) {
+            $this->terminateSession();
+
             return null;
         }
-        $samlAssertion = \unserialize($sessionValue);
+        $samlAssertion = \unserialize($assertionStr);
         if (!($samlAssertion instanceof Assertion)) {
             // we are unable to unserialize the Assertion
-            $this->session->remove(SP::SESSION_KEY_PREFIX.'assertion');
+            $this->terminateSession();
 
             return null;
         }
@@ -107,11 +103,69 @@ class SamlAuth
         // make sure the SAML session is still valid
         $sessionNotOnOrAfter = $samlAssertion->getSessionNotOnOrAfter();
         if ($sessionNotOnOrAfter <= $this->dateTime) {
-            $this->session->remove(SP::SESSION_KEY_PREFIX.'assertion');
+            $this->terminateSession();
 
             return null;
         }
 
+        if (null !== $authOptions) {
+            $this->verifyAuthOptions($samlAssertion, $authOptions);
+        }
+
         return $samlAssertion;
+    }
+
+    /**
+     * @return void
+     */
+    private function verifyAuthOptions(Assertion $samlAssertion, AuthOptions $authOptions)
+    {
+        // make sure we got the IdP we wanted
+        if (null !== $idpEntityId = $authOptions->getIdp()) {
+            if ($idpEntityId !== $samlAssertion->getIssuer()) {
+                $this->terminateSession();
+
+                throw new AuthException(\sprintf('IdP: expected "%s", got "%s"', $idpEntityId, $samlAssertion->getIssuer()));
+            }
+        }
+
+        // make sure we got (any of) the AuthnContextClassRef we wanted
+        if (0 !== \count($authOptions->getAuthnContextClassRef())) {
+            if (!\in_array($samlAssertion->getAuthnContext(), $authOptions->getAuthnContextClassRef(), true)) {
+                $this->terminateSession();
+
+                throw new AuthException(\sprintf('AuthnContextClassRef: expected any of [%s], got "%s"', \implode(' ', $authOptions->getAuthnContextClassRef()), $samlAssertion->getAuthnContext()));
+            }
+        }
+    }
+
+    /**
+     * @return string
+     */
+    private function prepareQueryParameters(AuthOptions $authOptions = null)
+    {
+        if (null === $authOptions) {
+            $authOptions = AuthOptions::init()->withReturnTo($this->request->getUri());
+        }
+        $queryParameters = [
+            'ReturnTo' => $authOptions->getReturnTo(),
+        ];
+        $authnContextClassRef = $authOptions->getAuthnContextClassRef();
+        if (0 !== \count($authnContextClassRef)) {
+            $queryParameters['AuthnContextClassRef'] = \implode(' ', $authnContextClassRef);
+        }
+        if (null !== $idpEntityId = $authOptions->getIdp()) {
+            $queryParameters['IdP'] = $idpEntityId;
+        }
+
+        return \http_build_query($queryParameters);
+    }
+
+    /**
+     * @return void
+     */
+    private function terminateSession()
+    {
+        $this->session->remove(SP::SESSION_KEY_PREFIX.'assertion');
     }
 }

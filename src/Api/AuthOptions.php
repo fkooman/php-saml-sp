@@ -26,18 +26,41 @@ namespace fkooman\SAML\SP\Api;
 
 class AuthOptions
 {
+    /** @var string|null */
+    private $returnTo = null;
+
     /** @var array<string> */
     private $authnContextClassRef = [];
 
-    /** @var string */
-    private $returnTo;
+    /** @var string|null */
+    private $idpEntityId = null;
+
+    /**
+     * @return self
+     */
+    public static function init()
+    {
+        return new self();
+    }
 
     /**
      * @param string $returnTo
+     *
+     * @return self
      */
-    public function __construct($returnTo)
+    public function withReturnTo($returnTo)
     {
         $this->returnTo = $returnTo;
+
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getReturnTo()
+    {
+        return $this->returnTo;
     }
 
     /**
@@ -45,7 +68,7 @@ class AuthOptions
      *
      * @return self
      */
-    public function setAuthnContextClassRef(array $authnContextClassRef)
+    public function withAuthnContextClassRef(array $authnContextClassRef)
     {
         $this->authnContextClassRef = $authnContextClassRef;
 
@@ -61,10 +84,22 @@ class AuthOptions
     }
 
     /**
-     * @return string
+     * @param string $idpEntityId
+     *
+     * @return self
      */
-    public function getReturnTo()
+    public function withIdp($idpEntityId)
     {
-        return $this->returnTo;
+        $this->idpEntityId = $idpEntityId;
+
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getIdp()
+    {
+        return $this->idpEntityId;
     }
 }

@@ -9,8 +9,7 @@
     </p>
 <?php else: ?>
 <?php if (null !== $lastChosenIdpInfo): ?>
-    <form method="get" action="wayf">
-        <input type="hidden" name="ReturnTo" value="<?=$this->e($returnTo); ?>">
+    <form method="post">
         <ul>
             <li>
                 <button autofocus="autofocus" name="IdP" type="submit" value="<?=$this->e($lastChosenIdpInfo->getEntityId()); ?>"><?=$this->e($lastChosenIdpInfo->getDisplayName()); ?></button>
@@ -22,8 +21,7 @@
             <form id="searchBox">
                 <input type="text" name="searchFor" placeholder="<?=$this->t('Search for your organization...'); ?>">
             </form>
-            <form id="organizationList" method="get" action="wayf">
-                <input type="hidden" name="ReturnTo" value="<?=$this->e($returnTo); ?>">
+            <form id="organizationList" method="post">
                 <ul>
 <?php foreach ($idpInfoList as $idpInfo): ?>
                     <li>
@@ -39,8 +37,7 @@
     <form id="searchBox">
         <input type="text" name="searchFor" placeholder="<?=$this->t('Search for your organization...'); ?>">
     </form>
-    <form id="organizationList" method="get" action="wayf">
-        <input type="hidden" name="ReturnTo" value="<?=$this->e($returnTo); ?>">
+    <form id="organizationList" method="post">
         <ul>
 <?php foreach ($idpInfoList as $idpInfo): ?>
             <li>
