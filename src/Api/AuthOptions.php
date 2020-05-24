@@ -41,16 +41,6 @@ class AuthOptions
     }
 
     /**
-     * @param string $returnTo
-     *
-     * @return self
-     */
-    public static function init($returnTo)
-    {
-        return new self($returnTo);
-    }
-
-    /**
      * @param array<string> $authnContextClassRef
      *
      * @return self
