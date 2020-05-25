@@ -10,8 +10,7 @@
     <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
 </ds:Transforms>
 ```
-- use separate session cookie to remember which idp was chosen in the session
-  and don't ask again until browser is restarted? Or 8 hours? or?
+
 - expose requested attributes through SP metadata
 - make IdpInfo also support multi-language display names so we can use those
   in the WAYF as well instead of just English (also requires a language 
