@@ -1,6 +1,6 @@
 # ChangeLog
 
-## 0.4.0 (...)
+## 0.4.0 (2020-05-25)
 - use `/login` endpoint instead of `/wayf` (issue #4)
 - support `ReturnTo` as a query parameter on `/login` (issue #5)
 - support `AuthnContextClassRef` as a query parameter on `/login`
