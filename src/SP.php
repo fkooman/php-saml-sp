@@ -78,12 +78,13 @@ class SP
      * @param string        $idpEntityId
      * @param string        $returnTo
      * @param array<string> $authnContextClassRef
+     * @param array<string> $scopingIdpList
      *
      * @throws \fkooman\SAML\SP\Exception\SpException
      *
      * @return string
      */
-    public function login($idpEntityId, $returnTo, array $authnContextClassRef = [])
+    public function login($idpEntityId, $returnTo, array $authnContextClassRef = [], array $scopingIdpList = [])
     {
         self::validateReturnTo($returnTo);
         $requestId = \sprintf('_%s', Hex::encode($this->random->requestId()));
@@ -101,6 +102,7 @@ class SP
                 'AssertionConsumerServiceURL' => $this->spInfo->getAcsUrl(),
                 'Issuer' => $this->spInfo->getEntityId(),
                 'AuthnContextClassRef' => $authnContextClassRef,
+                'ScopingIdpList' => $scopingIdpList,
             ]
         );
 

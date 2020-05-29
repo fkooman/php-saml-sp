@@ -131,14 +131,15 @@ class Service
 
                 $returnTo = self::verifyReturnToOrigin($request->getOrigin(), $request->requireQueryParameter('ReturnTo'));
                 $authnContextClassRef = self::verifyAuthnContextClassRef($request->optionalQueryParameter('AuthnContextClassRef'));
+                $scopingIdpList = self::verifyScopingIdpList($request->optionalQueryParameter('ScopingIdpList'));
                 if (1 === \count($availableIdpList)) {
                     // we only have 1 IdP, so use that
-                    return new RedirectResponse($this->sp->login($availableIdpList[0], $returnTo, $authnContextClassRef));
+                    return new RedirectResponse($this->sp->login($availableIdpList[0], $returnTo, $authnContextClassRef, $scopingIdpList));
                 }
 
                 if (null !== $idpEntityId = $request->optionalQueryParameter('IdP')) {
                     // an IdP entity ID is provided as a query parameter
-                    return new RedirectResponse($this->sp->login($idpEntityId, $returnTo, $authnContextClassRef));
+                    return new RedirectResponse($this->sp->login($idpEntityId, $returnTo, $authnContextClassRef, $scopingIdpList));
                 }
 
                 if (null !== $discoUrl = $this->config->getDiscoUrl()) {
@@ -289,5 +290,19 @@ class Service
         }
 
         return \explode(' ', $authnContextClassRef);
+    }
+
+    /**
+     * @param string|null $scopingIdpList
+     *
+     * @return array<string>
+     */
+    private static function verifyScopingIdpList($scopingIdpList)
+    {
+        if (null === $scopingIdpList) {
+            return [];
+        }
+
+        return \explode(' ', $scopingIdpList);
     }
 }

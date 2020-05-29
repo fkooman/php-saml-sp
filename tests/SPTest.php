@@ -125,6 +125,38 @@ EOF;
         $this->assertSame(\sprintf('http://localhost:8080/sso.php?%s&%s', $httpQuery, $signatureQuery), $ssoUrl);
     }
 
+    public function testScopingIdPList()
+    {
+        $ssoUrl = $this->sp->login(
+            'http://localhost:8080/metadata.php',
+            'http://localhost:8080/app',
+            [],
+            ['https://idp.tuxed.net/metadata']
+        );
+
+        $samlRequest = <<< EOF
+<samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="_30313233343536373839616263646566" Version="2.0" IssueInstant="2018-01-01T08:00:00Z" Destination="http://localhost:8080/sso.php" Consent="urn:oasis:names:tc:SAML:2.0:consent:current-implicit" ForceAuthn="false" IsPassive="false" AssertionConsumerServiceURL="http://localhost:8081/acs">
+  <saml:Issuer>http://localhost:8081/metadata</saml:Issuer>
+  <samlp:Scoping>
+    <samlp:IDPList>
+      <samlp:IDPEntry ProviderID="https://idp.tuxed.net/metadata"/>
+    </samlp:IDPList>
+  </samlp:Scoping>
+</samlp:AuthnRequest>
+EOF;
+
+        $relayState = \base64_encode('1234_relay_state_5678');
+        $httpQuery = \http_build_query(
+            [
+                'SAMLRequest' => \base64_encode(\gzdeflate($samlRequest)),
+                'RelayState' => $relayState,
+                'SigAlg' => 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256',
+            ]
+        );
+        $signatureQuery = \http_build_query(['Signature' => \base64_encode(Crypto::sign($httpQuery, PrivateKey::fromFile(__DIR__.'/data/signing.key')))]);
+        $this->assertSame(\sprintf('http://localhost:8080/sso.php?%s&%s', $httpQuery, $signatureQuery), $ssoUrl);
+    }
+
     public function testMetadata()
     {
         $metadataWithEncryptionSupportResponse = <<< EOF
