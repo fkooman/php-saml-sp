@@ -148,7 +148,7 @@ class SamlAuth
             $authOptions = new AuthOptions();
         }
 
-        if(null === $returnTo = $authOptions->getReturnTo()) {
+        if (null === $returnTo = $authOptions->getReturnTo()) {
             $returnTo = $this->request->getUri();
         }
         $queryParameters = [
