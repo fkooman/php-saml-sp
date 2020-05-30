@@ -35,6 +35,9 @@ class AuthOptions
     /** @var string|null */
     private $idpEntityId = null;
 
+    /** @var array<string> */
+    private $scopingIdpList = [];
+
     /**
      * @return self
      */
@@ -101,5 +104,25 @@ class AuthOptions
     public function getIdp()
     {
         return $this->idpEntityId;
+    }
+
+    /**
+     * @param array<string> $scopingIdpList
+     *
+     * @return self
+     */
+    public function withScopingIdpList(array $scopingIdpList)
+    {
+        $this->scopingIdpList = $scopingIdpList;
+
+        return $this;
+    }
+
+    /**
+     * @return array<string>
+     */
+    public function getScopingIdpList()
+    {
+        return $this->scopingIdpList;
     }
 }

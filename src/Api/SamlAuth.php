@@ -164,6 +164,11 @@ class SamlAuth
             $queryParameters['IdP'] = $idpEntityId;
         }
 
+        $scopingIdpList = $authOptions->getScopingIdpList();
+        if (0 !== \count($scopingIdpList)) {
+            $queryParameters['ScopingIdpList'] = \implode(' ', $scopingIdpList);
+        }
+
         return \http_build_query($queryParameters);
     }
 
