@@ -18,6 +18,11 @@
 
         <dt>AuthnContext</dt>
         <dd><code><?=$this->e($samlAssertion->getAuthnContext()); ?></code></dd>
+
+<?php if (null !== $authenticatingAuthority = $samlAssertion->getAuthenticatingAuthority()): ?>
+        <dt>AuthenticatingAuthority</dt>
+        <dd><code><?=$this->e($samlAssertion->getAuthenticatingAuthority()); ?></code></dd>
+<?php endif; ?>
     </dl>
 
 <?php if (0 !== \count($samlAssertion->getAttributes())): ?>

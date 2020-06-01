@@ -137,6 +137,22 @@ class SamlAuth
                 throw new AuthException(\sprintf('AuthnContextClassRef: expected any of [%s], got "%s"', \implode(' ', $authOptions->getAuthnContextClassRef()), $samlAssertion->getAuthnContext()));
             }
         }
+
+        // if we requested a particular IdP behind a proxy, make sure we
+        // actually got it
+        $scopingIdpList = $authOptions->getScopingIdpList();
+        if (0 !== \count($scopingIdpList)) {
+            if (null === $authenticatingAuthority = $samlAssertion->getAuthenticatingAuthority()) {
+                $this->terminateSession();
+
+                throw new AuthException(\sprintf('AuthenticatingAuthority: expected any of [%s], got _None_', \implode(' ', $scopingIdpList)));
+            }
+            if (!\in_array($authenticatingAuthority, $scopingIdpList, true)) {
+                $this->terminateSession();
+
+                throw new AuthException(\sprintf('AuthenticatingAuthority: expected any of [%s], got "%s"', \implode(' ', $scopingIdpList), $authenticatingAuthority));
+            }
+        }
     }
 
     /**

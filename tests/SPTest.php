@@ -308,6 +308,7 @@ EOF;
             new DateTime('2019-01-02T20:05:33Z'),
             new DateTime('2019-01-03T04:05:33Z'),
             'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport',
+            null,
             [
                 'urn:oid:0.9.2342.19200300.100.1.1' => [
                     'foo',

@@ -162,8 +162,13 @@ class Response
             }
         }
 
+        // AuthenticatingAuthority (Optional)
+        $authenticatingAuthorityString = XmlDocument::requireString($responseDocument->domXPath->evaluate('string(saml:AuthnStatement/saml:AuthnContext/saml:AuthenticatingAuthority)', $assertionElement));
+        $authenticatingAuthority = '' !== $authenticatingAuthorityString ? $authenticatingAuthorityString : null;
+        // XXX make sure we got what we requested here!
+
         $attributeList = self::extractAttributes($responseDocument, $assertionElement, $idpInfo, $spInfo);
-        $samlAssertion = new Assertion($idpInfo->getEntityId(), $authnInstant, $sessionNotOnOrAfter, $authnContextClassRef, $attributeList);
+        $samlAssertion = new Assertion($idpInfo->getEntityId(), $authnInstant, $sessionNotOnOrAfter, $authnContextClassRef, $authenticatingAuthority, $attributeList);
 
         // NameID
         $domNodeList = $responseDocument->domXPath->query('saml:Subject/saml:NameID', $assertionElement);

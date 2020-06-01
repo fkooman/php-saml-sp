@@ -81,6 +81,7 @@ class ResponseTest extends TestCase
             ],
             $samlAssertion->getAttributes()
         );
+        $this->assertNull($samlAssertion->getAuthenticatingAuthority());
     }
 
     public function testSURFconext()
@@ -121,6 +122,7 @@ class ResponseTest extends TestCase
             ],
             $samlAssertion->getAttributes()
         );
+        $this->assertSame('https://idp.surfnet.nl', $samlAssertion->getAuthenticatingAuthority());
     }
 
     //  XXX we do not support "raw" attributes yet, only in urn:oid format
