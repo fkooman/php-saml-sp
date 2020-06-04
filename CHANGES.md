@@ -1,5 +1,10 @@
 # ChangeLog
 
+## 0.4.1 (...)
+- implement `<sampl:Scoping>` for `<samlp:AuthnRequest>` to tell a SAML proxy
+  which IdP behind the proxy should be used for authentication, thus skipping 
+  the WAYF
+
 ## 0.4.0 (2020-05-25)
 - use `/login` endpoint instead of `/wayf` (issue #4)
 - support `ReturnTo` as a query parameter on `/login` (issue #5)
