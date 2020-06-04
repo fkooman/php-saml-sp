@@ -107,7 +107,7 @@ class SP
         );
 
         $relayState = Base64::encode($this->random->relayState());
-        $authnRequestState = new AuthnRequestState($requestId, $idpEntityId, $authnContextClassRef, $returnTo);
+        $authnRequestState = new AuthnRequestState($requestId, $idpEntityId, $returnTo);
         $this->session->set(self::SESSION_KEY_PREFIX.$relayState, \serialize($authnRequestState));
 
         return self::prepareRequestUrl($ssoUrl, $authnRequest, $relayState, $this->spInfo->getCryptoKeys()->getSigningPrivateKey());
@@ -138,14 +138,12 @@ class SP
             throw new SpException(\sprintf('IdP "%s" not registered', $idpEntityId));
         }
         $idpInfo = $this->idpInfoSource->get($idpEntityId);
-        $authnContextClassRef = $authnRequestState->getAuthnContextClassRef();
         $response = new Response($this->dateTime);
         $samlAssertion = $response->verify(
             $this->spInfo,
             $idpInfo,
             Base64::decode($samlResponse),
-            $authnRequestState->getRequestId(),
-            $authnContextClassRef
+            $authnRequestState->getRequestId()
         );
 
         $this->session->regenerate();

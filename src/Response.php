@@ -40,15 +40,14 @@ class Response
     }
 
     /**
-     * @param string        $samlResponse
-     * @param string        $expectedInResponseTo
-     * @param array<string> $authnContext
+     * @param string $samlResponse
+     * @param string $expectedInResponseTo
      *
      * @throws \fkooman\SAML\SP\Exception\ResponseException
      *
      * @return Assertion
      */
-    public function verify(SpInfo $spInfo, IdpInfo $idpInfo, $samlResponse, $expectedInResponseTo, array $authnContext)
+    public function verify(SpInfo $spInfo, IdpInfo $idpInfo, $samlResponse, $expectedInResponseTo)
     {
         $responseSigned = false;
         $assertionSigned = false;
@@ -155,17 +154,10 @@ class Response
         $sessionNotOnOrAfter = '' === $sessionNotOnOrAfterString ? \date_add(clone $this->dateTime, new DateInterval('PT8H')) : new DateTime($sessionNotOnOrAfterString);
 
         $authnContextClassRef = XmlDocument::requireNonEmptyString($responseDocument->domXPath->evaluate('string(saml:AuthnStatement/saml:AuthnContext/saml:AuthnContextClassRef)', $assertionElement));
-        if (0 !== \count($authnContext)) {
-            // we requested a particular AuthnContext, make sure we got it
-            if (!\in_array($authnContextClassRef, $authnContext, true)) {
-                throw new ResponseException(\sprintf('expected AuthnContext containing any of [%s], got "%s"', \implode(',', $authnContext), $authnContextClassRef));
-            }
-        }
 
         // AuthenticatingAuthority (Optional)
         $authenticatingAuthorityString = XmlDocument::requireString($responseDocument->domXPath->evaluate('string(saml:AuthnStatement/saml:AuthnContext/saml:AuthenticatingAuthority)', $assertionElement));
         $authenticatingAuthority = '' !== $authenticatingAuthorityString ? $authenticatingAuthorityString : null;
-        // XXX make sure we got what we requested here!
 
         $attributeList = self::extractAttributes($responseDocument, $assertionElement, $idpInfo, $spInfo);
         $samlAssertion = new Assertion($idpInfo->getEntityId(), $authnInstant, $sessionNotOnOrAfter, $authnContextClassRef, $authenticatingAuthority, $attributeList);

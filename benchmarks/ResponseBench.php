@@ -50,8 +50,7 @@ class ResponseBench
             ),
             new IdpInfo('http://localhost:8080/metadata.php', 'Test', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(\dirname(__DIR__).'/tests/data/certs/FrkoIdP.crt')], []),
             $samlResponse,
-            '_2483d0b8847ccaa5edf203dad685f860',
-            []
+            '_2483d0b8847ccaa5edf203dad685f860'
         );
     }
 }

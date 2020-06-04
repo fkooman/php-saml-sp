@@ -35,23 +35,18 @@ class AuthnRequestState
     /** @var string */
     private $idpEntityId;
 
-    /** @var array<string> */
-    private $authnContextClassRef;
-
     /** @var string */
     private $returnTo;
 
     /**
-     * @param string        $requestId
-     * @param string        $idpEntityId
-     * @param array<string> $authnContextClassRef
-     * @param string        $returnTo
+     * @param string $requestId
+     * @param string $idpEntityId
+     * @param string $returnTo
      */
-    public function __construct($requestId, $idpEntityId, array $authnContextClassRef, $returnTo)
+    public function __construct($requestId, $idpEntityId, $returnTo)
     {
         $this->requestId = $requestId;
         $this->idpEntityId = $idpEntityId;
-        $this->authnContextClassRef = $authnContextClassRef;
         $this->returnTo = $returnTo;
     }
 
@@ -69,14 +64,6 @@ class AuthnRequestState
     public function getIdpEntityId()
     {
         return $this->idpEntityId;
-    }
-
-    /**
-     * @return array<string>
-     */
-    public function getAuthnContextClassRef()
-    {
-        return $this->authnContextClassRef;
     }
 
     /**
