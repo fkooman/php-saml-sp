@@ -236,7 +236,7 @@ EOF;
         $samlResponse = \file_get_contents(__DIR__.'/data/assertion/FrkoIdP.xml');
 
         $session = new TestSession();
-        $authnRequestState = new AuthnRequestState('_2483d0b8847ccaa5edf203dad685f860', 'http://localhost:8080/metadata.php', [], 'http://localhost:8080/return_to');
+        $authnRequestState = new AuthnRequestState('_2483d0b8847ccaa5edf203dad685f860', 'http://localhost:8080/metadata.php', [], [], 'http://localhost:8080/return_to');
         $session->set(TestSP::SESSION_KEY_PREFIX.'1234_relay_state_5678', \serialize($authnRequestState));
         $this->sp->setSession($session);
         $this->sp->setDateTime(new DateTime('2019-02-23T17:01:21Z'));
@@ -281,7 +281,7 @@ EOF;
             $samlResponse = \file_get_contents(__DIR__.'/data/assertion/FrkoIdP.xml');
 
             $session = new TestSession();
-            $authnRequestState = new AuthnRequestState('_2483d0b8847ccaa5edf203dad685f860', 'http://localhost:8080/metadata.php', ['urn:x-example:bar'], 'return_to');
+            $authnRequestState = new AuthnRequestState('_2483d0b8847ccaa5edf203dad685f860', 'http://localhost:8080/metadata.php', ['urn:x-example:bar'], [], 'return_to');
             $session->set(TestSP::SESSION_KEY_PREFIX.''.\base64_encode('1234_relay_state_5678'), \serialize($authnRequestState));
             $this->sp->setSession($session);
             $this->sp->setDateTime(new DateTime('2019-02-23T17:01:21Z'));

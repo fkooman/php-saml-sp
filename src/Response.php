@@ -43,12 +43,13 @@ class Response
      * @param string        $samlResponse
      * @param string        $expectedInResponseTo
      * @param array<string> $authnContext
+     * @param array<string> $scopingIdpList
      *
      * @throws \fkooman\SAML\SP\Exception\ResponseException
      *
      * @return Assertion
      */
-    public function verify(SpInfo $spInfo, IdpInfo $idpInfo, $samlResponse, $expectedInResponseTo, array $authnContext)
+    public function verify(SpInfo $spInfo, IdpInfo $idpInfo, $samlResponse, $expectedInResponseTo, array $authnContext, array $scopingIdpList)
     {
         $responseSigned = false;
         $assertionSigned = false;
@@ -165,7 +166,14 @@ class Response
         // AuthenticatingAuthority (Optional)
         $authenticatingAuthorityString = XmlDocument::requireString($responseDocument->domXPath->evaluate('string(saml:AuthnStatement/saml:AuthnContext/saml:AuthenticatingAuthority)', $assertionElement));
         $authenticatingAuthority = '' !== $authenticatingAuthorityString ? $authenticatingAuthorityString : null;
-        // XXX make sure we got what we requested here!
+        if (0 !== \count($scopingIdpList)) {
+            // we requested a particular AuthenticatingAuthority, make sure we got it
+            // XXX deal with "null"
+            // XXX write a test for this!
+            if (!\in_array($authenticatingAuthority, $scopingIdpList, true)) {
+                throw new ResponseException(\sprintf('expected AuthenticatingAuthority containing any of [%s], got "%s"', \implode(',', $scopingIdpList), $authenticatingAuthority));
+            }
+        }
 
         $attributeList = self::extractAttributes($responseDocument, $assertionElement, $idpInfo, $spInfo);
         $samlAssertion = new Assertion($idpInfo->getEntityId(), $authnInstant, $sessionNotOnOrAfter, $authnContextClassRef, $authenticatingAuthority, $attributeList);

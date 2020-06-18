@@ -38,6 +38,9 @@ class AuthnRequestState
     /** @var array<string> */
     private $authnContextClassRef;
 
+    /** @var array<string> */
+    private $scopingIdpList;
+
     /** @var string */
     private $returnTo;
 
@@ -45,13 +48,15 @@ class AuthnRequestState
      * @param string        $requestId
      * @param string        $idpEntityId
      * @param array<string> $authnContextClassRef
+     * @param array<string> $scopingIdpList
      * @param string        $returnTo
      */
-    public function __construct($requestId, $idpEntityId, array $authnContextClassRef, $returnTo)
+    public function __construct($requestId, $idpEntityId, array $authnContextClassRef, array $scopingIdpList, $returnTo)
     {
         $this->requestId = $requestId;
         $this->idpEntityId = $idpEntityId;
         $this->authnContextClassRef = $authnContextClassRef;
+        $this->scopingIdpList = $scopingIdpList;
         $this->returnTo = $returnTo;
     }
 
@@ -77,6 +82,14 @@ class AuthnRequestState
     public function getAuthnContextClassRef()
     {
         return $this->authnContextClassRef;
+    }
+
+    /**
+     * @return array<string>
+     */
+    public function getScopingIdpList()
+    {
+        return $this->scopingIdpList;
     }
 
     /**
