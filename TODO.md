@@ -30,7 +30,6 @@
 - Validate schema of outgoing SAML messages (`AuthnRequest`, `LogoutRequest`, `Metadata`)?
 - implement automatic metadata refresh (somehow) and verify it using its XML
   signature
-- Expose `AuthenticatingAuthority` as well, next to `AuthnContextClassRef`?
 - Implement a way to have multiple certificates
   - key rollover?
 - `ForceAuthn` in `AuthnRequest` (is anyone actually using this?)
