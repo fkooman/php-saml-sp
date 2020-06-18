@@ -127,6 +127,31 @@ class ResponseTest extends TestCase
         $this->assertSame('https://idp.surfnet.nl', $samlAssertion->getAuthenticatingAuthority());
     }
 
+    public function testMismatchAuthenticatingAuthority()
+    {
+        try {
+            $response = new Response(new DateTime('2019-01-02T21:58:23Z'));
+            $samlResponse = \file_get_contents(__DIR__.'/data/assertion/SURFconext.xml');
+            $samlAssertion = $response->verify(
+                new SpInfo(
+                    'https://labrat.eduvpn.nl/saml',
+                    CryptoKeys::load(__DIR__.'/data/certs'),
+                    'https://labrat.eduvpn.nl/saml/postResponse',
+                    false,
+                    ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
+                ),
+                new IdpInfo('https://idp.surfnet.nl', 'Test', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/SURFconext.crt')], []),
+                $samlResponse,
+                '_928BA2C80BB10E7BA8F2C4504E0EB20B',
+                [],
+                ['https://foo.example.org', 'https://bar.example.org']
+            );
+            $this->fail();
+        } catch (ResponseException $e) {
+            $this->assertSame('expected AuthenticatingAuthority containing any of [https://foo.example.org,https://bar.example.org], got "https://idp.surfnet.nl"', $e->getMessage());
+        }
+    }
+
     //  XXX we do not support "raw" attributes yet, only in urn:oid format
 //    public function testSimpleSamlPhp()
 //    {

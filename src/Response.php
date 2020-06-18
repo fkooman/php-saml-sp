@@ -168,8 +168,9 @@ class Response
         $authenticatingAuthority = '' !== $authenticatingAuthorityString ? $authenticatingAuthorityString : null;
         if (0 !== \count($scopingIdpList)) {
             // we requested a particular AuthenticatingAuthority, make sure we got it
-            // XXX deal with "null"
-            // XXX write a test for this!
+            if (null === $authenticatingAuthority) {
+                throw new ResponseException(\sprintf('expected AuthenticatingAuthority containing any of [%s], got none', \implode(',', $scopingIdpList)));
+            }
             if (!\in_array($authenticatingAuthority, $scopingIdpList, true)) {
                 throw new ResponseException(\sprintf('expected AuthenticatingAuthority containing any of [%s], got "%s"', \implode(',', $scopingIdpList), $authenticatingAuthority));
             }
