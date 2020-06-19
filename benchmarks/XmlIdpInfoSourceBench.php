@@ -29,6 +29,8 @@ class XmlIdpInfoSourceBench
     /**
      * @Revs(1000)
      * @Iterations(5)
+     * @OutputTimeUnit("seconds")
+     * @OutputMode("throughput")
      *
      * @return void
      */
@@ -42,6 +44,8 @@ class XmlIdpInfoSourceBench
 
     /**
      * @Revs(100)
+     * @OutputTimeUnit("seconds")
+     * @OutputMode("throughput")
      *
      * @return void
      */

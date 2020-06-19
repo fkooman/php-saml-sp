@@ -33,6 +33,8 @@ class ResponseBench
     /**
      * @Revs(1000)
      * @Iterations(5)
+     * @OutputTimeUnit("seconds")
+     * @OutputMode("throughput")
      *
      * @return void
      */
