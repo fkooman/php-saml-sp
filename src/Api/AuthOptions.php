@@ -26,18 +26,24 @@ namespace fkooman\SAML\SP\Api;
 
 class AuthOptions
 {
+    /** @var string|null */
+    private $returnTo = null;
+
     /** @var array<string> */
     private $authnContextClassRef = [];
 
-    /** @var string */
-    private $returnTo;
+    /** @var string|null */
+    private $idpEntityId = null;
+
+    /** @var array<string> */
+    private $scopingIdpList = [];
 
     /**
-     * @param string $returnTo
+     * @return self
      */
-    public function __construct($returnTo)
+    public static function init()
     {
-        $this->returnTo = $returnTo;
+        return new self();
     }
 
     /**
@@ -45,9 +51,19 @@ class AuthOptions
      *
      * @return self
      */
-    public static function init($returnTo)
+    public function withReturnTo($returnTo)
     {
-        return new self($returnTo);
+        $this->returnTo = $returnTo;
+
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getReturnTo()
+    {
+        return $this->returnTo;
     }
 
     /**
@@ -55,7 +71,7 @@ class AuthOptions
      *
      * @return self
      */
-    public function setAuthnContextClassRef(array $authnContextClassRef)
+    public function withAuthnContextClassRef(array $authnContextClassRef)
     {
         $this->authnContextClassRef = $authnContextClassRef;
 
@@ -71,10 +87,42 @@ class AuthOptions
     }
 
     /**
-     * @return string
+     * @param string $idpEntityId
+     *
+     * @return self
      */
-    public function getReturnTo()
+    public function withIdp($idpEntityId)
     {
-        return $this->returnTo;
+        $this->idpEntityId = $idpEntityId;
+
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getIdp()
+    {
+        return $this->idpEntityId;
+    }
+
+    /**
+     * @param array<string> $scopingIdpList
+     *
+     * @return self
+     */
+    public function withScopingIdpList(array $scopingIdpList)
+    {
+        $this->scopingIdpList = $scopingIdpList;
+
+        return $this;
+    }
+
+    /**
+     * @return array<string>
+     */
+    public function getScopingIdpList()
+    {
+        return $this->scopingIdpList;
     }
 }

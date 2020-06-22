@@ -24,12 +24,10 @@
 
 namespace fkooman\SAML\SP\Web;
 
-use fkooman\SAML\SP\Api\AuthOptions; // XXX move AuthOptions to SP namespace?
 use fkooman\SAML\SP\Api\SamlAuth;
 use fkooman\SAML\SP\Crypto;
 use fkooman\SAML\SP\Exception\SamlException;
 use fkooman\SAML\SP\IdpInfo;
-use fkooman\SAML\SP\SessionInterface;
 use fkooman\SAML\SP\SP;
 use fkooman\SAML\SP\Web\Exception\HttpException;
 
@@ -50,16 +48,12 @@ class Service
     /** @var CookieInterface */
     private $cookie;
 
-    /** @var \fkooman\SAML\SP\SessionInterface */
-    private $session;
-
-    public function __construct(Config $config, Tpl $tpl, SP $sp, CookieInterface $cookie, SessionInterface $session)
+    public function __construct(Config $config, Tpl $tpl, SP $sp, CookieInterface $cookie)
     {
         $this->config = $config;
         $this->tpl = $tpl;
         $this->sp = $sp;
         $this->cookie = $cookie;
-        $this->session = $session;
     }
 
     /**
@@ -128,90 +122,77 @@ class Service
                         ]
                     )
                 );
-            case '/wayf':
+            case '/login':
                 // get the list of IdPs that can be used
                 $availableIdpList = $this->config->getIdpList();
-                if (null === $idpEntityId = $request->optionalQueryParameter('IdP')) {
-                    // check whether we have exactly 1 configured IdP, then use
-                    // that one!
-                    if (1 === \count($availableIdpList)) {
-                        $idpEntityId = $availableIdpList[0];
-                    }
+                if (0 === \count($availableIdpList)) {
+                    throw new HttpException(500, 'no IdP(s) available');
                 }
 
-                $discoUrl = $this->config->getDiscoUrl();
-                if (null === $idpEntityId) {
-                    // we don't know the IdP (yet)
-                    if (null !== $discoUrl) {
-                        // use external discovery service
-                        $discoQuery = \http_build_query(
-                            [
-                                'entityID' => $this->sp->getSpInfo()->getEntityId(),
-                                'returnIDParam' => 'IdP',
-                                'return' => $request->getUri(),
-                            ]
-                        );
+                $returnTo = self::verifyReturnToOrigin($request->getOrigin(), $request->requireQueryParameter('ReturnTo'));
+                $authnContextClassRef = self::verifyAuthnContextClassRef($request->optionalQueryParameter('AuthnContextClassRef'));
+                $scopingIdpList = self::verifyScopingIdpList($request->optionalQueryParameter('ScopingIdpList'));
+                if (1 === \count($availableIdpList)) {
+                    // we only have 1 IdP, so use that
+                    return new RedirectResponse($this->sp->login($availableIdpList[0], $returnTo, $authnContextClassRef, $scopingIdpList));
+                }
 
-                        return new RedirectResponse(
-                            \sprintf(
-                                '%s%s%s',
-                                $discoUrl,
-                                false === \strpos($discoUrl, '?') ? '?' : '&',
-                                $discoQuery
-                            )
-                        );
-                    }
+                if (null !== $idpEntityId = $request->optionalQueryParameter('IdP')) {
+                    // an IdP entity ID is provided as a query parameter
+                    return new RedirectResponse($this->sp->login($idpEntityId, $returnTo, $authnContextClassRef, $scopingIdpList));
+                }
 
-                    // we we use our own built-in simple "WAYF"
-                    $idpInfoList = [];
-                    foreach ($availableIdpList as $availableIdp) {
-                        if ($this->sp->getIdpInfoSource()->has($availableIdp)) {
-                            $idpInfoList[$availableIdp] = $this->sp->getIdpInfoSource()->get($availableIdp);
-                        }
-                    }
+                if (null !== $discoUrl = $this->config->getDiscoUrl()) {
+                    // use external discovery service
+                    $discoQuery = \http_build_query(
+                        [
+                            'entityID' => $this->sp->getSpInfo()->getEntityId(),
+                            'returnIDParam' => 'IdP',
+                            'return' => $request->getUri(),
+                        ]
+                    );
 
-                    // sort the IdPs by display name
-                    \uasort($idpInfoList, function (IdpInfo $a, IdpInfo $b) {
-                        return \strcasecmp($a->getDisplayName(), $b->getDisplayName());
-                    });
-
-                    $lastChosenIdpInfo = null;
-                    if (null !== $lastChosenIdp = $this->cookie->get(self::LAST_CHOSEN_COOKIE_NAME)) {
-                        $lastChosenIdpInfo = $idpInfoList[$lastChosenIdp];
-                        unset($idpInfoList[$lastChosenIdp]);
-                    }
-
-                    return new HtmlResponse(
-                        $this->tpl->render(
-                            'wayf',
-                            [
-                                'lastChosenIdpInfo' => $lastChosenIdpInfo,
-                                'returnTo' => $request->getUri(),
-                                'idpInfoList' => $idpInfoList,
-                            ]
+                    return new RedirectResponse(
+                        \sprintf(
+                            '%s%s%s',
+                            $discoUrl,
+                            false === \strpos($discoUrl, '?') ? '?' : '&',
+                            $discoQuery
                         )
                     );
                 }
 
-                if (1 < \count($availableIdpList) && null === $discoUrl) {
-                    // store the chosen IdP in case >= 1 is available and we
-                    // use our own discovery
-                    $this->cookie->set(self::LAST_CHOSEN_COOKIE_NAME, $idpEntityId);
+                // use our own discovery service
+                $idpInfoList = [];
+                foreach ($availableIdpList as $availableIdp) {
+                    if ($this->sp->getIdpInfoSource()->has($availableIdp)) {
+                        $idpInfoList[$availableIdp] = $this->sp->getIdpInfoSource()->get($availableIdp);
+                    }
                 }
 
-                // we require an AuthOptions stored in the session
-                if (null === $authOptionsStr = $this->session->take(SP::SESSION_KEY_PREFIX.'auth_options')) {
-                    throw new HttpException(400, 'SamlAuth API must be used');
-                }
-                $authOptions = \unserialize($authOptionsStr);
-                if (!($authOptions instanceof AuthOptions)) {
-                    throw new HttpException(500, 'expected "AuthOptions" in session data');
+                // sort the IdPs by display name
+                \uasort($idpInfoList, function (IdpInfo $a, IdpInfo $b) {
+                    return \strcasecmp($a->getDisplayName(), $b->getDisplayName());
+                });
+
+                $lastChosenIdpInfo = null;
+                if (null !== $lastChosenIdp = $this->cookie->get(self::LAST_CHOSEN_COOKIE_NAME)) {
+                    // make sure IdP (still) exists
+                    if (\array_key_exists($lastChosenIdp, $idpInfoList)) {
+                        $lastChosenIdpInfo = $idpInfoList[$lastChosenIdp];
+                        unset($idpInfoList[$lastChosenIdp]);
+                    }
                 }
 
-                $returnTo = self::verifyReturnToOrigin($request->getOrigin(), $authOptions->getReturnTo());
-
-                // we know which IdP to go to!
-                return new RedirectResponse($this->sp->login($idpEntityId, $returnTo, $authOptions->getAuthnContextClassRef()));
+                return new HtmlResponse(
+                    $this->tpl->render(
+                        'wayf',
+                        [
+                            'lastChosenIdpInfo' => $lastChosenIdpInfo,
+                            'idpInfoList' => $idpInfoList,
+                        ]
+                    )
+                );
             // user triggered logout
             case '/logout':
                 $returnTo = self::verifyReturnToOrigin($request->getOrigin(), $request->requireQueryParameter('ReturnTo'));
@@ -243,6 +224,14 @@ class Service
                 $returnTo = $this->sp->handleResponse($request->requirePostParameter('SAMLResponse'), $request->requirePostParameter('RelayState'));
 
                 return new RedirectResponse($returnTo);
+            case '/login':
+                $idpEntityId = $request->requirePostParameter('IdP');
+                // we don't care what the value of the cookie becomes, it will
+                // be checked before using it anyway...
+                $this->cookie->set(self::LAST_CHOSEN_COOKIE_NAME, $idpEntityId);
+                $returnTo = self::verifyReturnToOrigin($request->getOrigin(), $request->getUri());
+
+                return new RedirectResponse($returnTo.'&'.\http_build_query(['IdP' => $idpEntityId]));
             case '/setLanguage':
                 // we don't care what uiLanguage is, it can be anything, it
                 // will be verified by Tpl::setLanguage. User can provide any
@@ -273,7 +262,10 @@ class Service
         }
 
         // the filter_var FILTER_VALIDATE_URL make sure scheme and host are
-        // there...
+        // there, but just to make absolutely sure...
+        if (!\array_key_exists('scheme', $parsedUrl) || !\array_key_exists('host', $parsedUrl)) {
+            throw new HttpException(400, 'invalid "ReturnTo" provided');
+        }
         $urlConstruction = $parsedUrl['scheme'].'://'.$parsedUrl['host'];
         if (\array_key_exists('port', $parsedUrl)) {
             $urlConstruction .= ':'.(string) $parsedUrl['port'];
@@ -284,5 +276,33 @@ class Service
         }
 
         return $returnTo;
+    }
+
+    /**
+     * @param string|null $authnContextClassRef
+     *
+     * @return array<string>
+     */
+    private static function verifyAuthnContextClassRef($authnContextClassRef)
+    {
+        if (null === $authnContextClassRef) {
+            return [];
+        }
+
+        return \explode(' ', $authnContextClassRef);
+    }
+
+    /**
+     * @param string|null $scopingIdpList
+     *
+     * @return array<string>
+     */
+    private static function verifyScopingIdpList($scopingIdpList)
+    {
+        if (null === $scopingIdpList) {
+            return [];
+        }
+
+        return \explode(' ', $scopingIdpList);
     }
 }

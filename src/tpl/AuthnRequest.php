@@ -7,4 +7,13 @@
 <?php endforeach; ?>
   </samlp:RequestedAuthnContext>
 <?php endif; ?>
+<?php if (0 !== \count($ScopingIdpList)): ?>
+  <samlp:Scoping>
+    <samlp:IDPList>
+<?php foreach ($ScopingIdpList as $ScopingIdp): ?>
+      <samlp:IDPEntry ProviderID="<?=$ScopingIdp; ?>"/>
+<?php endforeach; ?>
+    </samlp:IDPList>
+  </samlp:Scoping>
+<?php endif; ?>
 </samlp:AuthnRequest>

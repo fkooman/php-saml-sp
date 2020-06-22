@@ -5,20 +5,20 @@ body {
     text-align: inherit;    /* override for bootstrap-reboot */
 }
 
-header {
+main, header {
     padding: 0 0.5em;
-    display: grid;
-    grid-template-columns: auto 2fr;
 }
 
-header form {
-    font-size: 75%;
+header {
     text-align: end;
 }
 
-main {
-    margin-top: 1em;
+header button {
+    border: 0;
+    font-size: 85%;
+    margin: 0;
     padding: 0 0.5em;
+    background-color: #fff;
 }
 
 button {
@@ -27,6 +27,7 @@ button {
     outline: none;
     margin: 0.5em 0;
     background-color: #f8f8f8;
+    color: #777;
 }
 
 dd {
@@ -91,7 +92,25 @@ pre {
 }
 
 footer {
-	margin-top: 2em;
-	font-size: 75%;
-	text-align: center;
+    margin-top: 2em;
+    font-size: 75%;
+    text-align: center;
+}
+
+form#searchBox {
+    margin-bottom: 0.5em;
+    display: none;
+}
+
+span#noResults {
+    display: none;
+    color: orange;
+    text-align: center;
+}
+
+form#searchBox input {
+    width: 100%;
+    text-align: start;
+    padding: 0.75em;
+    margin: 0;
 }

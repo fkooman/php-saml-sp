@@ -9,15 +9,24 @@
     <alg:SigningMethod MinKeySize="2048" Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
   </md:Extensions>
   <md:SPSSODescriptor AuthnRequestsSigned="true" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
-    <md:KeyDescriptor>
+    <md:KeyDescriptor use="signing">
       <ds:KeyInfo>
         <ds:X509Data>
-          <ds:X509Certificate><?=$spInfo->getPublicKey()->toEncodedString(); ?></ds:X509Certificate>
+          <ds:X509Certificate><?=$spInfo->getCryptoKeys()->getSigningPublicKey()->toEncodedString(); ?></ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </md:KeyDescriptor>
+<?php if (fkooman\SAML\SP\Crypto::hasDecryptionSupport()): ?>
+    <md:KeyDescriptor use="encryption">
+      <ds:KeyInfo>
+        <ds:X509Data>
+          <ds:X509Certificate><?=$spInfo->getCryptoKeys()->getEncryptionPublicKey()->toEncodedString(); ?></ds:X509Certificate>
         </ds:X509Data>
       </ds:KeyInfo>
       <md:EncryptionMethod Algorithm="http://www.w3.org/2009/xmlenc11#aes256-gcm"/>
       <md:EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"/>
     </md:KeyDescriptor>
+<?php endif; ?>
 <?php if (null !== $spInfo->getSloUrl()): ?>
     <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="<?=$spInfo->getSloUrl(); ?>"/>
 <?php endif; ?>

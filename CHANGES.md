@@ -1,10 +1,43 @@
 # ChangeLog
 
-## 0.3.0 (...)
+## 0.4.1 (...)
+- implement `<sampl:Scoping>` for `<samlp:AuthnRequest>` to tell a SAML proxy
+  which IdP behind the proxy should be used for authentication, thus skipping 
+  the WAYF
+
+## 0.4.0 (2020-05-25)
+- use `/login` endpoint instead of `/wayf` (issue #4)
+- support `ReturnTo` as a query parameter on `/login` (issue #5)
+- support `AuthnContextClassRef` as a query parameter on `/login`
+- support `IdP` as a query parameter on `/login`
+- add (optional) `AuthOptions` parameter to the `SamlAuth` methods for getting
+  and verifying the assertion instead of having to do this manually
+
+## 0.3.3 (2020-05-23)
+- update `nl-NL` translation files
+
+## 0.3.2 (2020-05-23)
+- implement JS search for WAYF (only if browser has JS enabled)
+- update bootstrap-reboot CSS
+- cleanup language handling / template
+
+## 0.3.1 (2020-02-23)
+- use `autofocus` element on the previously selected IdP in the WAYF, so enter
+  can be used to continue to that IdP immediately
+- translate language code to human readable language for display in UI
+
+## 0.3.0 (2020-02-12)
 - small API update for `XmlIdpInfoSource` now taking array in contructor to
-  allow specifying multiple metdata files 
+  allow specifying multiple metadata files 
 - initial support for "Web", i.e. run fkooman/saml-sp as an app on your server
   next to the application(s) you want to use SAML authentication with
+- support `<EncryptedAssertion>` with AES-256-GCM on PHP >= 7.1
+- update (C)
+- source formatting
+- `IdpInfo` supports "DisplayName"
+- `SpInfo` supports "DisplayName"
+- `SpInfo` can now enforce `<EncryptedAssertion>` from IdP(s)
+- SP Metadata now exposes "DisplayName" and supported encryption algorithms
 
 ## 0.2.2 (2019-08-06)
 - do not throw error when attribute `saml:AuthnStatement/@SessionNotOnOrAfter`

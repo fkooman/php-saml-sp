@@ -78,12 +78,13 @@ class SP
      * @param string        $idpEntityId
      * @param string        $returnTo
      * @param array<string> $authnContextClassRef
+     * @param array<string> $scopingIdpList
      *
      * @throws \fkooman\SAML\SP\Exception\SpException
      *
      * @return string
      */
-    public function login($idpEntityId, $returnTo, array $authnContextClassRef = [])
+    public function login($idpEntityId, $returnTo, array $authnContextClassRef = [], array $scopingIdpList = [])
     {
         self::validateReturnTo($returnTo);
         $requestId = \sprintf('_%s', Hex::encode($this->random->requestId()));
@@ -101,14 +102,15 @@ class SP
                 'AssertionConsumerServiceURL' => $this->spInfo->getAcsUrl(),
                 'Issuer' => $this->spInfo->getEntityId(),
                 'AuthnContextClassRef' => $authnContextClassRef,
+                'ScopingIdpList' => $scopingIdpList,
             ]
         );
 
         $relayState = Base64::encode($this->random->relayState());
-        $authnRequestState = new AuthnRequestState($requestId, $idpEntityId, $authnContextClassRef, $returnTo);
+        $authnRequestState = new AuthnRequestState($requestId, $idpEntityId, $authnContextClassRef, $scopingIdpList, $returnTo);
         $this->session->set(self::SESSION_KEY_PREFIX.$relayState, \serialize($authnRequestState));
 
-        return self::prepareRequestUrl($ssoUrl, $authnRequest, $relayState, $this->spInfo->getPrivateKey());
+        return self::prepareRequestUrl($ssoUrl, $authnRequest, $relayState, $this->spInfo->getCryptoKeys()->getSigningPrivateKey());
     }
 
     /**
@@ -136,14 +138,14 @@ class SP
             throw new SpException(\sprintf('IdP "%s" not registered', $idpEntityId));
         }
         $idpInfo = $this->idpInfoSource->get($idpEntityId);
-        $authnContextClassRef = $authnRequestState->getAuthnContextClassRef();
         $response = new Response($this->dateTime);
         $samlAssertion = $response->verify(
             $this->spInfo,
             $idpInfo,
             Base64::decode($samlResponse),
             $authnRequestState->getRequestId(),
-            $authnContextClassRef
+            $authnRequestState->getAuthnContextClassRef(),
+            $authnRequestState->getScopingIdpList()
         );
 
         $this->session->regenerate();
@@ -213,7 +215,7 @@ class SP
         $logoutRequestState = new LogoutRequestState($requestId, $idpEntityId, $returnTo);
         $this->session->set(self::SESSION_KEY_PREFIX.$relayState, \serialize($logoutRequestState));
 
-        return self::prepareRequestUrl($idpSloUrl, $logoutRequest, $relayState, $this->spInfo->getPrivateKey());
+        return self::prepareRequestUrl($idpSloUrl, $logoutRequest, $relayState, $this->spInfo->getCryptoKeys()->getSigningPrivateKey());
     }
 
     /**

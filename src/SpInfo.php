@@ -32,11 +32,8 @@ class SpInfo
     /** @var string */
     private $entityId;
 
-    /** @var PrivateKey */
-    private $privateKey;
-
-    /** @var PublicKey */
-    private $publicKey;
+    /** @var CryptoKeys */
+    private $cryptoKeys;
 
     /** @var string */
     private $acsUrl;
@@ -56,11 +53,10 @@ class SpInfo
      * @param bool                 $requireEncryption
      * @param array<string,string> $displayNameList
      */
-    public function __construct($entityId, PrivateKey $privateKey, PublicKey $publicKey, $acsUrl, $requireEncryption, array $displayNameList)
+    public function __construct($entityId, CryptoKeys $cryptoKeys, $acsUrl, $requireEncryption, array $displayNameList)
     {
         $this->entityId = $entityId;
-        $this->privateKey = $privateKey;
-        $this->publicKey = $publicKey;
+        $this->cryptoKeys = $cryptoKeys;
         $this->acsUrl = $acsUrl;
         $this->requireEncryption = $requireEncryption;
         $this->displayNameList = $displayNameList;
@@ -75,19 +71,11 @@ class SpInfo
     }
 
     /**
-     * @return PrivateKey
+     * @return CryptoKeys
      */
-    public function getPrivateKey()
+    public function getCryptoKeys()
     {
-        return $this->privateKey;
-    }
-
-    /**
-     * @return PublicKey
-     */
-    public function getPublicKey()
-    {
-        return $this->publicKey;
+        return $this->cryptoKeys;
     }
 
     /**

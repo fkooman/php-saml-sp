@@ -9,30 +9,35 @@
     </p>
 <?php else: ?>
 <?php if (null !== $lastChosenIdpInfo): ?>
-    <form method="get" action="wayf">
-        <input type="hidden" name="ReturnTo" value="<?=$this->e($returnTo); ?>">
+    <form method="post">
         <ul>
             <li>
-                <button name="IdP" type="submit" value="<?=$this->e($lastChosenIdpInfo->getEntityId()); ?>"><?=$this->e($lastChosenIdpInfo->getDisplayName()); ?></button>
+                <button autofocus="autofocus" name="IdP" type="submit" value="<?=$this->e($lastChosenIdpInfo->getEntityId()); ?>"><?=$this->e($lastChosenIdpInfo->getDisplayName()); ?></button>
             </li>
         </ul>
     </form>
-	<details>
-		<summary><?=$this->t('Other...'); ?></summary>
-		    <form method="get" action="wayf">
-		        <input type="hidden" name="ReturnTo" value="<?=$this->e($returnTo); ?>">
-		        <ul>
+    <details>
+        <summary><?=$this->t('Other...'); ?></summary>
+            <form id="searchBox">
+                <input type="text" name="searchFor" placeholder="<?=$this->t('Search for your organization...'); ?>">
+            </form>
+            <form id="organizationList" method="post">
+                <ul>
 <?php foreach ($idpInfoList as $idpInfo): ?>
-		            <li>
-		                <button name="IdP" type="submit" value="<?=$this->e($idpInfo->getEntityId()); ?>"><?=$this->e($idpInfo->getDisplayName()); ?></button>
-		            </li>
+                    <li>
+                        <button name="IdP" type="submit" value="<?=$this->e($idpInfo->getEntityId()); ?>"><?=$this->e($idpInfo->getDisplayName()); ?></button>
+                    </li>
 <?php endforeach; ?>
-		        </ul>
-		    </form>
-	</details>
+                </ul>
+            </form>
+            <span id="noResults"><?=$this->t('No Results!'); ?></span>
+    </details>
 <?php else: ?>
-    <form method="get" action="wayf">
-        <input type="hidden" name="ReturnTo" value="<?=$this->e($returnTo); ?>">
+
+    <form id="searchBox">
+        <input type="text" name="searchFor" placeholder="<?=$this->t('Search for your organization...'); ?>">
+    </form>
+    <form id="organizationList" method="post">
         <ul>
 <?php foreach ($idpInfoList as $idpInfo): ?>
             <li>
@@ -41,6 +46,7 @@
 <?php endforeach; ?>
         </ul>
     </form>
+    <span id="noResults"><?=$this->t('No Results!'); ?></span>
 <?php endif; ?>
 <?php endif; ?>
 <?php $this->stop('content'); ?>

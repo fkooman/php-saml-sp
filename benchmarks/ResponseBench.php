@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
+use fkooman\SAML\SP\CryptoKeys;
 use fkooman\SAML\SP\IdpInfo;
-use fkooman\SAML\SP\PrivateKey;
 use fkooman\SAML\SP\PublicKey;
 use fkooman\SAML\SP\Response;
 use fkooman\SAML\SP\SpInfo;
@@ -33,6 +33,8 @@ class ResponseBench
     /**
      * @Revs(1000)
      * @Iterations(5)
+     * @OutputTimeUnit("seconds")
+     * @OutputMode("throughput")
      *
      * @return void
      */
@@ -43,8 +45,7 @@ class ResponseBench
         $samlAssertion = $response->verify(
             new SpInfo(
                 'http://localhost:8081/metadata',
-                PrivateKey::fromFile(\dirname(__DIR__).'/tests/data/certs/sp.key'),
-                PublicKey::fromFile(\dirname(__DIR__).'/tests/data/certs/sp.crt'),
+                CryptoKeys::load(\dirname(__DIR__).'/tests/data/certs'),
                 'http://localhost:8081/acs',
                 false,
                 ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
@@ -52,6 +53,7 @@ class ResponseBench
             new IdpInfo('http://localhost:8080/metadata.php', 'Test', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(\dirname(__DIR__).'/tests/data/certs/FrkoIdP.crt')], []),
             $samlResponse,
             '_2483d0b8847ccaa5edf203dad685f860',
+            [],
             []
         );
     }

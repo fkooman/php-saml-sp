@@ -1,5 +1,4 @@
-/composer.lock
 /vendor
 /config/*.php
-/config/*.key
-/config/*.crt
+/keys/*.key
+/keys/*.crt

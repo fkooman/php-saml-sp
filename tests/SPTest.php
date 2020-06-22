@@ -29,11 +29,11 @@ use DOMDocument;
 use fkooman\SAML\SP\Assertion;
 use fkooman\SAML\SP\AuthnRequestState;
 use fkooman\SAML\SP\Crypto;
+use fkooman\SAML\SP\CryptoKeys;
 use fkooman\SAML\SP\Exception\ResponseException;
 use fkooman\SAML\SP\LogoutRequestState;
 use fkooman\SAML\SP\NameId;
 use fkooman\SAML\SP\PrivateKey;
-use fkooman\SAML\SP\PublicKey;
 use fkooman\SAML\SP\SpInfo;
 use fkooman\SAML\SP\XmlIdpInfoSource;
 use PHPUnit\Framework\TestCase;
@@ -47,8 +47,7 @@ class SPTest extends TestCase
     {
         $spInfo = new SpInfo(
             'http://localhost:8081/metadata',
-            PrivateKey::fromFile(__DIR__.'/data/sp.key'),
-            PublicKey::fromFile(__DIR__.'/data/sp.crt'),
+            CryptoKeys::load(__DIR__.'/data'),
             'http://localhost:8081/acs',
             false,
             ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
@@ -87,7 +86,7 @@ EOF;
                 'SigAlg' => 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256',
             ]
         );
-        $signatureQuery = \http_build_query(['Signature' => \base64_encode(Crypto::sign($httpQuery, PrivateKey::fromFile(__DIR__.'/data/sp.key')))]);
+        $signatureQuery = \http_build_query(['Signature' => \base64_encode(Crypto::sign($httpQuery, PrivateKey::fromFile(__DIR__.'/data/signing.key')))]);
         $this->assertSame(\sprintf('http://localhost:8080/sso.php?%s&%s', $httpQuery, $signatureQuery), $ssoUrl);
 
         $authnRequestState = \unserialize($session->get(TestSP::SESSION_KEY_PREFIX.''.$relayState));
@@ -122,13 +121,45 @@ EOF;
                 'SigAlg' => 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256',
             ]
         );
-        $signatureQuery = \http_build_query(['Signature' => \base64_encode(Crypto::sign($httpQuery, PrivateKey::fromFile(__DIR__.'/data/sp.key')))]);
+        $signatureQuery = \http_build_query(['Signature' => \base64_encode(Crypto::sign($httpQuery, PrivateKey::fromFile(__DIR__.'/data/signing.key')))]);
+        $this->assertSame(\sprintf('http://localhost:8080/sso.php?%s&%s', $httpQuery, $signatureQuery), $ssoUrl);
+    }
+
+    public function testScopingIdPList()
+    {
+        $ssoUrl = $this->sp->login(
+            'http://localhost:8080/metadata.php',
+            'http://localhost:8080/app',
+            [],
+            ['https://idp.tuxed.net/metadata']
+        );
+
+        $samlRequest = <<< EOF
+<samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="_30313233343536373839616263646566" Version="2.0" IssueInstant="2018-01-01T08:00:00Z" Destination="http://localhost:8080/sso.php" Consent="urn:oasis:names:tc:SAML:2.0:consent:current-implicit" ForceAuthn="false" IsPassive="false" AssertionConsumerServiceURL="http://localhost:8081/acs">
+  <saml:Issuer>http://localhost:8081/metadata</saml:Issuer>
+  <samlp:Scoping>
+    <samlp:IDPList>
+      <samlp:IDPEntry ProviderID="https://idp.tuxed.net/metadata"/>
+    </samlp:IDPList>
+  </samlp:Scoping>
+</samlp:AuthnRequest>
+EOF;
+
+        $relayState = \base64_encode('1234_relay_state_5678');
+        $httpQuery = \http_build_query(
+            [
+                'SAMLRequest' => \base64_encode(\gzdeflate($samlRequest)),
+                'RelayState' => $relayState,
+                'SigAlg' => 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256',
+            ]
+        );
+        $signatureQuery = \http_build_query(['Signature' => \base64_encode(Crypto::sign($httpQuery, PrivateKey::fromFile(__DIR__.'/data/signing.key')))]);
         $this->assertSame(\sprintf('http://localhost:8080/sso.php?%s&%s', $httpQuery, $signatureQuery), $ssoUrl);
     }
 
     public function testMetadata()
     {
-        $metadataResponse = <<< EOF
+        $metadataWithEncryptionSupportResponse = <<< EOF
 <md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:alg="urn:oasis:names:tc:SAML:metadata:algsupport" xmlns:mdui="urn:oasis:names:tc:SAML:metadata:ui" entityID="http://localhost:8081/metadata">
   <md:Extensions>
     <mdui:UIInfo>
@@ -139,7 +170,14 @@ EOF;
     <alg:SigningMethod MinKeySize="2048" Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
   </md:Extensions>
   <md:SPSSODescriptor AuthnRequestsSigned="true" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
-    <md:KeyDescriptor>
+    <md:KeyDescriptor use="signing">
+      <ds:KeyInfo>
+        <ds:X509Data>
+          <ds:X509Certificate>MIIEBTCCAm2gAwIBAgIUS7YFVomn/lUz/H0CEm8RL1UxNpowDQYJKoZIhvcNAQELBQAwEjEQMA4GA1UEAwwHU0FNTCBTUDAeFw0xOTAxMDcxODU5MTNaFw0yODExMTUxODU5MTNaMBIxEDAOBgNVBAMMB1NBTUwgU1AwggGiMA0GCSqGSIb3DQEBAQUAA4IBjwAwggGKAoIBgQDydCL4AJfuaOesEcLb+WUiQx0HXs42yyXl/ZIWpg7NaASFFRZC096gnW06sDq2TLIpCdcKt8qd5WBxll4RXN/CoPC1nnHW6AzGPC3zVQne7unJuPSG8Ka1OzXBt9tA+NyQd0h/U5yIVUrtK0svNGtjZ8pOZ76Dm/STIV5mq3HZQ7RfJtMPfagcDY72Eu+FNQaQ72YQFKlg6tm3mqduGdIuMATfVv4my4EHDkux8PV+AbtZcnwq4YlrbgeQ73CnA8LCw0WG8yHblzd8eKwdBuE53tthvu44qEvtx49nrvP0o6KfGG7Qn7tDzaXkmxz23L4GsXdON9jc9yu/BUYYYtUwB7shW42q2RJHWOel5L/GEXGesn4C5DMUG62I4+RDxUIwtoHjz5Fh4BC32uZvPBnIIphXXoDqCqGN9ruzLD1wBlj5UwTr7ves0+aYUwv7lOq1TY5ljA5PkBz3mVQjWMgWaruGdLgJsC3OsRmidUN+/XtXvBHFCeBkvURoOBl95UcCAwEAAaNTMFEwHQYDVR0OBBYEFAdw5e4frADj6CRyrRT1ojo+9ojOMB8GA1UdIwQYMBaAFAdw5e4frADj6CRyrRT1ojo+9ojOMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggGBAHN1ZOlG7gEZYrxjCWTITiP2eCMMb5+bCpi3D69tCtRE1Tz4vEDlHrdepqQo7TVrCYoQiUg1KnGDBMXxY/L/MGKJbgeP+9o8cNpP+1scF5Sac6K/jRAlzso//eSUJkReYynUHjLaIsmhyQ8UOEfUHQmpgAGlSHNcTT9lUpwyphQs4HcIgTYXT1sZVb09/7gEeaKdAfXQ5BEyLU3RYaQUzkyvHYywo1gSKOSjB2UfqCt2+nJzztQzZzmDePDVRWyxfQNHN/Y4PUxIKi/8hxBB3497A5FNsI7gq1j5dBzbPpv+G17sBix7QkoiMy5n2degHhLfSFX1I6+I1lMIEtqR+uI9civOtRo9D90L8uydACoLY4CqslouwCsHuJU39h1HEES8FaXYS7nrthVShNJ8pOk5SPshl637FxlLGWfuFZR1Ot20WtVgXZFwq9ZgRrAnO7PLgbXadocn4skHHbigVWHdwjZIv1rjOVcewY/W/w93mgh5CZikrQQ2PTmUPn6Raw==</ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </md:KeyDescriptor>
+    <md:KeyDescriptor use="encryption">
       <ds:KeyInfo>
         <ds:X509Data>
           <ds:X509Certificate>MIIEBTCCAm2gAwIBAgIUS7YFVomn/lUz/H0CEm8RL1UxNpowDQYJKoZIhvcNAQELBQAwEjEQMA4GA1UEAwwHU0FNTCBTUDAeFw0xOTAxMDcxODU5MTNaFw0yODExMTUxODU5MTNaMBIxEDAOBgNVBAMMB1NBTUwgU1AwggGiMA0GCSqGSIb3DQEBAQUAA4IBjwAwggGKAoIBgQDydCL4AJfuaOesEcLb+WUiQx0HXs42yyXl/ZIWpg7NaASFFRZC096gnW06sDq2TLIpCdcKt8qd5WBxll4RXN/CoPC1nnHW6AzGPC3zVQne7unJuPSG8Ka1OzXBt9tA+NyQd0h/U5yIVUrtK0svNGtjZ8pOZ76Dm/STIV5mq3HZQ7RfJtMPfagcDY72Eu+FNQaQ72YQFKlg6tm3mqduGdIuMATfVv4my4EHDkux8PV+AbtZcnwq4YlrbgeQ73CnA8LCw0WG8yHblzd8eKwdBuE53tthvu44qEvtx49nrvP0o6KfGG7Qn7tDzaXkmxz23L4GsXdON9jc9yu/BUYYYtUwB7shW42q2RJHWOel5L/GEXGesn4C5DMUG62I4+RDxUIwtoHjz5Fh4BC32uZvPBnIIphXXoDqCqGN9ruzLD1wBlj5UwTr7ves0+aYUwv7lOq1TY5ljA5PkBz3mVQjWMgWaruGdLgJsC3OsRmidUN+/XtXvBHFCeBkvURoOBl95UcCAwEAAaNTMFEwHQYDVR0OBBYEFAdw5e4frADj6CRyrRT1ojo+9ojOMB8GA1UdIwQYMBaAFAdw5e4frADj6CRyrRT1ojo+9ojOMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggGBAHN1ZOlG7gEZYrxjCWTITiP2eCMMb5+bCpi3D69tCtRE1Tz4vEDlHrdepqQo7TVrCYoQiUg1KnGDBMXxY/L/MGKJbgeP+9o8cNpP+1scF5Sac6K/jRAlzso//eSUJkReYynUHjLaIsmhyQ8UOEfUHQmpgAGlSHNcTT9lUpwyphQs4HcIgTYXT1sZVb09/7gEeaKdAfXQ5BEyLU3RYaQUzkyvHYywo1gSKOSjB2UfqCt2+nJzztQzZzmDePDVRWyxfQNHN/Y4PUxIKi/8hxBB3497A5FNsI7gq1j5dBzbPpv+G17sBix7QkoiMy5n2degHhLfSFX1I6+I1lMIEtqR+uI9civOtRo9D90L8uydACoLY4CqslouwCsHuJU39h1HEES8FaXYS7nrthVShNJ8pOk5SPshl637FxlLGWfuFZR1Ot20WtVgXZFwq9ZgRrAnO7PLgbXadocn4skHHbigVWHdwjZIv1rjOVcewY/W/w93mgh5CZikrQQ2PTmUPn6Raw==</ds:X509Certificate>
@@ -154,10 +192,43 @@ EOF;
 </md:EntityDescriptor>
 EOF;
 
-        $this->assertSame(
-            $metadataResponse,
-            $this->sp->metadata()
-        );
+        $metadataWithoutEncryptionSupportResponse = <<< EOF
+<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:alg="urn:oasis:names:tc:SAML:metadata:algsupport" xmlns:mdui="urn:oasis:names:tc:SAML:metadata:ui" entityID="http://localhost:8081/metadata">
+  <md:Extensions>
+    <mdui:UIInfo>
+      <mdui:DisplayName xml:lang="en-US">My SP</mdui:DisplayName>
+      <mdui:DisplayName xml:lang="nl-NL">Mijn SP</mdui:DisplayName>
+    </mdui:UIInfo>
+    <alg:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+    <alg:SigningMethod MinKeySize="2048" Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+  </md:Extensions>
+  <md:SPSSODescriptor AuthnRequestsSigned="true" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+    <md:KeyDescriptor use="signing">
+      <ds:KeyInfo>
+        <ds:X509Data>
+          <ds:X509Certificate>MIIEBTCCAm2gAwIBAgIUS7YFVomn/lUz/H0CEm8RL1UxNpowDQYJKoZIhvcNAQELBQAwEjEQMA4GA1UEAwwHU0FNTCBTUDAeFw0xOTAxMDcxODU5MTNaFw0yODExMTUxODU5MTNaMBIxEDAOBgNVBAMMB1NBTUwgU1AwggGiMA0GCSqGSIb3DQEBAQUAA4IBjwAwggGKAoIBgQDydCL4AJfuaOesEcLb+WUiQx0HXs42yyXl/ZIWpg7NaASFFRZC096gnW06sDq2TLIpCdcKt8qd5WBxll4RXN/CoPC1nnHW6AzGPC3zVQne7unJuPSG8Ka1OzXBt9tA+NyQd0h/U5yIVUrtK0svNGtjZ8pOZ76Dm/STIV5mq3HZQ7RfJtMPfagcDY72Eu+FNQaQ72YQFKlg6tm3mqduGdIuMATfVv4my4EHDkux8PV+AbtZcnwq4YlrbgeQ73CnA8LCw0WG8yHblzd8eKwdBuE53tthvu44qEvtx49nrvP0o6KfGG7Qn7tDzaXkmxz23L4GsXdON9jc9yu/BUYYYtUwB7shW42q2RJHWOel5L/GEXGesn4C5DMUG62I4+RDxUIwtoHjz5Fh4BC32uZvPBnIIphXXoDqCqGN9ruzLD1wBlj5UwTr7ves0+aYUwv7lOq1TY5ljA5PkBz3mVQjWMgWaruGdLgJsC3OsRmidUN+/XtXvBHFCeBkvURoOBl95UcCAwEAAaNTMFEwHQYDVR0OBBYEFAdw5e4frADj6CRyrRT1ojo+9ojOMB8GA1UdIwQYMBaAFAdw5e4frADj6CRyrRT1ojo+9ojOMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggGBAHN1ZOlG7gEZYrxjCWTITiP2eCMMb5+bCpi3D69tCtRE1Tz4vEDlHrdepqQo7TVrCYoQiUg1KnGDBMXxY/L/MGKJbgeP+9o8cNpP+1scF5Sac6K/jRAlzso//eSUJkReYynUHjLaIsmhyQ8UOEfUHQmpgAGlSHNcTT9lUpwyphQs4HcIgTYXT1sZVb09/7gEeaKdAfXQ5BEyLU3RYaQUzkyvHYywo1gSKOSjB2UfqCt2+nJzztQzZzmDePDVRWyxfQNHN/Y4PUxIKi/8hxBB3497A5FNsI7gq1j5dBzbPpv+G17sBix7QkoiMy5n2degHhLfSFX1I6+I1lMIEtqR+uI9civOtRo9D90L8uydACoLY4CqslouwCsHuJU39h1HEES8FaXYS7nrthVShNJ8pOk5SPshl637FxlLGWfuFZR1Ot20WtVgXZFwq9ZgRrAnO7PLgbXadocn4skHHbigVWHdwjZIv1rjOVcewY/W/w93mgh5CZikrQQ2PTmUPn6Raw==</ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </md:KeyDescriptor>
+    <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="http://localhost:8081/slo"/>
+    <md:AssertionConsumerService index="0" Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="http://localhost:8081/acs"/>
+  </md:SPSSODescriptor>
+</md:EntityDescriptor>
+EOF;
+
+        if (Crypto::hasDecryptionSupport()) {
+            $this->assertSame(
+                $metadataWithEncryptionSupportResponse,
+                $this->sp->metadata()
+            );
+        }
+
+        if (!Crypto::hasDecryptionSupport()) {
+            $this->assertSame(
+                $metadataWithoutEncryptionSupportResponse,
+                $this->sp->metadata()
+            );
+        }
     }
 
     public function testHandleResponse()
@@ -165,7 +236,7 @@ EOF;
         $samlResponse = \file_get_contents(__DIR__.'/data/assertion/FrkoIdP.xml');
 
         $session = new TestSession();
-        $authnRequestState = new AuthnRequestState('_2483d0b8847ccaa5edf203dad685f860', 'http://localhost:8080/metadata.php', [], 'http://localhost:8080/return_to');
+        $authnRequestState = new AuthnRequestState('_2483d0b8847ccaa5edf203dad685f860', 'http://localhost:8080/metadata.php', [], [], 'http://localhost:8080/return_to');
         $session->set(TestSP::SESSION_KEY_PREFIX.'1234_relay_state_5678', \serialize($authnRequestState));
         $this->sp->setSession($session);
         $this->sp->setDateTime(new DateTime('2019-02-23T17:01:21Z'));
@@ -210,7 +281,7 @@ EOF;
             $samlResponse = \file_get_contents(__DIR__.'/data/assertion/FrkoIdP.xml');
 
             $session = new TestSession();
-            $authnRequestState = new AuthnRequestState('_2483d0b8847ccaa5edf203dad685f860', 'http://localhost:8080/metadata.php', ['urn:x-example:bar'], 'return_to');
+            $authnRequestState = new AuthnRequestState('_2483d0b8847ccaa5edf203dad685f860', 'http://localhost:8080/metadata.php', ['urn:x-example:bar'], [], 'return_to');
             $session->set(TestSP::SESSION_KEY_PREFIX.''.\base64_encode('1234_relay_state_5678'), \serialize($authnRequestState));
             $this->sp->setSession($session);
             $this->sp->setDateTime(new DateTime('2019-02-23T17:01:21Z'));
@@ -237,6 +308,7 @@ EOF;
             new DateTime('2019-01-02T20:05:33Z'),
             new DateTime('2019-01-03T04:05:33Z'),
             'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport',
+            null,
             [
                 'urn:oid:0.9.2342.19200300.100.1.1' => [
                     'foo',
@@ -272,7 +344,7 @@ EOF;
             ]
         );
 
-        $signatureQuery = \http_build_query(['Signature' => \base64_encode(Crypto::sign($httpQuery, PrivateKey::fromFile(__DIR__.'/data/sp.key')))]);
+        $signatureQuery = \http_build_query(['Signature' => \base64_encode(Crypto::sign($httpQuery, PrivateKey::fromFile(__DIR__.'/data/signing.key')))]);
         $this->assertSame(\sprintf('http://localhost:8080/slo.php?%s&%s', $httpQuery, $signatureQuery), $sloUrl);
     }
 

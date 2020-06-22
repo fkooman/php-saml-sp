@@ -22,38 +22,26 @@
  * SOFTWARE.
  */
 
-use fkooman\SAML\SP\XmlDocument;
-
-class XmlIdpInfoSourceBench
-{
-    /**
-     * @Revs(1000)
-     * @Iterations(5)
-     * @OutputTimeUnit("seconds")
-     * @OutputMode("throughput")
-     *
-     * @return void
-     */
-    public function benchFromMetadataNoSchemaValidate()
-    {
-        $xmlDocument = XmlDocument::fromMetadata(
-            \file_get_contents(\dirname(__DIR__).'/tests/data/metadata/localhost.xml'),
-            false
-        );
-    }
-
-    /**
-     * @Revs(100)
-     * @OutputTimeUnit("seconds")
-     * @OutputMode("throughput")
-     *
-     * @return void
-     */
-    public function benchFromMetadataSchemaValidate()
-    {
-        $xmlDocument = XmlDocument::fromMetadata(
-            \file_get_contents(\dirname(__DIR__).'/tests/data/metadata/localhost.xml'),
-            true
-        );
-    }
-}
+return [
+    'Assertion' => '',
+    'Attributes' => '',
+    'Authentication' => '',
+    'Error' => '',
+    'Error Message' => '',
+    'IdPs ❤️ SP metadata! Use the URL or the XML below to feed your IdP.' => '',
+    'Issuer' => '',
+    'Logout' => '',
+    'Metadata' => '',
+    'No IdP(s) configured for authenticating to this SP!' => '',
+    'No Results!' => '',
+    'Other...' => '',
+    'PHP >= 7.1 is required <code>&lt;EncryptedAssertion&gt;</code> support.' => '',
+    'Search for your organization...' => '',
+    'Secure Cookies are disabled. This is ONLY appropriate for development!' => '',
+    'Select your organization to continue the login process.' => '',
+    'Test' => '',
+    'This is the information page of this SAML SP. If you don\'t know what SAML is, you should not have arrived here! 🤔' => '',
+    'Welcome' => '',
+    'XML' => '',
+    'You can perform authentication tests here with the configured IdP(s).' => '',
+];

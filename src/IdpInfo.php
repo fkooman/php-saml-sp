@@ -32,7 +32,7 @@ class IdpInfo
     /** @var string */
     private $entityId;
 
-    /** @var string */
+    /** @var string|null */
     private $displayName;
 
     /** @var string */
@@ -58,7 +58,7 @@ class IdpInfo
     public function __construct($entityId, $displayName, $ssoUrl, $sloUrl, array $publicKeys, array $scopeList)
     {
         $this->entityId = $entityId;
-        $this->displayName = null !== $displayName ? $displayName : $entityId;
+        $this->displayName = $displayName;
         $this->ssoUrl = $ssoUrl;
         $this->sloUrl = $sloUrl;
         $this->publicKeys = $publicKeys;
@@ -78,6 +78,10 @@ class IdpInfo
      */
     public function getDisplayName()
     {
+        if (null === $this->displayName) {
+            return $this->entityId;
+        }
+
         return $this->displayName;
     }
 

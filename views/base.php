@@ -7,14 +7,14 @@
     <title><?=$this->e($serviceName); ?></title>
     <link href="css/bootstrap-reboot.min.css" media="screen" rel="stylesheet">
     <link href="css/screen.css" media="screen" rel="stylesheet">
+    <script src="js/search.js"></script>
 </head>
 <body>
     <header>
-        <h1><?=$this->e($serviceName); ?></h1>
 <?php if (1 < \count($enabledLanguages)): ?>
         <form method="post" action="setLanguage">
 <?php foreach ($enabledLanguages as $uiLanguage): ?>
-            <button type="submit" name="uiLanguage" value="<?=$this->e($uiLanguage); ?>"><?=$this->e($uiLanguage); ?></button>
+            <button type="submit" name="uiLanguage" value="<?=$this->e($uiLanguage); ?>"><?=$this->e($uiLanguage, 'language_code_to_human'); ?></button>
 <?php endforeach; ?>
         </form>
 <?php endif; ?>

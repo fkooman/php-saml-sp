@@ -62,37 +62,19 @@ class Tpl
     {
         $this->templateFolderList = $templateFolderList;
         $this->translationFolderList = $translationFolderList;
+        $this->addCallback('language_code_to_human', [__CLASS__, 'languageCodeToHuman']);
     }
 
     /**
-     * @param string|null $uiLanguage
+     * @param string $languageCode
      *
      * @return void
      */
-    public function setLanguage($uiLanguage)
+    public function setLanguageCode($languageCode)
     {
-        if (null === $uiLanguage) {
-            $this->uiLanguage = null;
-
-            return;
-        }
-
-        // verify whether we have this translation file available
-        // NOTE: we first fetch a list of supported languages and *then* only
-        // check if the requested language is available to avoid needing to
-        // use crazy regexp to match language codes
-        $availableLanguages = [];
-        foreach ($this->translationFolderList as $translationFolder) {
-            foreach (\glob($translationFolder.'/*.php') as $translationFile) {
-                $supportedLanguage = \basename($translationFile, '.php');
-                if (!\in_array($supportedLanguage, $availableLanguages, true)) {
-                    $availableLanguages[] = $supportedLanguage;
-                }
-            }
-        }
-
-        if (\in_array($uiLanguage, $availableLanguages, true)) {
-            $this->uiLanguage = $uiLanguage;
+        $implementedLocales = self::getImplementedLocales();
+        if (\in_array($languageCode, \array_keys($implementedLocales), true)) {
+            $this->uiLanguage = $languageCode;
         }
     }
 
@@ -141,6 +123,32 @@ class Tpl
         }
 
         return $templateStr;
+    }
+
+    /**
+     * @param string $languageCode
+     *
+     * @return string
+     */
+    private static function languageCodeToHuman($languageCode)
+    {
+        $implementedLocales = self::getImplementedLocales();
+        if (!\array_key_exists($languageCode, $implementedLocales)) {
+            return $languageCode;
+        }
+
+        return $implementedLocales[$languageCode];
+    }
+
+    /**
+     * @return array<string,string>
+     */
+    private static function getImplementedLocales()
+    {
+        return [
+            'en-US' => 'English',
+            'nl-NL' => 'Nederlands',
+        ];
     }
 
     /**

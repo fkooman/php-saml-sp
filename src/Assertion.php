@@ -43,20 +43,25 @@ class Assertion
     /** @var string */
     private $authnContext;
 
+    /** @var string|null */
+    private $authenticatingAuthority;
+
     /** @var array<string,array<string>> */
     private $attributeList;
 
     /**
      * @param string                      $issuer
      * @param string                      $authnContext
+     * @param string|null                 $authenticatingAuthority
      * @param array<string,array<string>> $attributeList
      */
-    public function __construct($issuer, DateTime $authnInstant, DateTime $sessionNotOnOrAfter, $authnContext, array $attributeList)
+    public function __construct($issuer, DateTime $authnInstant, DateTime $sessionNotOnOrAfter, $authnContext, $authenticatingAuthority, array $attributeList)
     {
         $this->issuer = $issuer;
         $this->authnInstant = $authnInstant;
-        $this->authnContext = $authnContext;
         $this->sessionNotOnOrAfter = $sessionNotOnOrAfter;
+        $this->authnContext = $authnContext;
+        $this->authenticatingAuthority = $authenticatingAuthority;
         $this->attributeList = $attributeList;
     }
 
@@ -106,6 +111,14 @@ class Assertion
     public function getAuthnContext()
     {
         return $this->authnContext;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getAuthenticatingAuthority()
+    {
+        return $this->authenticatingAuthority;
     }
 
     /**

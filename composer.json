@@ -21,7 +21,7 @@
             "fkooman\\SAML\\SP\\Tests\\": "tests/"
         }
     },
-    "description": "SAML Service Provider library",
+    "description": "SAML Service Provider",
     "license": "MIT",
     "name": "fkooman/saml-sp",
     "require": {
@@ -47,5 +47,5 @@
         "email": "fkooman@tuxed.net",
         "source": "https://git.tuxed.net/fkooman/php-saml-sp"
     },
-    "type": "library"
+    "type": "project"
 }
