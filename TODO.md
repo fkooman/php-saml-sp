@@ -1,6 +1,6 @@
 # TODO
 
-## 0.5
+## Before 1.0
 
 - make sure the transforms are exactly as we expect them to be
 
@@ -10,19 +10,10 @@
     <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
 </ds:Transforms>
 ```
-
-- expose requested attributes through SP metadata
-- make IdpInfo also support multi-language display names so we can use those
-  in the WAYF as well instead of just English (also requires a language 
-  mapping function, i.e. if language is `en-US` we should prefer `en` and not
-  `de` for instance
 - add tests for `src/Web` and `src/Api` classes
 - include DomNode/Element in error message so we know where the problem is in
   the XML
-- think about implementing caching for eduGAIN purpose with 2k+ IdPs
-
-## 1.0
-
+- implementing caching for eduGAIN purpose with 2k+ IdPs
 - input validation on ALL (public) methods
 - make absolutely sure we verify the assertion with the right public key as to
   avoid allowing one IdP to pretend to be another IdP
@@ -30,13 +21,18 @@
 - Validate schema of outgoing SAML messages (`AuthnRequest`, `LogoutRequest`, `Metadata`)?
 - implement automatic metadata refresh (somehow) and verify it using its XML
   signature
-- Implement a way to have multiple certificates
+- Implement a way to have multiple SP certificates
   - key rollover?
 - `ForceAuthn` in `AuthnRequest` (is anyone actually using this?)
 - support verifying SAML metadata from ADFS servers?
 
-## 2.0
+## After 1.0
 
+- make IdpInfo also support multi-language display names so we can use those
+  in the WAYF as well instead of just English (also requires a language 
+  mapping function, i.e. if language is `en-US` we should prefer `en` and not
+  `de` for instance
+- expose requested attributes through SP metadata
 - remove PHP 5 support
   - only support PHP >= 7.2 (CentOS 8, Debian 10)
 - Improve SLO?
