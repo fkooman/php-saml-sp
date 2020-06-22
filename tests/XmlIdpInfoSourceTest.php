@@ -78,6 +78,9 @@ class XmlIdpInfoSourceTest extends TestCase
     public function testAdfsMd()
     {
         $xmlIdpInfoSource = new XmlIdpInfoSource([__DIR__.'/data/metadata/sts.stc-r.nl.xml']);
-        $xmlIdpInfoSource->get('http://sts.stc-r.nl/adfs/services/trust');
+        $idpInfo = $xmlIdpInfoSource->get('http://sts.stc-r.nl/adfs/services/trust');
+        $this->assertSame('http://sts.stc-r.nl/adfs/services/trust', $idpInfo->getEntityId());
+        $this->assertSame('https://sts.stc-r.nl/adfs/ls/', $idpInfo->getSsoUrl());
+        $this->assertSame('https://sts.stc-r.nl/adfs/ls/', $idpInfo->getSloUrl());
     }
 }
