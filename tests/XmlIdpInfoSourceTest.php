@@ -40,6 +40,7 @@ class XmlIdpInfoSourceTest extends TestCase
         $xmlIdpInfoSource = new XmlIdpInfoSource([__DIR__.'/data/metadata/idp.tuxed.net.xml']);
         $idpInfo = $xmlIdpInfoSource->get('https://idp.tuxed.net/metadata.php');
         $this->assertSame('https://idp.tuxed.net/metadata.php', $idpInfo->getEntityId());
+        $this->assertSame('FrkoIdP', $idpInfo->getDisplayName());
         $this->assertSame('https://idp.tuxed.net/sso.php', $idpInfo->getSsoUrl());
         $this->assertSame('https://idp.tuxed.net/slo.php', $idpInfo->getSloUrl());
         $this->assertSame($encodedString, $idpInfo->getPublicKeys()[0]->toEncodedString());
