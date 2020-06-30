@@ -1,7 +1,7 @@
 # ChangeLog
 
 ## 0.4.1 (2020-06-29)
-- implement `<sampl:Scoping>` for `<samlp:AuthnRequest>` to tell a SAML proxy
+- implement `<samlp:Scoping>` for `<samlp:AuthnRequest>` to tell a SAML proxy
   which IdP behind the proxy should be used for authentication, thus skipping 
   the WAYF
 - support eduMember `isMemberOf` attribute
