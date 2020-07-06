@@ -24,7 +24,7 @@
 
 namespace fkooman\SAML\SP\Tests;
 
-use fkooman\SAML\SP\Exception\XmlIdpInfoSourceException;
+use fkooman\SAML\SP\Exception\XmlIdpInfoException;
 use fkooman\SAML\SP\XmlIdpInfoSource;
 use PHPUnit\Framework\TestCase;
 
@@ -68,7 +68,7 @@ class XmlIdpInfoSourceTest extends TestCase
             $xmlIdpInfoSource = new XmlIdpInfoSource([__DIR__.'/data/metadata/x509idp.moonshot.utr.surfcloud.nl_metadata.xml']);
             $xmlIdpInfoSource->get('%');
             $this->fail();
-        } catch (XmlIdpInfoSourceException $e) {
+        } catch (XmlIdpInfoException $e) {
             $this->assertSame('invalid entityID', $e->getMessage());
         }
     }

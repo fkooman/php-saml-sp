@@ -24,6 +24,8 @@
 
 namespace fkooman\SAML\SP;
 
+use fkooman\SAML\SP\Exception\XmlIdpInfoException;
+
 /**
  * Holds the configuration information of an IdP.
  */
@@ -119,5 +121,124 @@ class IdpInfo
     public function getScopeList()
     {
         return $this->scopeList;
+    }
+
+    /**
+     * @param string $xmlString
+     * @param string $entityId
+     *
+     * @return self
+     */
+    public static function fromXml($entityId, $xmlString)
+    {
+        $xmlDocument = XmlDocument::fromMetadata($xmlString, true);
+
+        return new self(
+            $entityId,
+            self::extractDisplayName($xmlDocument, $entityId),
+            self::extractSingleSignOnService($xmlDocument, $entityId),
+            self::extractSingleLogoutService($xmlDocument, $entityId),
+            self::extractPublicKeys($xmlDocument, $entityId),
+            self::extractScope($xmlDocument, $entityId)
+        );
+    }
+
+    /**
+     * @param string $entityId
+     *
+     * @throws Exception\XmlIdpInfoException
+     *
+     * @return string
+     */
+    private static function extractSingleSignOnService(XmlDocument $xmlDocument, $entityId)
+    {
+        $pathQuery = \sprintf('/md:EntityDescriptor[@entityID="%s"]/md:IDPSSODescriptor/md:SingleSignOnService[@Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"]/@Location', $entityId);
+        $domNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query($pathQuery));
+        if (null === $firstNode = $domNodeList->item(0)) {
+            throw new XmlIdpInfoException(\sprintf('path not found: "%s"', $pathQuery));
+        }
+
+        return \trim($firstNode->textContent);
+    }
+
+    /**
+     * @param string $entityId
+     *
+     * @return string|null
+     */
+    private static function extractSingleLogoutService(XmlDocument $xmlDocument, $entityId)
+    {
+        $pathQuery = \sprintf('/md:EntityDescriptor[@entityID="%s"]/md:IDPSSODescriptor/md:SingleLogoutService[@Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"]/@Location', $entityId);
+        $domNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query($pathQuery));
+        if (null === $firstNode = $domNodeList->item(0)) {
+            return null;
+        }
+
+        return \trim($firstNode->textContent);
+    }
+
+    /**
+     * @param string $entityId
+     *
+     * @throws Exception\XmlIdpInfoException
+     *
+     * @return array<PublicKey>
+     */
+    private static function extractPublicKeys(XmlDocument $xmlDocument, $entityId)
+    {
+        $pathQuery = \sprintf('/md:EntityDescriptor[@entityID="%s"]/md:IDPSSODescriptor/md:KeyDescriptor[not(@use) or @use="signing"]/ds:KeyInfo/ds:X509Data/ds:X509Certificate', $entityId);
+        $domNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query($pathQuery));
+        if (0 === $domNodeList->length) {
+            throw new XmlIdpInfoException(\sprintf('path not found: "%s"', $pathQuery));
+        }
+        $publicKeys = [];
+        foreach ($domNodeList as $domNode) {
+            $certificateElement = XmlDocument::requireDomElement($domNode);
+            $publicKeys[] = PublicKey::fromEncodedString(\trim($certificateElement->textContent));
+        }
+
+        return $publicKeys;
+    }
+
+    /**
+     * @param string $entityId
+     *
+     * @return array<string>
+     */
+    private static function extractScope(XmlDocument $xmlDocument, $entityId)
+    {
+        $pathQuery = \sprintf('/md:EntityDescriptor[@entityID="%s"]/md:IDPSSODescriptor/md:Extensions/shibmd:Scope[not(@regexp) or @regexp="false" or @regexp="0"]', $entityId);
+        $domNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query($pathQuery));
+        $scopeList = [];
+        foreach ($domNodeList as $domNode) {
+            $scopeElement = XmlDocument::requireDomElement($domNode);
+            $scopeList[] = \trim($scopeElement->textContent);
+        }
+
+        return $scopeList;
+    }
+
+    /**
+     * @param string $entityId
+     *
+     * @return string|null
+     */
+    private static function extractDisplayName(XmlDocument $xmlDocument, $entityId)
+    {
+        $pathQueryList = [
+            \sprintf('/md:EntityDescriptor[@entityID="%s"]/md:IDPSSODescriptor/md:Extensions/mdui:UIInfo/mdui:DisplayName[@xml:lang="en"]', $entityId),
+            \sprintf('/md:EntityDescriptor[@entityID="%s"]/md:Organization/md:OrganizationDisplayName[@xml:lang="en"]', $entityId),
+            \sprintf('/md:EntityDescriptor[@entityID="%s"]/md:Organization/md:OrganizationName[@xml:lang="en"]', $entityId),
+        ];
+
+        foreach ($pathQueryList as $pathQuery) {
+            $domNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query($pathQuery));
+            if (0 === $domNodeList->length) {
+                continue;
+            }
+            $nameNode = XmlDocument::requireDomElement($domNodeList->item(0));
+
+            return \trim($nameNode->textContent);
+        }
     }
 }

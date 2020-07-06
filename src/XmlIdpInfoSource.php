@@ -24,8 +24,8 @@
 
 namespace fkooman\SAML\SP;
 
-use DOMElement;
-use fkooman\SAML\SP\Exception\XmlIdpInfoSourceException;
+use DOMDOcument;
+use fkooman\SAML\SP\Exception\XmlIdpInfoException;
 use RuntimeException;
 
 class XmlIdpInfoSource implements IdpInfoSourceInterface
@@ -51,56 +51,37 @@ class XmlIdpInfoSource implements IdpInfoSourceInterface
     }
 
     /**
-     * Make sure there is exactly 1 IdP with this entityID.
+     * Get XML of IdP.
      *
      * @param string $entityId
      *
-     * @return bool
+     * @return string|null
      */
-    public function has($entityId)
+    public function getXml($entityId)
     {
         self::validateEntityId($entityId);
-        $xPathQuery = \sprintf('//md:EntityDescriptor[@entityID="%s"]/md:IDPSSODescriptor', $entityId);
-
         foreach ($this->xmlDocumentList as $xmlDocument) {
-            if (1 === $xmlDocument->domXPath->query($xPathQuery)->length) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * @return array<IdpInfo>
-     */
-    public function getAll()
-    {
-        $xPathQuery = '//md:EntityDescriptor/md:IDPSSODescriptor';
-        $idpList = [];
-        foreach ($this->xmlDocumentList as $xmlDocument) {
-            if (false === $domNodeList = $xmlDocument->domXPath->query($xPathQuery)) {
+            $entityDescriptorDomNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query(\sprintf('//md:EntityDescriptor[@entityID="%s"]', $entityId)));
+            if (1 !== $entityDescriptorDomNodeList->length) {
                 continue;
             }
-            if (1 !== $domNodeList->length) {
+            $entityDescriptorDomElement = XmlDocument::requireDomElement($entityDescriptorDomNodeList->item(0));
+            // XXX this probably can be implemented in 1 query with parent() call or similar
+            $idpEntityDescriptorDomElement = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query('md:IDPSSODescriptor', $entityDescriptorDomElement));
+            if (1 !== $idpEntityDescriptorDomElement->length) {
                 continue;
             }
-            $domElement = XmlDocument::requireDomElement($domNodeList->item(0));
 
-            // determine entityID
-            $entityId = $xmlDocument->domXPath->evaluate('string(parent::node()/@entityID)', $domElement);
+            // we want to create a self-contained XML document that references
+            // all the namespaces. Doing this by directly calling saveXML does
+            // not work in all cases
+            $entityDocument = new DOMDocument('1.0', 'UTF-8');
+            $entityDocument->appendChild($entityDocument->importNode($entityDescriptorDomElement, true));
 
-            $idpList[] = new IdpInfo(
-                $entityId,
-                $this->getDisplayName($xmlDocument, $domElement),
-                $this->getSingleSignOnService($xmlDocument, $domElement),
-                $this->getSingleLogoutService($xmlDocument, $domElement),
-                $this->getPublicKeys($xmlDocument, $domElement),
-                $this->getScope($xmlDocument, $domElement)
-            );
+            return $entityDocument->saveXML();
         }
 
-        return $idpList;
+        return null;
     }
 
     /**
@@ -108,117 +89,16 @@ class XmlIdpInfoSource implements IdpInfoSourceInterface
      *
      * @param string $entityId
      *
-     * @return IdpInfo
+     * @return IdpInfo|null
      */
     public function get($entityId)
     {
         self::validateEntityId($entityId);
-        $xPathQuery = \sprintf('//md:EntityDescriptor[@entityID="%s"]/md:IDPSSODescriptor', $entityId);
-
-        foreach ($this->xmlDocumentList as $xmlDocument) {
-            if (false === $domNodeList = $xmlDocument->domXPath->query($xPathQuery)) {
-                continue;
-            }
-            if (1 !== $domNodeList->length) {
-                continue;
-            }
-
-            $domElement = XmlDocument::requireDomElement($domNodeList->item(0));
-
-            return new IdpInfo(
-                $entityId,
-                $this->getDisplayName($xmlDocument, $domElement),
-                $this->getSingleSignOnService($xmlDocument, $domElement),
-                $this->getSingleLogoutService($xmlDocument, $domElement),
-                $this->getPublicKeys($xmlDocument, $domElement),
-                $this->getScope($xmlDocument, $domElement)
-            );
-        }
-
-        throw new XmlIdpInfoSourceException(\sprintf('IdP "%s" not available', $entityId));
-    }
-
-    /**
-     * @throws \fkooman\SAML\SP\Exception\XmlIdpInfoSourceException
-     *
-     * @return string
-     */
-    private function getSingleSignOnService(XmlDocument $xmlDocument, DOMElement $domElement)
-    {
-        $domNodeList = $xmlDocument->domXPath->query('md:SingleSignOnService[@Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"]/@Location', $domElement);
-        // return the first one, also if multiple are available
-        if (null === $firstNode = $domNodeList->item(0)) {
-            throw new XmlIdpInfoSourceException('no "md:SingleSignOnService" available');
-        }
-
-        return \trim($firstNode->textContent);
-    }
-
-    /**
-     * @return string|null
-     */
-    private function getSingleLogoutService(XmlDocument $xmlDocument, DOMElement $domElement)
-    {
-        $domNodeList = $xmlDocument->domXPath->query('md:SingleLogoutService[@Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"]/@Location', $domElement);
-        // return the first one, also if multiple are available
-        if (null === $firstNode = $domNodeList->item(0)) {
+        if (null === $idpXml = $this->getXml($entityId)) {
             return null;
         }
 
-        return \trim($firstNode->textContent);
-    }
-
-    /**
-     * @throws \fkooman\SAML\SP\Exception\XmlIdpInfoSourceException
-     *
-     * @return array<PublicKey>
-     */
-    private function getPublicKeys(XmlDocument $xmlDocument, DOMElement $domElement)
-    {
-        $publicKeys = [];
-        $domNodeList = $xmlDocument->domXPath->query('md:KeyDescriptor[not(@use) or @use="signing"]/ds:KeyInfo/ds:X509Data/ds:X509Certificate', $domElement);
-        if (0 === $domNodeList->length) {
-            throw new XmlIdpInfoSourceException('entry MUST have at least one X509Certificate');
-        }
-        for ($i = 0; $i < $domNodeList->length; ++$i) {
-            $certificateNode = $domNodeList->item($i);
-            if (null !== $certificateNode) {
-                $publicKeys[] = PublicKey::fromEncodedString($certificateNode->textContent);
-            }
-        }
-
-        return $publicKeys;
-    }
-
-    /**
-     * @return array<string>
-     */
-    private function getScope(XmlDocument $xmlDocument, DOMElement $domElement)
-    {
-        $scopeList = [];
-        $domNodeList = $xmlDocument->domXPath->query('md:Extensions/shibmd:Scope[not(@regexp) or @regexp="false" or @regexp="0"]', $domElement);
-        foreach ($domNodeList as $domNode) {
-            $scopeElement = XmlDocument::requireDomElement($domNode);
-            $scopeList[] = $scopeElement->textContent;
-        }
-
-        return $scopeList;
-    }
-
-    /**
-     * @return string|null
-     */
-    private function getDisplayName(XmlDocument $xmlDocument, DOMElement $domElement)
-    {
-        $domNodeList = $xmlDocument->domXPath->query('md:Extensions/mdui:UIInfo/mdui:DisplayName[@xml:lang="en"]', $domElement);
-        if (0 === $domNodeList->length) {
-            return null;
-        }
-        if (null === $displayNameNode = $domNodeList->item(0)) {
-            return null;
-        }
-
-        return \trim($displayNameNode->textContent);
+        return IdpInfo::fromXml($entityId, $idpXml);
     }
 
     /**
@@ -235,7 +115,7 @@ class XmlIdpInfoSource implements IdpInfoSourceInterface
         //
         // Maybe it is enough to allow everything, except DQUOTE (")?
         if (1 !== \preg_match('|^[0-9a-zA-Z-./:=_?]+$|', $entityId)) {
-            throw new XmlIdpInfoSourceException('invalid entityID');
+            throw new XmlIdpInfoException('invalid entityID');
         }
     }
 }

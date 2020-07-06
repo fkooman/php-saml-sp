@@ -165,8 +165,8 @@ class Service
                 // use our own discovery service
                 $idpInfoList = [];
                 foreach ($availableIdpList as $availableIdp) {
-                    if ($this->sp->getIdpInfoSource()->has($availableIdp)) {
-                        $idpInfoList[$availableIdp] = $this->sp->getIdpInfoSource()->get($availableIdp);
+                    if (null !== $idpInfo = $this->sp->getIdpInfoSource()->get($availableIdp)) {
+                        $idpInfoList[$availableIdp] = $idpInfo;
                     }
                 }
 

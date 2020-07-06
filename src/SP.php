@@ -88,10 +88,9 @@ class SP
     {
         self::validateReturnTo($returnTo);
         $requestId = \sprintf('_%s', Hex::encode($this->random->requestId()));
-        if (!$this->idpInfoSource->has($idpEntityId)) {
+        if (null === $idpInfo = $this->idpInfoSource->get($idpEntityId)) {
             throw new SpException(\sprintf('IdP "%s" not registered', $idpEntityId));
         }
-        $idpInfo = $this->idpInfoSource->get($idpEntityId);
         $ssoUrl = $idpInfo->getSsoUrl();
         $authnRequest = $this->tpl->render(
             'AuthnRequest',
@@ -134,10 +133,9 @@ class SP
         }
 
         $idpEntityId = $authnRequestState->getIdpEntityId();
-        if (!$this->idpInfoSource->has($idpEntityId)) {
+        if (null === $idpInfo = $this->idpInfoSource->get($idpEntityId)) {
             throw new SpException(\sprintf('IdP "%s" not registered', $idpEntityId));
         }
-        $idpInfo = $this->idpInfoSource->get($idpEntityId);
         $response = new Response($this->dateTime);
         $samlAssertion = $response->verify(
             $this->spInfo,
@@ -179,11 +177,9 @@ class SP
         $this->session->remove(self::SESSION_KEY_PREFIX.'assertion');
 
         $idpEntityId = $samlAssertion->getIssuer();
-        if (!$this->idpInfoSource->has($idpEntityId)) {
+        if (null === $idpInfo = $this->idpInfoSource->get($idpEntityId)) {
             throw new SpException(\sprintf('IdP "%s" not registered', $idpEntityId));
         }
-        $idpInfo = $this->idpInfoSource->get($idpEntityId);
-
         if (null === $samlAssertion->getNameId()) {
             // IdP's assertion does NOT have a NameID, so we cannot construct a
             // LogoutRequest
@@ -244,10 +240,9 @@ class SP
 
         $idpEntityId = $logoutRequestState->getIdpEntityId();
 
-        if (!$this->idpInfoSource->has($idpEntityId)) {
+        if (null === $idpInfo = $this->idpInfoSource->get($idpEntityId)) {
             throw new SpException(\sprintf('IdP "%s" not registered', $idpEntityId));
         }
-        $idpInfo = $this->idpInfoSource->get($idpEntityId);
 
         $logoutResponse = new LogoutResponse();
         $logoutResponse->verify(
