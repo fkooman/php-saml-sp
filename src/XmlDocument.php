@@ -155,7 +155,7 @@ class XmlDocument
     {
         $domDocument = new DOMDocument();
         $entityLoader = \libxml_disable_entity_loader(true);
-        $loadResult = $domDocument->loadXML($xmlStr, LIBXML_NONET | LIBXML_DTDLOAD | LIBXML_DTDATTR | LIBXML_COMPACT);
+        $loadResult = @$domDocument->loadXML($xmlStr, LIBXML_NONET | LIBXML_DTDLOAD | LIBXML_DTDATTR | LIBXML_COMPACT);
         \libxml_disable_entity_loader($entityLoader);
         if (false === $loadResult) {
             throw new XmlDocumentException('unable to load XML document');
