@@ -72,6 +72,38 @@ class XmlIdpInfoSource implements IdpInfoSourceInterface
     }
 
     /**
+     * @return array<IdpInfo>
+     */
+    public function getAll()
+    {
+        $xPathQuery = '//md:EntityDescriptor/md:IDPSSODescriptor';
+        $idpList = [];
+        foreach ($this->xmlDocumentList as $xmlDocument) {
+            if (false === $domNodeList = $xmlDocument->domXPath->query($xPathQuery)) {
+                continue;
+            }
+            if (1 !== $domNodeList->length) {
+                continue;
+            }
+            $domElement = XmlDocument::requireDomElement($domNodeList->item(0));
+
+            // determine entityID
+            $entityId = $xmlDocument->domXPath->evaluate('string(parent::node()/@entityID)', $domElement);
+
+            $idpList[] = new IdpInfo(
+                $entityId,
+                $this->getDisplayName($xmlDocument, $domElement),
+                $this->getSingleSignOnService($xmlDocument, $domElement),
+                $this->getSingleLogoutService($xmlDocument, $domElement),
+                $this->getPublicKeys($xmlDocument, $domElement),
+                $this->getScope($xmlDocument, $domElement)
+            );
+        }
+
+        return $idpList;
+    }
+
+    /**
      * Get IdP information for an IdP.
      *
      * @param string $entityId
