@@ -1,5 +1,8 @@
 # ChangeLog
 
+## 0.4.2 (2020-07-06)
+- support validating ADFS metadata (ws-federation)
+
 ## 0.4.1 (2020-06-29)
 - implement `<samlp:Scoping>` for `<samlp:AuthnRequest>` to tell a SAML proxy
   which IdP behind the proxy should be used for authentication, thus skipping 
