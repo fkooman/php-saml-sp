@@ -3,11 +3,8 @@
 A SAML Service Provider (SP) with an easy API to use SAML authentication from
 your existing PHP applications.
 
-It is quite to [simpleSAMLphp](https://simplesamlphp.org/) in how to use it, 
-but only focuses on SAML (SP) support.
-
 **NOTE**: this project did NOT receive a comprehensive security audit yet. Do 
-**NOT** use it in production until there is a 1.0.0 release!
+**NOT** use it in production until there is a 1.0 release!
 
 # Why
 
