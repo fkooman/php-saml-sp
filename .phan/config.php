@@ -144,42 +144,17 @@ return [
     // [php7cc (no longer maintained)](https://github.com/sstalle/php7cc)
     // and [php7mar](https://github.com/Alexia/php7mar),
     // which have different backwards compatibility checks.
+    //
+    // If you are still using versions of php older than 5.6,
+    // `PHP53CompatibilityPlugin` may be worth looking into if you are not running
+    // syntax checks for php 5.3 through another method such as
+    // `InvokePHPNativeSyntaxCheckPlugin` (see .phan/plugins/README.md).
     'backward_compatibility_checks' => false,
 
     // If true, check to make sure the return type declared
     // in the doc-block (if any) matches the return type
     // declared in the method signature.
     'check_docblock_signature_return_type_match' => false,
-
-    // If true, make narrowed types from phpdoc params override
-    // the real types from the signature, when real types exist.
-    // (E.g. allows specifying desired lists of subclasses,
-    //  or to indicate a preference for non-nullable types over nullable types)
-    //
-    // Affects analysis of the body of the method and the param types passed in by callers.
-    //
-    // (*Requires `check_docblock_signature_param_type_match` to be true*)
-    'prefer_narrowed_phpdoc_param_type' => true,
-
-    // (*Requires `check_docblock_signature_return_type_match` to be true*)
-    //
-    // If true, make narrowed types from phpdoc returns override
-    // the real types from the signature, when real types exist.
-    //
-    // (E.g. allows specifying desired lists of subclasses,
-    // or to indicate a preference for non-nullable types over nullable types)
-    //
-    // This setting affects the analysis of return statements in the body of the method and the return types passed in by callers.
-    'prefer_narrowed_phpdoc_return_type' => true,
-
-    // If enabled, check all methods that override a
-    // parent method to make sure its signature is
-    // compatible with the parent's.
-    //
-    // This check can add quite a bit of time to the analysis.
-    //
-    // This will also check if final methods are overridden, etc.
-    'analyze_signature_compatibility' => true,
 
     // This setting maps case-insensitive strings to union types.
     //
@@ -208,6 +183,9 @@ return [
     // as variables (like `$class->$property` or
     // `$class->$method()`) in ways that we're unable
     // to make sense of.
+    //
+    // To more aggressively detect dead code,
+    // you may want to set `dead_code_detection_prefer_false_negative` to `false`.
     'dead_code_detection' => false,
 
     // Set to true in order to attempt to detect unused variables.
@@ -260,10 +238,6 @@ return [
     // `string` instead of an `int` as declared.
     'quick_mode' => false,
 
-    // Enable or disable support for generic templated
-    // class types.
-    'generic_types_enabled' => true,
-
     // Override to hardcode existence and types of (non-builtin) globals in the global scope.
     // Class names should be prefixed with `\`.
     //
@@ -310,9 +284,11 @@ return [
     //       to `exclude_analysis_directory_list`.
     'exclude_analysis_directory_list' => [
         'vendor/',
+        'src/tpl/',
     ],
 
     // Enable this to enable checks of require/include statements referring to valid paths.
+    // The settings `include_paths` and `warn_about_relative_include_statement` affect the checks.
     'enable_include_path_checks' => true,
 
     // The number of processes to fork off during the analysis
@@ -359,7 +335,7 @@ return [
     'directory_list' => [
         'src',
         'tests',
-        'benchmarks',
+        'bin',
         'web',
         'example',
         'vendor/fkooman/secookie/src',

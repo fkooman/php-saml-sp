@@ -24,6 +24,7 @@
 
 namespace fkooman\SAML\SP;
 
+use fkooman\SAML\SP\Exception\DbSourceException;
 use PDO;
 
 class DbSource implements SourceInterface
@@ -45,15 +46,18 @@ class DbSource implements SourceInterface
      */
     public function get($entityId)
     {
-        $stmt = $this->db->prepare(
+        $sqlQuery =
 <<< 'SQL'
     SELECT
         entity_metadata
     FROM saml_entities
     WHERE
         entity_id = :entity_id
-SQL
-        );
+SQL;
+
+        if (false === $stmt = $this->db->prepare($sqlQuery)) {
+            return null;
+        }
 
         $stmt->bindValue(':entity_id', $entityId, PDO::PARAM_STR);
         $stmt->execute();
@@ -73,14 +77,17 @@ SQL
      */
     public function add($entityId, $entityMetadata)
     {
-        $stmt = $this->db->prepare(
+        $sqlQuery =
 <<< 'SQL'
     INSERT INTO
         saml_entities (entity_id, entity_metadata)
     VALUES
         (:entity_id, :entity_metadata)
-SQL
-        );
+SQL;
+
+        if (false === $stmt = $this->db->prepare($sqlQuery)) {
+            throw new DbSourceException(\sprintf('unable to prepare SQL query "%s"', $sqlQuery));
+        }
         $stmt->bindValue(':entity_id', $entityId, PDO::PARAM_STR);
         $stmt->bindValue(':entity_metadata', $entityMetadata, PDO::PARAM_STR);
         $stmt->execute();
@@ -91,14 +98,15 @@ SQL
      */
     public function init()
     {
-        $this->db->exec(
+        $sqlQuery =
 <<< 'SQL'
     CREATE TABLE IF NOT EXISTS saml_entities (
         entity_id VARCHAR(255) NOT NULL,
         entity_metadata TEXT NOT NULL,
         UNIQUE(entity_id)
     )
-SQL
-        );
+SQL;
+
+        $this->db->exec($sqlQuery);
     }
 }
