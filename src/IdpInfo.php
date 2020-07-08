@@ -131,7 +131,10 @@ class IdpInfo
      */
     public static function fromXml($entityId, $xmlString)
     {
-        $xmlDocument = XmlDocument::fromMetadata($xmlString, true);
+        // we do NOT (again) perform XML schema validation. Entities coming
+        // from DbSource are considered "valid". Entities coming from
+        // MetadataSource are verified there...
+        $xmlDocument = XmlDocument::fromMetadata($xmlString, false);
 
         return new self(
             $entityId,

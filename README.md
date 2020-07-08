@@ -3,8 +3,9 @@
 A SAML Service Provider (SP) with an easy API to use SAML authentication from
 your existing PHP applications.
 
-**NOTE**: this project did NOT receive a comprehensive security audit yet. Do 
-**NOT** use it in production until there is a 1.0 release!
+**NOTE**: this project did NOT receive a comprehensive security audit yet!
+
+**NOTE**: do NOT use it in production until there is a 1.0 release!
 
 # Why
 
