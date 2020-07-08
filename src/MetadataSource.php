@@ -64,8 +64,10 @@ class MetadataSource implements SourceInterface
                 continue;
             }
 
-            // XXX glob can return false?
-            foreach (\glob($metadataDir.'/*.xml') as $metadataFile) {
+            if (false === $metadataFileList = \glob($metadataDir.'/*.xml')) {
+                throw new RuntimeException(\sprintf('unable to read files in "%s"', $metadataDir));
+            }
+            foreach ($metadataFileList as $metadataFile) {
                 if (false === $xmlData = @\file_get_contents($metadataFile)) {
                     throw new RuntimeException(\sprintf('unable to read "%s"', $metadataFile));
                 }
@@ -93,9 +95,13 @@ class MetadataSource implements SourceInterface
                 if (null !== $entityXml) {
                     // we already found an EntityDescriptor with this entityID
                     // in one of the metadata files...
-                    throw new MetadataSourceException('XX');
+                    throw new MetadataSourceException(\sprintf('duplicate entityID "%s", contained in multiple metadata files', $entityId));
                 }
 
+                // we need to create a new document in order to take the
+                // namespaces with us. Simply doing saveXML() on
+                // EntityDescriptor DomElement will not take (all) namespace
+                // declarations...
                 $entityDescriptorDomElement = XmlDocument::requireDomElement($entityDescriptorDomNodeList->item(0));
                 $entityDocument = new DOMDocument('1.0', 'UTF-8');
                 $entityDocument->appendChild($entityDocument->importNode($entityDescriptorDomElement, true));
