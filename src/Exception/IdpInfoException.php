@@ -24,6 +24,6 @@
 
 namespace fkooman\SAML\SP\Exception;
 
-class XmlIdpInfoException extends SamlException
+class IdpInfoException extends SamlException
 {
 }

@@ -48,13 +48,13 @@ class SP
     /** @var SpInfo */
     private $spInfo;
 
-    /** @var IdpInfoSourceInterface */
+    /** @var IdpInfoSource */
     private $idpInfoSource;
 
     /** @var Template */
     private $tpl;
 
-    public function __construct(SpInfo $spInfo, IdpInfoSourceInterface $idpInfoSource, SessionInterface $session)
+    public function __construct(SpInfo $spInfo, IdpInfoSource $idpInfoSource, SessionInterface $session)
     {
         $this->spInfo = $spInfo;
         $this->idpInfoSource = $idpInfoSource;
@@ -289,7 +289,7 @@ class SP
     }
 
     /**
-     * @return IdpInfoSourceInterface
+     * @return IdpInfoSource
      */
     public function getIdpInfoSource()
     {

@@ -25,6 +25,9 @@
 require_once \dirname(__DIR__).'/vendor/autoload.php';
 
 use fkooman\SAML\SP\CryptoKeys;
+use fkooman\SAML\SP\DbSource;
+use fkooman\SAML\SP\IdpInfoSource;
+use fkooman\SAML\SP\MetadataSource;
 use fkooman\SAML\SP\SeSession;
 use fkooman\SAML\SP\SP;
 use fkooman\SAML\SP\SpInfo;
@@ -34,9 +37,9 @@ use fkooman\SAML\SP\Web\Response;
 use fkooman\SAML\SP\Web\SeCookie;
 use fkooman\SAML\SP\Web\Service;
 use fkooman\SAML\SP\Web\Tpl;
-use fkooman\SAML\SP\XmlIdpInfoSource;
 
 $baseDir = \dirname(__DIR__);
+$dataDir = $baseDir.'/data';
 
 try {
     $config = Config::fromFile($baseDir.'/config/config.php');
@@ -59,8 +62,14 @@ try {
     $tpl = new Tpl($templateDirs, $translationDirs);
     $tpl->setLanguageCode($languageCode);
     $tpl->addDefault(['secureCookie' => $secureCookie, 'enabledLanguages' => $config->getEnabledLanguages(), 'serviceName' => $config->getServiceName($languageCode)]);
-    $metadataFileList = \glob($baseDir.'/config/metadata/*.xml');
-    $idpInfoSource = new XmlIdpInfoSource($metadataFileList);
+
+    $idpInfoSource = new IdpInfoSource(
+        [
+            new DbSource(new PDO('sqlite://'.$dataDir.'/db.sqlite')),
+            new MetadataSource([$baseDir.'/config/metadata', $dataDir.'/metadata']),
+        ]
+    );
+
     $request = new Request($_SERVER, $_GET, $_POST);
 
     // have a default entityID, but allow overriding from config

@@ -22,16 +22,8 @@
  * SOFTWARE.
  */
 
-namespace fkooman\SAML\SP;
+namespace fkooman\SAML\SP\Exception;
 
-interface IdpInfoSourceInterface
+class MetadataSourceException extends SamlException
 {
-    /**
-     * Get IdP information for an IdP.
-     *
-     * @param string $entityId
-     *
-     * @return IdpInfo|null
-     */
-    public function get($entityId);
 }

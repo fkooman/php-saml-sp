@@ -24,7 +24,7 @@
 
 namespace fkooman\SAML\SP;
 
-use fkooman\SAML\SP\Exception\XmlIdpInfoException;
+use fkooman\SAML\SP\Exception\IdpInfoException;
 
 /**
  * Holds the configuration information of an IdP.
@@ -124,8 +124,8 @@ class IdpInfo
     }
 
     /**
-     * @param string $xmlString
      * @param string $entityId
+     * @param string $xmlString
      *
      * @return self
      */
@@ -146,7 +146,7 @@ class IdpInfo
     /**
      * @param string $entityId
      *
-     * @throws Exception\XmlIdpInfoException
+     * @throws Exception\IdpInfoException
      *
      * @return string
      */
@@ -155,7 +155,7 @@ class IdpInfo
         $pathQuery = \sprintf('/md:EntityDescriptor[@entityID="%s"]/md:IDPSSODescriptor/md:SingleSignOnService[@Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"]/@Location', $entityId);
         $domNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query($pathQuery));
         if (null === $firstNode = $domNodeList->item(0)) {
-            throw new XmlIdpInfoException(\sprintf('path not found: "%s"', $pathQuery));
+            throw new IdpInfoException(\sprintf('path not found: "%s"', $pathQuery));
         }
 
         return \trim($firstNode->textContent);
@@ -180,7 +180,7 @@ class IdpInfo
     /**
      * @param string $entityId
      *
-     * @throws Exception\XmlIdpInfoException
+     * @throws Exception\IdpInfoException
      *
      * @return array<PublicKey>
      */
@@ -189,7 +189,7 @@ class IdpInfo
         $pathQuery = \sprintf('/md:EntityDescriptor[@entityID="%s"]/md:IDPSSODescriptor/md:KeyDescriptor[not(@use) or @use="signing"]/ds:KeyInfo/ds:X509Data/ds:X509Certificate', $entityId);
         $domNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query($pathQuery));
         if (0 === $domNodeList->length) {
-            throw new XmlIdpInfoException(\sprintf('path not found: "%s"', $pathQuery));
+            throw new IdpInfoException(\sprintf('path not found: "%s"', $pathQuery));
         }
         $publicKeys = [];
         foreach ($domNodeList as $domNode) {
