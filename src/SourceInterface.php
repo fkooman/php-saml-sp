@@ -27,11 +27,18 @@ namespace fkooman\SAML\SP;
 interface SourceInterface
 {
     /**
-     * Get SAML metadata.
+     * Get SAML metadata for one entity.
      *
      * @param string $entityId
      *
      * @return string|null
      */
     public function get($entityId);
+
+    /**
+     * Get SAML metadata for all entities.
+     *
+     * @return array<string>
+     */
+    public function getAll();
 }

@@ -51,6 +51,26 @@ class DbSource implements SourceInterface
     }
 
     /**
+     * Get SAML metadata for all entities.
+     *
+     * @return array<string>
+     */
+    public function getAll()
+    {
+        $sqlQuery =
+<<< 'SQL'
+    SELECT
+        entity_metadata
+    FROM saml_entities
+SQL;
+
+        $stmt = $this->dbHandle->prepare($sqlQuery);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+    /**
      * Get SAML metadata.
      *
      * @param string $entityId

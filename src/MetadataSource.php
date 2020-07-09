@@ -46,11 +46,13 @@ class MetadataSource implements SourceInterface
     }
 
     /**
-     * @return array<string,string>
+     * Get SAML metadata for all entities.
+     *
+     * @return array<string>
      */
     public function getAll()
     {
-        $entityXmlList = [];
+        $xmlStringList = [];
         foreach ($this->metadataDirList as $metadataDir) {
             if (!@\file_exists($metadataDir) || !@\is_dir($metadataDir)) {
                 // do not exist, or is not a folder
@@ -82,7 +84,6 @@ class MetadataSource implements SourceInterface
                         // not an IdP
                         continue;
                     }
-                    $entityId = $entityDescriptorDomElement->getAttribute('entityID');
 
                     // we need to create a new document in order to take the
                     // namespaces with us. Simply doing saveXML() on
@@ -90,14 +91,12 @@ class MetadataSource implements SourceInterface
                     // namespace declarations...
                     $entityDocument = new DOMDocument('1.0', 'UTF-8');
                     $entityDocument->appendChild($entityDocument->importNode($entityDescriptorDomElement, true));
-
-                    // XXX make sure entityId does not yet exist
-                    $entityXmlList[$entityId] = $entityDocument->saveXML();
+                    $xmlStringList[] = $entityDocument->saveXML();
                 }
             }
         }
 
-        return $entityXmlList;
+        return $xmlStringList;
     }
 
     /**

@@ -124,12 +124,11 @@ class IdpInfo
     }
 
     /**
-     * @param string $entityId
      * @param string $xmlString
      *
      * @return self
      */
-    public static function fromXml($entityId, $xmlString)
+    public static function fromXml($xmlString)
     {
         // we do NOT (again) perform XML schema validation. Entities coming
         // from DbSource are considered "valid". Entities coming from
@@ -137,25 +136,32 @@ class IdpInfo
         $xmlDocument = XmlDocument::fromMetadata($xmlString, false);
 
         return new self(
-            $entityId,
-            self::extractDisplayName($xmlDocument, $entityId),
-            self::extractSingleSignOnService($xmlDocument, $entityId),
-            self::extractSingleLogoutService($xmlDocument, $entityId),
-            self::extractPublicKeys($xmlDocument, $entityId),
-            self::extractScope($xmlDocument, $entityId)
+            self::extractEntityId($xmlDocument),
+            self::extractDisplayName($xmlDocument),
+            self::extractSingleSignOnService($xmlDocument),
+            self::extractSingleLogoutService($xmlDocument),
+            self::extractPublicKeys($xmlDocument),
+            self::extractScope($xmlDocument)
         );
     }
 
     /**
-     * @param string $entityId
-     *
-     * @throws Exception\IdpInfoException
-     *
      * @return string
      */
-    private static function extractSingleSignOnService(XmlDocument $xmlDocument, $entityId)
+    private static function extractEntityId(XmlDocument $xmlDocument)
     {
-        $pathQuery = \sprintf('/md:EntityDescriptor[@entityID="%s"]/md:IDPSSODescriptor/md:SingleSignOnService[@Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"]/@Location', $entityId);
+        $entityDescriptorDomNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query('/md:EntityDescriptor'));
+        $entityDescriptorDomElement = XmlDocument::requireDomElement($entityDescriptorDomNodeList->item(0));
+
+        return $entityDescriptorDomElement->getAttribute('entityID');
+    }
+
+    /**
+     * @return string
+     */
+    private static function extractSingleSignOnService(XmlDocument $xmlDocument)
+    {
+        $pathQuery = '/md:EntityDescriptor/md:IDPSSODescriptor/md:SingleSignOnService[@Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"]/@Location';
         $domNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query($pathQuery));
         if (null === $firstNode = $domNodeList->item(0)) {
             throw new IdpInfoException(\sprintf('path not found: "%s"', $pathQuery));
@@ -165,13 +171,11 @@ class IdpInfo
     }
 
     /**
-     * @param string $entityId
-     *
      * @return string|null
      */
-    private static function extractSingleLogoutService(XmlDocument $xmlDocument, $entityId)
+    private static function extractSingleLogoutService(XmlDocument $xmlDocument)
     {
-        $pathQuery = \sprintf('/md:EntityDescriptor[@entityID="%s"]/md:IDPSSODescriptor/md:SingleLogoutService[@Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"]/@Location', $entityId);
+        $pathQuery = '/md:EntityDescriptor/md:IDPSSODescriptor/md:SingleLogoutService[@Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"]/@Location';
         $domNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query($pathQuery));
         if (null === $firstNode = $domNodeList->item(0)) {
             return null;
@@ -181,15 +185,13 @@ class IdpInfo
     }
 
     /**
-     * @param string $entityId
-     *
      * @throws Exception\IdpInfoException
      *
      * @return array<PublicKey>
      */
-    private static function extractPublicKeys(XmlDocument $xmlDocument, $entityId)
+    private static function extractPublicKeys(XmlDocument $xmlDocument)
     {
-        $pathQuery = \sprintf('/md:EntityDescriptor[@entityID="%s"]/md:IDPSSODescriptor/md:KeyDescriptor[not(@use) or @use="signing"]/ds:KeyInfo/ds:X509Data/ds:X509Certificate', $entityId);
+        $pathQuery = '/md:EntityDescriptor/md:IDPSSODescriptor/md:KeyDescriptor[not(@use) or @use="signing"]/ds:KeyInfo/ds:X509Data/ds:X509Certificate';
         $domNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query($pathQuery));
         if (0 === $domNodeList->length) {
             throw new IdpInfoException(\sprintf('path not found: "%s"', $pathQuery));
@@ -204,13 +206,11 @@ class IdpInfo
     }
 
     /**
-     * @param string $entityId
-     *
      * @return array<string>
      */
-    private static function extractScope(XmlDocument $xmlDocument, $entityId)
+    private static function extractScope(XmlDocument $xmlDocument)
     {
-        $pathQuery = \sprintf('/md:EntityDescriptor[@entityID="%s"]/md:IDPSSODescriptor/md:Extensions/shibmd:Scope[not(@regexp) or @regexp="false" or @regexp="0"]', $entityId);
+        $pathQuery = '/md:EntityDescriptor/md:IDPSSODescriptor/md:Extensions/shibmd:Scope[not(@regexp) or @regexp="false" or @regexp="0"]';
         $domNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query($pathQuery));
         $scopeList = [];
         foreach ($domNodeList as $domNode) {
@@ -222,16 +222,14 @@ class IdpInfo
     }
 
     /**
-     * @param string $entityId
-     *
      * @return string|null
      */
-    private static function extractDisplayName(XmlDocument $xmlDocument, $entityId)
+    private static function extractDisplayName(XmlDocument $xmlDocument)
     {
         $pathQueryList = [
-            \sprintf('/md:EntityDescriptor[@entityID="%s"]/md:IDPSSODescriptor/md:Extensions/mdui:UIInfo/mdui:DisplayName[@xml:lang="en"]', $entityId),
-            \sprintf('/md:EntityDescriptor[@entityID="%s"]/md:Organization/md:OrganizationDisplayName[@xml:lang="en"]', $entityId),
-            \sprintf('/md:EntityDescriptor[@entityID="%s"]/md:Organization/md:OrganizationName[@xml:lang="en"]', $entityId),
+            '/md:EntityDescriptor/md:IDPSSODescriptor/md:Extensions/mdui:UIInfo/mdui:DisplayName[@xml:lang="en"]',
+            '/md:EntityDescriptor/md:Organization/md:OrganizationDisplayName[@xml:lang="en"]',
+            '/md:EntityDescriptor/md:Organization/md:OrganizationName[@xml:lang="en"]',
         ];
 
         foreach ($pathQueryList as $pathQuery) {

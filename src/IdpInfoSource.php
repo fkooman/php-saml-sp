@@ -37,6 +37,27 @@ class IdpInfoSource
     }
 
     /**
+     * @return array<IdpInfo>
+     */
+    public function getAll()
+    {
+        $idpInfoList = [];
+        foreach ($this->sourceList as $source) {
+            $xmlStringList = $source->getAll();
+            if (0 === \count($xmlStringList)) {
+                // this source does not have any, continue at next source
+                // XXX this is NOT great if the set is not exactly the same...
+                continue;
+            }
+            foreach ($xmlStringList as $xmlString) {
+                $idpInfoList[] = IdpInfo::fromXml($xmlString);
+            }
+        }
+
+        return $idpInfoList;
+    }
+
+    /**
      * @param string $entityId
      *
      * @return IdpInfo|null
@@ -45,7 +66,7 @@ class IdpInfoSource
     {
         foreach ($this->sourceList as $source) {
             if (null !== $xmlString = $source->get($entityId)) {
-                return IdpInfo::fromXml($entityId, $xmlString);
+                return IdpInfo::fromXml($xmlString);
             }
         }
 
