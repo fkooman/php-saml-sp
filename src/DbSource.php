@@ -30,11 +30,24 @@ use PDO;
 class DbSource implements SourceInterface
 {
     /** @var \PDO */
-    private $db;
+    private $dbHandle;
 
-    public function __construct(PDO $db)
+    /**
+     * @param string $dbFile
+     */
+    public function __construct($dbFile)
     {
-        $this->db = $db;
+        $dbExists = @\file_exists($dbFile);
+        $dbHandle = new PDO('sqlite://'.$dbFile);
+        $dbHandle->exec('PRAGMA foreign_keys = ON');
+        $this->dbHandle = $dbHandle;
+        if (!$dbExists) {
+            // as creating the PDO object will create the database file if it
+            // doesn't yet exist, we must check before creating the object
+            // whether or not the DB file exists... only then we know whether
+            // or not to initialize the (new) DB
+            $this->init();
+        }
     }
 
     /**
@@ -55,7 +68,7 @@ class DbSource implements SourceInterface
         entity_id = :entity_id
 SQL;
 
-        if (false === $stmt = $this->db->prepare($sqlQuery)) {
+        if (false === $stmt = $this->dbHandle->prepare($sqlQuery)) {
             return null;
         }
 
@@ -85,7 +98,7 @@ SQL;
         (:entity_id, :entity_metadata)
 SQL;
 
-        if (false === $stmt = $this->db->prepare($sqlQuery)) {
+        if (false === $stmt = $this->dbHandle->prepare($sqlQuery)) {
             throw new DbSourceException(\sprintf('unable to prepare SQL query "%s"', $sqlQuery));
         }
         $stmt->bindValue(':entity_id', $entityId, PDO::PARAM_STR);
@@ -107,6 +120,6 @@ SQL;
     )
 SQL;
 
-        $this->db->exec($sqlQuery);
+        $this->dbHandle->exec($sqlQuery);
     }
 }

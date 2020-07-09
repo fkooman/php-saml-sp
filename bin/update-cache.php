@@ -42,11 +42,9 @@ try {
     $metadataSource = new MetadataSource([$baseDir.'/config/metadata']);
     $idpList = $config->getIdpList();
 
-    // generate a new database from scratch from the SAML metadata
-    $db = new PDO('sqlite://'.$tmpDbFile);
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $db->exec('PRAGMA foreign_keys = ON');
-    $dbSource = new DbSource($db);
+    // write the SAML metadata in a new SQLite database and rename the file
+    // afterwards
+    $dbSource = new DbSource($tmpDbFile);
     $dbSource->init();
     foreach ($idpList as $entityId) {
         if (null !== $xmlString = $metadataSource->get($entityId)) {

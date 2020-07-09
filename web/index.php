@@ -65,7 +65,7 @@ try {
 
     $idpInfoSource = new IdpInfoSource(
         [
-            new DbSource(new PDO('sqlite://'.$dataDir.'/db.sqlite')),
+            new DbSource($dataDir.'/db.sqlite'),
             new MetadataSource([$baseDir.'/config/metadata', $dataDir.'/metadata']),
         ]
     );
