@@ -75,7 +75,7 @@ SQL;
         $stmt->bindValue(':entity_id', $entityId, PDO::PARAM_STR);
         $stmt->execute();
 
-        if (null === $idpMetadata = $stmt->fetchColumn(0)) {
+        if (false === $idpMetadata = $stmt->fetchColumn(0)) {
             return null;
         }
 
