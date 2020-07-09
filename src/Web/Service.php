@@ -126,7 +126,10 @@ class Service
                 // get the list of IdPs that can be used
                 $availableIdpList = $this->config->getIdpList();
                 if (0 === \count($availableIdpList)) {
-                    throw new HttpException(500, 'no IdP(s) available');
+                    // XXX this is not efficient...
+                    foreach ($this->sp->getIdpInfoSource()->getAll() as $idpInfo) {
+                        $availableIdpList[] = $idpInfo->getEntityId();
+                    }
                 }
 
                 $returnTo = self::verifyReturnToOrigin($request->getOrigin(), $request->requireQueryParameter('ReturnTo'));
@@ -170,6 +173,7 @@ class Service
                 // use our own discovery service
                 $idpInfoList = [];
                 foreach ($availableIdpList as $availableIdp) {
+                    // XXX we can use getAll here also to avoid this whole loop, but only if there was no configured list of IdPs
                     if (null !== $idpInfo = $this->sp->getIdpInfoSource()->get($availableIdp)) {
                         $idpInfoList[$availableIdp] = $idpInfo;
                     }

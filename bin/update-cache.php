@@ -25,6 +25,7 @@
 require_once \dirname(__DIR__).'/vendor/autoload.php';
 
 use fkooman\SAML\SP\DbSource;
+use fkooman\SAML\SP\IdpInfo;
 use fkooman\SAML\SP\MetadataSource;
 
 $baseDir = \dirname(__DIR__);
@@ -41,8 +42,9 @@ try {
     // write the SAML metadata in a new SQLite database and rename the file
     // afterwards
     $dbSource = new DbSource($tmpDbFile);
-    foreach ($metadataSource->getAll() as $entityId => $xmlString) {
-        $dbSource->add($entityId, $xmlString);
+    foreach ($metadataSource->getAll() as $xmlString) {
+        $idpInfo = IdpInfo::fromXml($xmlString);
+        $dbSource->add($idpInfo->getEntityId(), $xmlString);
     }
     if (false === @\rename($tmpDbFile, $dbFile)) {
         throw new RuntimeException(\sprintf('unable to rename "%s" to "%s"', $tmpDbFile, $dbFile));
