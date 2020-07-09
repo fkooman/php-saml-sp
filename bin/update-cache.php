@@ -45,7 +45,6 @@ try {
     // write the SAML metadata in a new SQLite database and rename the file
     // afterwards
     $dbSource = new DbSource($tmpDbFile);
-    $dbSource->init();
     foreach ($idpList as $entityId) {
         if (null !== $xmlString = $metadataSource->get($entityId)) {
             $dbSource->add($entityId, $xmlString);

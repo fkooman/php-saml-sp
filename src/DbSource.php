@@ -109,7 +109,7 @@ SQL;
     /**
      * @return void
      */
-    public function init()
+    private function init()
     {
         $sqlQuery =
 <<< 'SQL'
