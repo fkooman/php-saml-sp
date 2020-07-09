@@ -138,7 +138,12 @@ class Service
                 }
 
                 if (null !== $idpEntityId = $request->optionalQueryParameter('IdP')) {
-                    // an IdP entity ID is provided as a query parameter
+                    // an IdP entity ID is provided as a query parameter, make
+                    // sure we allow it
+                    if (!\in_array($idpEntityId, $availableIdpList, true)) {
+                        throw new HttpException(400, 'IdP is not available');
+                    }
+
                     return new RedirectResponse($this->sp->login($idpEntityId, $returnTo, $authnContextClassRef, $scopingIdpList));
                 }
 
