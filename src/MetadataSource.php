@@ -58,7 +58,7 @@ class MetadataSource implements SourceInterface
             }
 
             if (false === $metadataFileList = \glob($metadataDir.'/*.xml')) {
-                throw new RuntimeException(\sprintf('unable to list files in "%s"', $metadataDir));
+                throw new RuntimeException(\sprintf('unable to list files in directory "%s"', $metadataDir));
             }
             foreach ($metadataFileList as $metadataFile) {
                 if (false === $xmlData = @\file_get_contents($metadataFile)) {
@@ -69,7 +69,7 @@ class MetadataSource implements SourceInterface
                 $entityDescriptorDomNodeList = XmlDocument::requireDomNodeList(
                     $xmlDocument->domXPath->query(
                         // we use "//" because "EntityDescriptor" could be in
-                        // the root of the XML document, or inside (nested)
+                        // the root of the XML document, or inside a (nested)
                         // "EntitiesDescriptor"
                         '//md:EntityDescriptor'
                     )
@@ -77,14 +77,17 @@ class MetadataSource implements SourceInterface
 
                 foreach ($entityDescriptorDomNodeList as $entityDescriptorDomNode) {
                     $entityDescriptorDomElement = XmlDocument::requireDomElement($entityDescriptorDomNode);
-                    // get entityID
+                    $idpSsoDescriptorDomNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query('md:IDPSSODescriptor', $entityDescriptorDomElement));
+                    if (0 === $idpSsoDescriptorDomNodeList->length) {
+                        // not an IdP
+                        continue;
+                    }
                     $entityId = $entityDescriptorDomElement->getAttribute('entityID');
 
                     // we need to create a new document in order to take the
                     // namespaces with us. Simply doing saveXML() on
-                    // EntityDescriptor DomElement will not take (all) namespace
-                    // declarations...
-//                    $entityDescriptorDomElement = XmlDocument::requireDomElement($entityDescriptorDomNodeList->item(0));
+                    // $entityDescriptorDomElement will not retain (all)
+                    // namespace declarations...
                     $entityDocument = new DOMDocument('1.0', 'UTF-8');
                     $entityDocument->appendChild($entityDocument->importNode($entityDescriptorDomElement, true));
 
@@ -117,7 +120,7 @@ class MetadataSource implements SourceInterface
             }
 
             if (false === $metadataFileList = \glob($metadataDir.'/*.xml')) {
-                throw new RuntimeException(\sprintf('unable to list files in "%s"', $metadataDir));
+                throw new RuntimeException(\sprintf('unable to list files in directory "%s"', $metadataDir));
             }
             foreach ($metadataFileList as $metadataFile) {
                 if (false === $xmlData = @\file_get_contents($metadataFile)) {
@@ -128,7 +131,7 @@ class MetadataSource implements SourceInterface
                 $entityDescriptorDomNodeList = XmlDocument::requireDomNodeList(
                     $xmlDocument->domXPath->query(
                         // we use "//" because "EntityDescriptor" could be in
-                        // the root of the XML document, or inside (nested)
+                        // the root of the XML document, or inside a (nested)
                         // "EntitiesDescriptor"
                         \sprintf('//md:EntityDescriptor[@entityID="%s"]', $entityId)
                     )
@@ -144,6 +147,13 @@ class MetadataSource implements SourceInterface
                     throw new MetadataSourceException(\sprintf('found >= 1 EntityDescriptor with entityID "%s" in "%s"', $entityId, $metadataFile));
                 }
 
+                $entityDescriptorDomElement = XmlDocument::requireDomElement($entityDescriptorDomNodeList->item(0));
+                $idpSsoDescriptorDomNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query('md:IDPSSODescriptor', $entityDescriptorDomElement));
+                if (0 === $idpSsoDescriptorDomNodeList->length) {
+                    // not an IdP
+                    continue;
+                }
+
                 if (null !== $entityXml) {
                     // we already found an EntityDescriptor with this entityID
                     // in one of the metadata files...
@@ -154,7 +164,6 @@ class MetadataSource implements SourceInterface
                 // namespaces with us. Simply doing saveXML() on
                 // EntityDescriptor DomElement will not take (all) namespace
                 // declarations...
-                $entityDescriptorDomElement = XmlDocument::requireDomElement($entityDescriptorDomNodeList->item(0));
                 $entityDocument = new DOMDocument('1.0', 'UTF-8');
                 $entityDocument->appendChild($entityDocument->importNode($entityDescriptorDomElement, true));
 
