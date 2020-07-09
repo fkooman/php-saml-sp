@@ -123,28 +123,23 @@ class Service
                     )
                 );
             case '/login':
-                // get the list of IdPs that can be used
-                $availableIdpList = $this->config->getIdpList();
-                if (0 === \count($availableIdpList)) {
-                    // XXX this is not efficient...
-                    foreach ($this->sp->getIdpInfoSource()->getAll() as $idpInfo) {
-                        $availableIdpList[] = $idpInfo->getEntityId();
-                    }
-                }
-
+                $availableIdpInfoList = $this->getAvailableIdpInfoList();
                 $returnTo = self::verifyReturnToOrigin($request->getOrigin(), $request->requireQueryParameter('ReturnTo'));
                 $authnContextClassRef = self::verifyAuthnContextClassRef($request->optionalQueryParameter('AuthnContextClassRef'));
                 $scopingIdpList = self::verifyScopingIdpList($request->optionalQueryParameter('ScopingIdpList'));
-                if (1 === \count($availableIdpList)) {
+                if (1 === \count($availableIdpInfoList)) {
                     // we only have 1 IdP, so use that
-                    return new RedirectResponse($this->sp->login($availableIdpList[0], $returnTo, $authnContextClassRef, $scopingIdpList));
+                    $idpEntityId = \array_keys($availableIdpInfoList)[0];
+
+                    return new RedirectResponse($this->sp->login($idpEntityId, $returnTo, $authnContextClassRef, $scopingIdpList));
                 }
 
                 if (null !== $idpEntityId = $request->optionalQueryParameter('IdP')) {
+                    $idpEntityId = self::verifyEntityId($idpEntityId);
                     // an IdP entity ID is provided as a query parameter, make
-                    // sure we allow it
-                    if (!\in_array($idpEntityId, $availableIdpList, true)) {
-                        throw new HttpException(400, 'IdP is not available');
+                    // sure it is available
+                    if (!\array_key_exists($idpEntityId, $availableIdpInfoList)) {
+                        throw new HttpException(400, \sprintf('IdP "%s" is not available', $idpEntityId));
                     }
 
                     return new RedirectResponse($this->sp->login($idpEntityId, $returnTo, $authnContextClassRef, $scopingIdpList));
@@ -171,25 +166,17 @@ class Service
                 }
 
                 // use our own discovery service
-                $idpInfoList = [];
-                foreach ($availableIdpList as $availableIdp) {
-                    // XXX we can use getAll here also to avoid this whole loop, but only if there was no configured list of IdPs
-                    if (null !== $idpInfo = $this->sp->getIdpInfoSource()->get($availableIdp)) {
-                        $idpInfoList[$availableIdp] = $idpInfo;
-                    }
-                }
-
                 // sort the IdPs by display name
-                \uasort($idpInfoList, function (IdpInfo $a, IdpInfo $b) {
+                \uasort($availableIdpInfoList, function (IdpInfo $a, IdpInfo $b) {
                     return \strcasecmp($a->getDisplayName(), $b->getDisplayName());
                 });
 
                 $lastChosenIdpInfo = null;
                 if (null !== $lastChosenIdp = $this->cookie->get(self::LAST_CHOSEN_COOKIE_NAME)) {
                     // make sure IdP (still) exists
-                    if (\array_key_exists($lastChosenIdp, $idpInfoList)) {
-                        $lastChosenIdpInfo = $idpInfoList[$lastChosenIdp];
-                        unset($idpInfoList[$lastChosenIdp]);
+                    if (\array_key_exists($lastChosenIdp, $availableIdpInfoList)) {
+                        $lastChosenIdpInfo = $availableIdpInfoList[$lastChosenIdp];
+                        unset($availableIdpInfoList[$lastChosenIdp]);
                     }
                 }
 
@@ -198,7 +185,7 @@ class Service
                         'wayf',
                         [
                             'lastChosenIdpInfo' => $lastChosenIdpInfo,
-                            'idpInfoList' => $idpInfoList,
+                            'idpInfoList' => $availableIdpInfoList,
                         ]
                     )
                 );
@@ -234,7 +221,11 @@ class Service
 
                 return new RedirectResponse($returnTo);
             case '/login':
-                $idpEntityId = $request->requirePostParameter('IdP');
+                $availableIdpInfoList = $this->getAvailableIdpInfoList();
+                $idpEntityId = self::verifyEntityId($request->requirePostParameter('IdP'));
+                if (!\array_key_exists($idpEntityId, $availableIdpInfoList)) {
+                    throw new HttpException(400, \sprintf('IdP "%s" is not available', $idpEntityId));
+                }
                 // we don't care what the value of the cookie becomes, it will
                 // be checked before using it anyway...
                 $this->cookie->set(self::LAST_CHOSEN_COOKIE_NAME, $idpEntityId);
@@ -252,6 +243,30 @@ class Service
             default:
                 throw new HttpException(404, 'URL not found: '.$request->getPathInfo());
         }
+    }
+
+    /**
+     * @return array<string,IdpInfo>
+     */
+    private function getAvailableIdpInfoList()
+    {
+        $configIdpList = $this->config->getIdpList();
+        if (0 === \count($configIdpList)) {
+            // all IdPs available in the metadata can be used for
+            // authentication
+            return $this->sp->getIdpInfoSource()->getAll();
+        }
+
+        // only a subset of IdPs can be used for authentication
+        $availableIdpInfoList = [];
+        foreach ($configIdpList as $entityId) {
+            if (null === $idpInfo = $this->sp->getIdpInfoSource()->get($entityId)) {
+                throw new HttpException(500, \sprintf('no metadata for IdP "%s" available', $entityId));
+            }
+            $availableIdpInfoList[$entityId] = $idpInfo;
+        }
+
+        return $availableIdpInfoList;
     }
 
     /**
@@ -313,5 +328,24 @@ class Service
         }
 
         return \explode(' ', $scopingIdpList);
+    }
+
+    /**
+     * @param string $entityId
+     *
+     * @return string
+     */
+    private static function verifyEntityId($entityId)
+    {
+        // we took all IdP entityID entries from eduGAIN metadata and made sure
+        // the filter accepts all of those... anything outside this range is
+        // probably not a valid xsd:anyURI anyway... this may need tweaking!
+        //
+        // Maybe it is enough to allow everything, except DQUOTE (")?
+        if (1 !== \preg_match('|^[0-9a-zA-Z-./:=_?]+$|', $entityId)) {
+            throw new HttpException(400, 'invalid entityID');
+        }
+
+        return $entityId;
     }
 }

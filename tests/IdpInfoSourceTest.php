@@ -24,7 +24,6 @@
 
 namespace fkooman\SAML\SP\Tests;
 
-use fkooman\SAML\SP\Exception\MetadataSourceException;
 use fkooman\SAML\SP\IdpInfoSource;
 use fkooman\SAML\SP\MetadataSource;
 use PHPUnit\Framework\TestCase;
@@ -58,20 +57,6 @@ class IdpInfoSourceTest extends TestCase
         $this->assertSame('https://x509idp.moonshot.utr.surfcloud.nl/metadata', $idpInfo->getEntityId());
         $this->assertSame('https://x509idp.moonshot.utr.surfcloud.nl/sso', $idpInfo->getSsoUrl());
         $this->assertNull($idpInfo->getSloUrl());
-    }
-
-    /**
-     * @return void
-     */
-    public function testInvalidEntityId()
-    {
-        try {
-            $idpInfoSource = new IdpInfoSource([new MetadataSource([__DIR__.'/data/metadata'])]);
-            $idpInfoSource->get('%');
-            $this->fail();
-        } catch (MetadataSourceException $e) {
-            $this->assertSame('invalid entityID', $e->getMessage());
-        }
     }
 
     /**

@@ -108,9 +108,6 @@ class MetadataSource implements SourceInterface
      */
     public function get($entityId)
     {
-        // XXX move this to a separate "Utils" class?
-        self::validateEntityId($entityId);
-
         $entityXml = null;
         foreach ($this->metadataDirList as $metadataDir) {
             if (!@\file_exists($metadataDir) || !\is_dir($metadataDir)) {
@@ -171,23 +168,5 @@ class MetadataSource implements SourceInterface
         }
 
         return $entityXml;
-    }
-
-    /**
-     * @param string $entityId
-     *
-     * @return void
-     */
-    private static function validateEntityId($entityId)
-    {
-        // we took all IdP entityID entries from eduGAIN metadata and made sure
-        // the filter accepts all of those... anything outside this range is
-        // probably not a valid xsd:anyURI anyway... this may need tweaking in
-        // the future...
-        //
-        // Maybe it is enough to allow everything, except DQUOTE (")?
-        if (1 !== \preg_match('|^[0-9a-zA-Z-./:=_?]+$|', $entityId)) {
-            throw new MetadataSourceException('invalid entityID');
-        }
     }
 }
