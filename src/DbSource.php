@@ -38,7 +38,7 @@ class DbSource implements SourceInterface
     public function __construct($dbFile)
     {
         $dbExists = @\file_exists($dbFile);
-        $dbHandle = new PDO('sqlite://'.$dbFile);
+        $dbHandle = new PDO('sqlite:'.$dbFile);
         $dbHandle->exec('PRAGMA foreign_keys = ON');
         $this->dbHandle = $dbHandle;
         if (!$dbExists) {

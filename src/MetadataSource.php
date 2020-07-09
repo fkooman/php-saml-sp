@@ -46,6 +46,58 @@ class MetadataSource implements SourceInterface
     }
 
     /**
+     * @return array<string,string>
+     */
+    public function getAll()
+    {
+        $entityXmlList = [];
+        foreach ($this->metadataDirList as $metadataDir) {
+            if (!@\file_exists($metadataDir) || !@\is_dir($metadataDir)) {
+                // do not exist, or is not a folder
+                continue;
+            }
+
+            if (false === $metadataFileList = \glob($metadataDir.'/*.xml')) {
+                throw new RuntimeException(\sprintf('unable to list files in "%s"', $metadataDir));
+            }
+            foreach ($metadataFileList as $metadataFile) {
+                if (false === $xmlData = @\file_get_contents($metadataFile)) {
+                    throw new RuntimeException(\sprintf('unable to read "%s"', $metadataFile));
+                }
+
+                $xmlDocument = XmlDocument::fromMetadata($xmlData, true);
+                $entityDescriptorDomNodeList = XmlDocument::requireDomNodeList(
+                    $xmlDocument->domXPath->query(
+                        // we use "//" because "EntityDescriptor" could be in
+                        // the root of the XML document, or inside (nested)
+                        // "EntitiesDescriptor"
+                        '//md:EntityDescriptor'
+                    )
+                );
+
+                foreach ($entityDescriptorDomNodeList as $entityDescriptorDomNode) {
+                    $entityDescriptorDomElement = XmlDocument::requireDomElement($entityDescriptorDomNode);
+                    // get entityID
+                    $entityId = $entityDescriptorDomElement->getAttribute('entityID');
+
+                    // we need to create a new document in order to take the
+                    // namespaces with us. Simply doing saveXML() on
+                    // EntityDescriptor DomElement will not take (all) namespace
+                    // declarations...
+//                    $entityDescriptorDomElement = XmlDocument::requireDomElement($entityDescriptorDomNodeList->item(0));
+                    $entityDocument = new DOMDocument('1.0', 'UTF-8');
+                    $entityDocument->appendChild($entityDocument->importNode($entityDescriptorDomElement, true));
+
+                    // XXX make sure entityId does not yet exist
+                    $entityXmlList[$entityId] = $entityDocument->saveXML();
+                }
+            }
+        }
+
+        return $entityXmlList;
+    }
+
+    /**
      * Get SAML metadata.
      *
      * @param string $entityId
@@ -65,7 +117,7 @@ class MetadataSource implements SourceInterface
             }
 
             if (false === $metadataFileList = \glob($metadataDir.'/*.xml')) {
-                throw new RuntimeException(\sprintf('unable to read files in "%s"', $metadataDir));
+                throw new RuntimeException(\sprintf('unable to list files in "%s"', $metadataDir));
             }
             foreach ($metadataFileList as $metadataFile) {
                 if (false === $xmlData = @\file_get_contents($metadataFile)) {

@@ -26,7 +26,6 @@ require_once \dirname(__DIR__).'/vendor/autoload.php';
 
 use fkooman\SAML\SP\DbSource;
 use fkooman\SAML\SP\MetadataSource;
-use fkooman\SAML\SP\Web\Config;
 
 $baseDir = \dirname(__DIR__);
 $dataDir = $baseDir.'/data';
@@ -37,18 +36,13 @@ try {
     if (@\file_exists($tmpDbFile)) {
         throw new RuntimeException(\sprintf('"%s" already exists', $tmpDbFile));
     }
-
-    $config = Config::fromFile($baseDir.'/config/config.php');
     $metadataSource = new MetadataSource([$baseDir.'/config/metadata']);
-    $idpList = $config->getIdpList();
 
     // write the SAML metadata in a new SQLite database and rename the file
     // afterwards
     $dbSource = new DbSource($tmpDbFile);
-    foreach ($idpList as $entityId) {
-        if (null !== $xmlString = $metadataSource->get($entityId)) {
-            $dbSource->add($entityId, $xmlString);
-        }
+    foreach ($metadataSource->getAll() as $entityId => $xmlString) {
+        $dbSource->add($entityId, $xmlString);
     }
     if (false === @\rename($tmpDbFile, $dbFile)) {
         throw new RuntimeException(\sprintf('unable to rename "%s" to "%s"', $tmpDbFile, $dbFile));
