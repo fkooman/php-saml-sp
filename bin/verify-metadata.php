@@ -39,6 +39,7 @@ $publicKeyFile = $argv[2];
 try {
     $publicKey = PublicKey::fromFile($publicKeyFile);
     $xmlDocument = XmlDocument::fromMetadata(\file_get_contents($metadataUrl), true);
+    // XXX make sure "/*" can only match the root element...
     $documentRoot = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query('/*'));
     $rootElement = XmlDocument::requireDomElement($documentRoot->item(0));
     Crypto::verifyXml($xmlDocument, $rootElement, [$publicKey]);

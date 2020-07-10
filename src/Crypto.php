@@ -68,8 +68,8 @@ class Crypto
             throw new CryptoException(\sprintf('only signature method "%s" is supported', self::SIGN_ALGO));
         }
 
-        $signatureValue = self::removeWhitespaces(XmlDocument::requireNonEmptyString($xmlDocument->domXPath->evaluate('string(ds:Signature/ds:SignatureValue)', $domElement)));
-        $digestValue = self::removeWhitespaces(XmlDocument::requireNonEmptyString($xmlDocument->domXPath->evaluate('string(ds:Signature/ds:SignedInfo/ds:Reference/ds:DigestValue)', $domElement)));
+        $signatureValue = self::removeWhiteSpace(XmlDocument::requireNonEmptyString($xmlDocument->domXPath->evaluate('string(ds:Signature/ds:SignatureValue)', $domElement)));
+        $digestValue = self::removeWhiteSpace(XmlDocument::requireNonEmptyString($xmlDocument->domXPath->evaluate('string(ds:Signature/ds:SignedInfo/ds:Reference/ds:DigestValue)', $domElement)));
 
         $signedInfoElement = XmlDocument::requireDomElement($xmlDocument->domXPath->query('ds:Signature/ds:SignedInfo', $domElement)->item(0));
         $canonicalSignedInfo = $signedInfoElement->C14N(true, false);
@@ -140,7 +140,7 @@ class Crypto
         }
 
         // extract the session key
-        $keyCipherValue = self::removeWhitespaces(XmlDocument::requireNonEmptyString($xmlDocument->domXPath->evaluate('string(xenc:EncryptedData/ds:KeyInfo/xenc:EncryptedKey/xenc:CipherData/xenc:CipherValue)', $domElement)));
+        $keyCipherValue = self::removeWhiteSpace(XmlDocument::requireNonEmptyString($xmlDocument->domXPath->evaluate('string(xenc:EncryptedData/ds:KeyInfo/xenc:EncryptedKey/xenc:CipherData/xenc:CipherValue)', $domElement)));
 
         // decrypt the session key
         if (false === \openssl_private_decrypt(Base64::decode($keyCipherValue), $symmetricEncryptionKey, $privateKey->raw(), OPENSSL_PKCS1_OAEP_PADDING)) {
@@ -153,7 +153,7 @@ class Crypto
         }
 
         // extract the encrypted Assertion
-        $assertionCipherValue = Base64::decode(self::removeWhitespaces(XmlDocument::requireNonEmptyString($xmlDocument->domXPath->evaluate('string(xenc:EncryptedData/xenc:CipherData/xenc:CipherValue)', $domElement))));
+        $assertionCipherValue = Base64::decode(self::removeWhiteSpace(XmlDocument::requireNonEmptyString($xmlDocument->domXPath->evaluate('string(xenc:EncryptedData/xenc:CipherData/xenc:CipherValue)', $domElement))));
 
         // @see https://www.w3.org/TR/xmlenc-core1/#sec-AES-GCM
         $messageIv = Binary::safeSubstr($assertionCipherValue, 0, self::ENCRYPT_IV_LENGTH); // IV (first 96 bits)
@@ -210,9 +210,12 @@ class Crypto
      *
      * @return string
      */
-    private static function removeWhitespaces($inputStr)
+    private static function removeWhiteSpace($inputStr)
     {
-        // white space in XML: https://www.w3.org/TR/xml/#NT-S
-        return \str_replace(["\x20", "\x09", "\x0d", "\x0a"], '', $inputStr);
+        // https://www.w3.org/TR/xmlschema11-2/#base64Binary
+        // https://www.w3.org/TR/xmlschema11-2/#rf-whiteSpace
+        // we do NOT follow the exact rules for white space removal, because
+        // they are insane...
+        return \str_replace(["\x09", "\x0a", "\x0d", "\x20"], '', $inputStr);
     }
 }
