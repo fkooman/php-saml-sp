@@ -24,52 +24,17 @@
 
 namespace fkooman\SAML\SP;
 
-class IdpInfoSource
+interface IdpSourceInterface
 {
-    /** @var array<SourceInterface> */
-    private $sourceList = [];
-
-    /**
-     * @param array<SourceInterface> $sourceList */
-    public function __construct(array $sourceList)
-    {
-        $this->sourceList = $sourceList;
-    }
-
-    /**
-     * @return array<IdpInfo>
-     */
-    public function getAll()
-    {
-        $idpInfoList = [];
-        foreach ($this->sourceList as $source) {
-            $xmlStringList = $source->getAll();
-            if (0 === \count($xmlStringList)) {
-                // this source does not have any, continue at next source
-                // XXX this is NOT great if the set is not exactly the same...
-                continue;
-            }
-            foreach ($xmlStringList as $xmlString) {
-                $idpInfoList[] = IdpInfo::fromXml($xmlString);
-            }
-        }
-
-        return $idpInfoList;
-    }
-
     /**
      * @param string $entityId
      *
      * @return IdpInfo|null
      */
-    public function get($entityId)
-    {
-        foreach ($this->sourceList as $source) {
-            if (null !== $xmlString = $source->get($entityId)) {
-                return IdpInfo::fromXml($xmlString);
-            }
-        }
+    public function get($entityId);
 
-        return null;
-    }
+    /**
+     * @return array<IdpInfo>
+     */
+    public function getAll();
 }

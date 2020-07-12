@@ -254,13 +254,13 @@ class Service
         if (0 === \count($configIdpList)) {
             // all IdPs available in the metadata can be used for
             // authentication
-            return $this->sp->getIdpInfoSource()->getAll();
+            return $this->sp->getIdpSource()->getAll();
         }
 
         // only a subset of IdPs can be used for authentication
         $availableIdpInfoList = [];
         foreach ($configIdpList as $entityId) {
-            if (null === $idpInfo = $this->sp->getIdpInfoSource()->get($entityId)) {
+            if (null === $idpInfo = $this->sp->getIdpSource()->get($entityId)) {
                 throw new HttpException(500, \sprintf('no metadata for IdP "%s" available', $entityId));
             }
             $availableIdpInfoList[$entityId] = $idpInfo;

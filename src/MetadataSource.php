@@ -32,7 +32,7 @@ use RuntimeException;
  * This class parses (federation) SAML Metadata files and allows extracting the
  * XML for a particular entity.
  */
-class MetadataSource implements SourceInterface
+class MetadataSource implements IdpSourceInterface
 {
     /** @var array<string> */
     private $metadataDirList = [];
@@ -46,16 +46,14 @@ class MetadataSource implements SourceInterface
     }
 
     /**
-     * Get SAML metadata for all entities.
-     *
-     * @return array<string>
+     * @return array<IdpInfo>
      */
     public function getAll()
     {
-        $xmlStringList = [];
+        $idpInfoList = [];
         foreach ($this->metadataDirList as $metadataDir) {
             if (!@\file_exists($metadataDir) || !@\is_dir($metadataDir)) {
-                // do not exist, or is not a folder
+                // does not exist, or is not a folder
                 continue;
             }
 
@@ -67,7 +65,7 @@ class MetadataSource implements SourceInterface
                     throw new RuntimeException(\sprintf('unable to read "%s"', $metadataFile));
                 }
 
-                $xmlDocument = XmlDocument::fromMetadata($xmlData, true);
+                $xmlDocument = XmlDocument::fromMetadata($xmlData, false);
                 $entityDescriptorDomNodeList = XmlDocument::requireDomNodeList(
                     $xmlDocument->domXPath->query(
                         // we use "//" because "EntityDescriptor" could be in
@@ -91,27 +89,24 @@ class MetadataSource implements SourceInterface
                     // namespace declarations...
                     $entityDocument = new DOMDocument('1.0', 'UTF-8');
                     $entityDocument->appendChild($entityDocument->importNode($entityDescriptorDomElement, true));
-                    $xmlStringList[] = $entityDocument->saveXML();
+                    $idpInfoList[] = IdpInfo::fromXml($entityDocument->saveXML());
                 }
             }
         }
 
-        return $xmlStringList;
+        return $idpInfoList;
     }
 
     /**
-     * Get SAML metadata.
-     *
      * @param string $entityId
      *
-     * @return string|null
+     * @return IdpInfo|null
      */
     public function get($entityId)
     {
-        $entityXml = null;
         foreach ($this->metadataDirList as $metadataDir) {
             if (!@\file_exists($metadataDir) || !\is_dir($metadataDir)) {
-                // do not exist, or is not a folder
+                // does not exist, or is not a folder
                 continue;
             }
 
@@ -123,7 +118,7 @@ class MetadataSource implements SourceInterface
                     throw new RuntimeException(\sprintf('unable to read "%s"', $metadataFile));
                 }
 
-                $xmlDocument = XmlDocument::fromMetadata($xmlData, true);
+                $xmlDocument = XmlDocument::fromMetadata($xmlData, false);
                 $entityDescriptorDomNodeList = XmlDocument::requireDomNodeList(
                     $xmlDocument->domXPath->query(
                         // we use "//" because "EntityDescriptor" could be in
@@ -138,22 +133,11 @@ class MetadataSource implements SourceInterface
                     continue;
                 }
 
-                if (1 < $entityDescriptorDomNodeList->length) {
-                    // more than one EntityDescriptor found with this entityID
-                    throw new MetadataSourceException(\sprintf('found >= 1 EntityDescriptor with entityID "%s" in "%s"', $entityId, $metadataFile));
-                }
-
                 $entityDescriptorDomElement = XmlDocument::requireDomElement($entityDescriptorDomNodeList->item(0));
                 $idpSsoDescriptorDomNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query('md:IDPSSODescriptor', $entityDescriptorDomElement));
                 if (0 === $idpSsoDescriptorDomNodeList->length) {
                     // not an IdP
                     continue;
-                }
-
-                if (null !== $entityXml) {
-                    // we already found an EntityDescriptor with this entityID
-                    // in one of the metadata files...
-                    throw new MetadataSourceException(\sprintf('duplicate entityID "%s", contained in multiple metadata files', $entityId));
                 }
 
                 // we need to create a new document in order to take the
@@ -163,10 +147,37 @@ class MetadataSource implements SourceInterface
                 $entityDocument = new DOMDocument('1.0', 'UTF-8');
                 $entityDocument->appendChild($entityDocument->importNode($entityDescriptorDomElement, true));
 
-                $entityXml = $entityDocument->saveXML();
+                return IdpInfo::fromXml($entityDocument->saveXML());
             }
         }
 
-        return $entityXml;
+        return null;
+    }
+
+    /**
+     * @param string           $metadataFile
+     * @param array<PublicKey> $publicKeyList
+     *
+     * @return void
+     */
+    public static function validateMetadataFile($metadataFile, array $publicKeyList)
+    {
+        if (0 === \count($publicKeyList)) {
+            throw new MetadataSourceException('need at least one PublicKey to verify metadata');
+        }
+        if (false === $metadataStr = @\file_get_contents($metadataFile)) {
+            throw new MetadataSourceException(\sprintf('unable to read "%s"', $metadataFile));
+        }
+
+        // read metadata file and validate its XML schema
+        $xmlDocument = XmlDocument::fromMetadata($metadataStr, true);
+        // XXX make sure "/*" can only match either EntityDescriptor or
+        // EntitiesDescriptor...
+        $rootDomElement = XmlDocument::requireDomElement(
+            XmlDocument::requireDomNodeList(
+                $xmlDocument->domXPath->query('/*')
+            )->item(0)
+        );
+        Crypto::verifyXml($xmlDocument, $rootDomElement, $publicKeyList);
     }
 }

@@ -24,32 +24,36 @@
 
 require_once \dirname(__DIR__).'/vendor/autoload.php';
 
-use fkooman\SAML\SP\DbSource;
-use fkooman\SAML\SP\IdpInfo;
+use fkooman\SAML\SP\CurlHttpClient;
 use fkooman\SAML\SP\MetadataSource;
+use fkooman\SAML\SP\PublicKey;
+use fkooman\SAML\SP\Web\Config;
 
 $baseDir = \dirname(__DIR__);
 $dataDir = $baseDir.'/data';
-$dbFile = $dataDir.'/db.sqlite';
-$tmpDbFile = $dataDir.'/db.sqlite.tmp';
+$configDir = $baseDir.'/config';
+$verifiedMetadataDir = $dataDir.'/metadata/verified';
+$unverifiedMetadataDir = $dataDir.'/metadata';
 
 try {
-    if (@\file_exists($tmpDbFile)) {
-        throw new RuntimeException(\sprintf('"%s" already exists', $tmpDbFile));
-    }
-    $metadataSource = new MetadataSource([$baseDir.'/config/metadata']);
+    $config = Config::fromFile($configDir.'/config.php');
+    \mkdir($unverifiedMetadataDir, 0755);
+    \mkdir($verifiedMetadataDir, 0755);
 
-    // write the SAML metadata in a new SQLite database and rename the file
-    // afterwards
-    $dbSource = new DbSource($tmpDbFile);
-    foreach ($metadataSource->getAll() as $xmlString) {
-        $idpInfo = IdpInfo::fromXml($xmlString);
-        $dbSource->add($idpInfo->getEntityId(), $xmlString);
-    }
-    if (false === @\rename($tmpDbFile, $dbFile)) {
-        throw new RuntimeException(\sprintf('unable to rename "%s" to "%s"', $tmpDbFile, $dbFile));
+    foreach ($config->getMetadataList() as $metadataUrl => $publicKeyFileList) {
+        // get the metadata
+        $metadataString = CurlHttpClient::get($metadataUrl);
+        $unverifiedFile = $unverifiedMetadataDir.'/'.\base64_encode($metadataUrl).'.xml';
+        $verifiedFile = $verifiedMetadataDir.'/'.\base64_encode($metadataUrl).'.xml';
+        \file_put_contents($unverifiedFile, $metadataString);
+        $publicKeyList = [];
+        foreach ($publicKeyFileList as $publicKeyFile) {
+            $publicKeyList[] = PublicKey::fromFile($publicKeyFile);
+        }
+        MetadataSource::validateMetadataFile($unverifiedFile, $publicKeyList);
+        \rename($unverifiedFile, $verifiedFile);
     }
 } catch (Exception $e) {
-    echo 'ERROR: '.$e->getMessage().PHP_EOL;
+    echo 'ERROR: ['.\get_class($e).'] '.$e->getMessage().PHP_EOL;
     exit(1);
 }

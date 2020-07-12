@@ -25,8 +25,6 @@
 require_once \dirname(__DIR__).'/vendor/autoload.php';
 
 use fkooman\SAML\SP\CryptoKeys;
-use fkooman\SAML\SP\DbSource;
-use fkooman\SAML\SP\IdpInfoSource;
 use fkooman\SAML\SP\MetadataSource;
 use fkooman\SAML\SP\SeSession;
 use fkooman\SAML\SP\SP;
@@ -63,12 +61,7 @@ try {
     $tpl->setLanguageCode($languageCode);
     $tpl->addDefault(['secureCookie' => $secureCookie, 'enabledLanguages' => $config->getEnabledLanguages(), 'serviceName' => $config->getServiceName($languageCode)]);
 
-    $idpInfoSource = new IdpInfoSource(
-        [
-            new DbSource($dataDir.'/db.sqlite'),
-            new MetadataSource([$baseDir.'/config/metadata', $dataDir.'/metadata']),
-        ]
-    );
+    $idpSource = new MetadataSource([$baseDir.'/config/metadata', $dataDir.'/metadata/verified']);
 
     $request = new Request($_SERVER, $_GET, $_POST);
 
@@ -87,7 +80,7 @@ try {
         $config->getServiceNames()
     );
     $spInfo->setSloUrl($request->getRootUri().'slo');
-    $sp = new SP($spInfo, $idpInfoSource, $seSession);
+    $sp = new SP($spInfo, $idpSource, $seSession);
     $service = new Service($config, $tpl, $sp, $seCookie);
     $request = new Request($_SERVER, $_GET, $_POST);
     $service->run($request)->send();

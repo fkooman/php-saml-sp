@@ -24,21 +24,40 @@
 
 namespace fkooman\SAML\SP;
 
-interface SourceInterface
+use RuntimeException;
+
+class CurlHttpClient
 {
     /**
-     * Get SAML metadata for one entity.
+     * @param string $requestUrl
      *
-     * @param string $entityId
-     *
-     * @return string|null
+     * @return string
      */
-    public function get($entityId);
+    public static function get($requestUrl)
+    {
+        if (false === $curlChannel = \curl_init()) {
+            throw new RuntimeException('unable to create cURL channel');
+        }
 
-    /**
-     * Get SAML metadata for all entities.
-     *
-     * @return array<string>
-     */
-    public function getAll();
+        $curlOptions = [
+            CURLOPT_URL => $requestUrl,
+            CURLOPT_HEADER => false,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => false,
+            CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+        ];
+
+        if (false === \curl_setopt_array($curlChannel, $curlOptions)) {
+            throw new RuntimeException('unable to set cURL options');
+        }
+
+        $responseData = \curl_exec($curlChannel);
+        if (!\is_string($responseData)) {
+            throw new RuntimeException(\sprintf('failure performing the HTTP request: "%s"', \curl_error($curlChannel)));
+        }
+
+        \curl_close($curlChannel);
+
+        return $responseData;
+    }
 }

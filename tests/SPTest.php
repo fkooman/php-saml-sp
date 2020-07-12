@@ -31,7 +31,6 @@ use fkooman\SAML\SP\AuthnRequestState;
 use fkooman\SAML\SP\Crypto;
 use fkooman\SAML\SP\CryptoKeys;
 use fkooman\SAML\SP\Exception\ResponseException;
-use fkooman\SAML\SP\IdpInfoSource;
 use fkooman\SAML\SP\LogoutRequestState;
 use fkooman\SAML\SP\MetadataSource;
 use fkooman\SAML\SP\NameId;
@@ -56,7 +55,7 @@ class SPTest extends TestCase
         $spInfo->setSloUrl('http://localhost:8081/slo');
         $this->sp = new TestSP(
             $spInfo,
-            new IdpInfoSource([new MetadataSource([__DIR__.'/data/metadata'])]),
+            new MetadataSource([__DIR__.'/data/metadata']),
             new TestSession()
         );
         $this->sp->setDateTime(new DateTime('2018-01-01 08:00:00'));

@@ -193,6 +193,18 @@ class Config
     }
 
     /**
+     * @return array<string,array<string>>
+     */
+    public function getMetadataList()
+    {
+        if (null === $metadataList = $this->get('metadataList')) {
+            return [];
+        }
+
+        return $metadataList;
+    }
+
+    /**
      * @param string $k
      *
      * @return mixed
@@ -204,23 +216,5 @@ class Config
         }
 
         return $this->configData[$k];
-    }
-
-    /**
-     * @param string $s
-     *
-     * @return self|null
-     */
-    private function getSection($s)
-    {
-        if (!\array_key_exists($s, $this->configData)) {
-            return null;
-        }
-
-        if (!\is_array($this->configData[$s])) {
-            return null;
-        }
-
-        return new self($this->configData[$s]);
     }
 }
