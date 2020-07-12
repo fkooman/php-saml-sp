@@ -25,7 +25,6 @@
     "license": "MIT",
     "name": "fkooman/saml-sp",
     "require": {
-        "ext-pdo": "*",
         "ext-date": "*",
         "ext-dom": "*",
         "ext-filter": "*",
