@@ -46,55 +46,13 @@ class MetadataSource implements IdpSourceInterface
     }
 
     /**
-     * @return array<IdpInfo>
+     * Get a list of all entity IDs available in the metadata.
+     *
+     * @return array<string>
      */
-    public function getAll()
+    public function getEntityIdList()
     {
-        $idpInfoList = [];
-        foreach ($this->metadataDirList as $metadataDir) {
-            if (!@\file_exists($metadataDir) || !@\is_dir($metadataDir)) {
-                // does not exist, or is not a folder
-                continue;
-            }
-
-            if (false === $metadataFileList = \glob($metadataDir.'/*.xml')) {
-                throw new RuntimeException(\sprintf('unable to list files in directory "%s"', $metadataDir));
-            }
-            foreach ($metadataFileList as $metadataFile) {
-                if (false === $xmlData = @\file_get_contents($metadataFile)) {
-                    throw new RuntimeException(\sprintf('unable to read "%s"', $metadataFile));
-                }
-
-                $xmlDocument = XmlDocument::fromMetadata($xmlData, false);
-                $entityDescriptorDomNodeList = XmlDocument::requireDomNodeList(
-                    $xmlDocument->domXPath->query(
-                        // we use "//" because "EntityDescriptor" could be in
-                        // the root of the XML document, or inside a (nested)
-                        // "EntitiesDescriptor"
-                        '//md:EntityDescriptor'
-                    )
-                );
-
-                foreach ($entityDescriptorDomNodeList as $entityDescriptorDomNode) {
-                    $entityDescriptorDomElement = XmlDocument::requireDomElement($entityDescriptorDomNode);
-                    $idpSsoDescriptorDomNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query('md:IDPSSODescriptor', $entityDescriptorDomElement));
-                    if (0 === $idpSsoDescriptorDomNodeList->length) {
-                        // not an IdP
-                        continue;
-                    }
-
-                    // we need to create a new document in order to take the
-                    // namespaces with us. Simply doing saveXML() on
-                    // $entityDescriptorDomElement will not retain (all)
-                    // namespace declarations...
-                    $entityDocument = new DOMDocument('1.0', 'UTF-8');
-                    $entityDocument->appendChild($entityDocument->importNode($entityDescriptorDomElement, true));
-                    $idpInfoList[] = IdpInfo::fromXml($entityDocument->saveXML());
-                }
-            }
-        }
-
-        return $idpInfoList;
+        return [];
     }
 
     /**
@@ -104,54 +62,22 @@ class MetadataSource implements IdpSourceInterface
      */
     public function get($entityId)
     {
-        foreach ($this->metadataDirList as $metadataDir) {
-            if (!@\file_exists($metadataDir) || !\is_dir($metadataDir)) {
-                // does not exist, or is not a folder
-                continue;
-            }
-
-            if (false === $metadataFileList = \glob($metadataDir.'/*.xml')) {
-                throw new RuntimeException(\sprintf('unable to list files in directory "%s"', $metadataDir));
-            }
-            foreach ($metadataFileList as $metadataFile) {
-                if (false === $xmlData = @\file_get_contents($metadataFile)) {
-                    throw new RuntimeException(\sprintf('unable to read "%s"', $metadataFile));
-                }
-
-                $xmlDocument = XmlDocument::fromMetadata($xmlData, false);
-                $entityDescriptorDomNodeList = XmlDocument::requireDomNodeList(
-                    $xmlDocument->domXPath->query(
-                        // we use "//" because "EntityDescriptor" could be in
-                        // the root of the XML document, or inside a (nested)
-                        // "EntitiesDescriptor"
-                        \sprintf('//md:EntityDescriptor[@entityID="%s"]', $entityId)
-                    )
-                );
-
-                if (0 === $entityDescriptorDomNodeList->length) {
-                    // no EntityDescriptor found with this entityID
-                    continue;
-                }
-
-                $entityDescriptorDomElement = XmlDocument::requireDomElement($entityDescriptorDomNodeList->item(0));
-                $idpSsoDescriptorDomNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query('md:IDPSSODescriptor', $entityDescriptorDomElement));
-                if (0 === $idpSsoDescriptorDomNodeList->length) {
-                    // not an IdP
-                    continue;
-                }
-
-                // we need to create a new document in order to take the
-                // namespaces with us. Simply doing saveXML() on
-                // EntityDescriptor DomElement will not take (all) namespace
-                // declarations...
-                $entityDocument = new DOMDocument('1.0', 'UTF-8');
-                $entityDocument->appendChild($entityDocument->importNode($entityDescriptorDomElement, true));
-
-                return IdpInfo::fromXml($entityDocument->saveXML());
-            }
+        $idpInfoList = $this->getIdpInfo($entityId);
+        if (0 === \count($idpInfoList)) {
+            return null;
         }
 
-        return null;
+        // we expect there to be only 1 result, but even if there are more we
+        // simply return the first one...
+        return $idpInfoList[0];
+    }
+
+    /**
+     * @return array<IdpInfo>
+     */
+    public function getAll()
+    {
+        return $this->getIdpInfo(null);
     }
 
     /**
@@ -179,5 +105,60 @@ class MetadataSource implements IdpSourceInterface
             )->item(0)
         );
         Crypto::verifyXml($xmlDocument, $rootDomElement, $publicKeyList);
+    }
+
+    /**
+     * @param string|null $entityId
+     *
+     * @return array<IdpInfo>
+     */
+    private function getIdpInfo($entityId)
+    {
+        $idpInfoList = [];
+        foreach ($this->metadataDirList as $metadataDir) {
+            if (!@\file_exists($metadataDir) || !@\is_dir($metadataDir)) {
+                // does not exist, or is not a folder
+                continue;
+            }
+
+            if (false === $metadataFileList = \glob($metadataDir.'/*.xml')) {
+                throw new RuntimeException(\sprintf('unable to list files in directory "%s"', $metadataDir));
+            }
+            foreach ($metadataFileList as $metadataFile) {
+                if (false === $xmlData = @\file_get_contents($metadataFile)) {
+                    throw new RuntimeException(\sprintf('unable to read "%s"', $metadataFile));
+                }
+
+                $xmlDocument = XmlDocument::fromMetadata($xmlData, false);
+
+                // we use "//" because "EntityDescriptor" could be in
+                // the root of the XML document, or inside a (nested)
+                // "EntitiesDescriptor"
+                $xPathQuery = null === $entityId ? '//md:EntityDescriptor' : \sprintf('//md:EntityDescriptor[@entityID="%s"]', $entityId);
+
+                $entityDescriptorDomNodeList = XmlDocument::requireDomNodeList(
+                    $xmlDocument->domXPath->query($xPathQuery)
+                );
+
+                foreach ($entityDescriptorDomNodeList as $entityDescriptorDomNode) {
+                    $entityDescriptorDomElement = XmlDocument::requireDomElement($entityDescriptorDomNode);
+                    $idpSsoDescriptorDomNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query('md:IDPSSODescriptor', $entityDescriptorDomElement));
+                    if (0 === $idpSsoDescriptorDomNodeList->length) {
+                        // not an IdP
+                        continue;
+                    }
+
+                    // we need to create a new document in order to take the
+                    // namespaces with us. Simply doing saveXML() on
+                    // $entityDescriptorDomElement will not retain (all)
+                    // namespace declarations...
+                    $entityDocument = new DOMDocument('1.0', 'UTF-8');
+                    $entityDocument->appendChild($entityDocument->importNode($entityDescriptorDomElement, true));
+                    $idpInfoList[] = IdpInfo::fromXml($entityDocument->saveXML());
+                }
+            }
+        }
+
+        return $idpInfoList;
     }
 }
