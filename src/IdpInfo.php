@@ -25,6 +25,7 @@
 namespace fkooman\SAML\SP;
 
 use fkooman\SAML\SP\Exception\IdpInfoException;
+use fkooman\SAML\SP\Exception\KeyException;
 
 /**
  * Holds the configuration information of an IdP.
@@ -199,7 +200,13 @@ class IdpInfo
         $publicKeys = [];
         foreach ($domNodeList as $domNode) {
             $certificateElement = XmlDocument::requireDomElement($domNode);
-            $publicKeys[] = PublicKey::fromEncodedString(\trim($certificateElement->textContent));
+            try {
+                $publicKeys[] = PublicKey::fromEncodedString(\trim($certificateElement->textContent));
+            } catch (KeyException $e) {
+                // we do not (yet) support other keys than RSA at the moment,
+                // trying to parse e.g. an EC cert will fail. We ignore those
+                // entries..
+            }
         }
 
         return $publicKeys;
