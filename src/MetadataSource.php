@@ -24,7 +24,8 @@
 
 namespace fkooman\SAML\SP;
 
-use DOMDOcument;
+use DOMDocument;
+use DOMElement;
 use fkooman\SAML\SP\Exception\MetadataSourceException;
 use RuntimeException;
 
@@ -46,38 +47,42 @@ class MetadataSource implements IdpSourceInterface
     }
 
     /**
-     * Get a list of all entity IDs available in the metadata.
-     *
-     * @return array<string>
-     */
-    public function getEntityIdList()
-    {
-        return [];
-    }
-
-    /**
      * @param string $entityId
      *
      * @return IdpInfo|null
      */
     public function get($entityId)
     {
-        $idpInfoList = $this->getIdpInfo($entityId);
+        $idpInfoList = [];
+        $this->foreachIdp(function (DOMElement $entityDescriptorDomElement) use (&$idpInfoList) {
+            $entityDocument = new DOMDocument('1.0', 'UTF-8');
+            $entityDocument->appendChild($entityDocument->importNode($entityDescriptorDomElement, true));
+            $idpInfoList[] = IdpInfo::fromXml($entityDocument->saveXML());
+        }, $entityId);
+
+        // we expect there to be only 1 result, but even if there are more we
+        // simply return the first one...
         if (0 === \count($idpInfoList)) {
             return null;
         }
 
-        // we expect there to be only 1 result, but even if there are more we
-        // simply return the first one...
         return $idpInfoList[0];
     }
 
     /**
-     * @return array<IdpInfo>
+     * @return array<string,IdpInfo>
      */
     public function getAll()
     {
-        return $this->getIdpInfo(null);
+        $idpInfoList = [];
+        $this->foreachIdp(function (DOMElement $entityDescriptorDomElement) use (&$idpInfoList) {
+            $entityDocument = new DOMDocument('1.0', 'UTF-8');
+            $entityDocument->appendChild($entityDocument->importNode($entityDescriptorDomElement, true));
+            $idpInfo = IdpInfo::fromXml($entityDocument->saveXML());
+            $idpInfoList[$idpInfo->getEntityId()] = $idpInfo;
+        }, null);
+
+        return $idpInfoList;
     }
 
     /**
@@ -110,11 +115,10 @@ class MetadataSource implements IdpSourceInterface
     /**
      * @param string|null $entityId
      *
-     * @return array<IdpInfo>
+     * @return void
      */
-    private function getIdpInfo($entityId)
+    private function forEachIdP(callable $c, $entityId)
     {
-        $idpInfoList = [];
         foreach ($this->metadataDirList as $metadataDir) {
             if (!@\file_exists($metadataDir) || !@\is_dir($metadataDir)) {
                 // does not exist, or is not a folder
@@ -148,17 +152,9 @@ class MetadataSource implements IdpSourceInterface
                         continue;
                     }
 
-                    // we need to create a new document in order to take the
-                    // namespaces with us. Simply doing saveXML() on
-                    // $entityDescriptorDomElement will not retain (all)
-                    // namespace declarations...
-                    $entityDocument = new DOMDocument('1.0', 'UTF-8');
-                    $entityDocument->appendChild($entityDocument->importNode($entityDescriptorDomElement, true));
-                    $idpInfoList[] = IdpInfo::fromXml($entityDocument->saveXML());
+                    $c($entityDescriptorDomElement);
                 }
             }
         }
-
-        return $idpInfoList;
     }
 }

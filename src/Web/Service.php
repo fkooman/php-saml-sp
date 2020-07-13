@@ -137,7 +137,7 @@ class Service
                 if (null !== $idpEntityId = $request->optionalQueryParameter('IdP')) {
                     $idpEntityId = self::verifyEntityId($idpEntityId);
                     // an IdP entity ID is provided as a query parameter, make
-                    // sure it is available
+                    // sure it is allowed...
                     if (!\array_key_exists($idpEntityId, $availableIdpInfoList)) {
                         throw new HttpException(400, \sprintf('IdP "%s" is not available', $idpEntityId));
                     }
@@ -221,13 +221,10 @@ class Service
 
                 return new RedirectResponse($returnTo);
             case '/login':
-                $availableIdpInfoList = $this->getAvailableIdpInfoList();
                 $idpEntityId = self::verifyEntityId($request->requirePostParameter('IdP'));
-                if (!\array_key_exists($idpEntityId, $availableIdpInfoList)) {
-                    throw new HttpException(400, \sprintf('IdP "%s" is not available', $idpEntityId));
-                }
-                // we don't care what the value of the cookie becomes, it will
-                // be checked before using it anyway...
+                // we do not have to make sure the IdP is actually available
+                // in the metadata (or allowed) as the GET to /login where this
+                // POST will redirect to will take care of this...
                 $this->cookie->set(self::LAST_CHOSEN_COOKIE_NAME, $idpEntityId);
                 $returnTo = self::verifyReturnToOrigin($request->getOrigin(), $request->getUri());
 
