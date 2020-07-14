@@ -4,11 +4,12 @@
 
 ### Features
 
-- implementing caching for eduGAIN purpose with 2k+ IdPs
 - include DomNode/Element in error message so we know where the problem is in
   the XML
 - implement automatic metadata refresh and verify it using its XML
   signature
+  - mostly done now, only need to consider `validUntil` or "caching" info in 
+    metadata on *when* to refresh exactly instead of forcing it every hour...
 
 ### Fixes / Security Audit
 
@@ -21,6 +22,7 @@
 
 ## After 1.0
 
+- implementing caching for eduGAIN purpose with 2k+ IdPs
 - validate schema of outgoing SAML messages (`AuthnRequest`, `LogoutRequest`, `Metadata`)?
 - `ForceAuthn` in `AuthnRequest` (is anyone actually using this?)
 - Implement a way to have multiple SP certificates
@@ -37,9 +39,7 @@
   - Implement unsolicited `Response`, "IdP initiated"
   - Receive unsolicited `LogoutRequest` from IdPs
 
-## Notee
-
-[1]: 
+## Notes
 
 ```
 <ds:Transforms>
