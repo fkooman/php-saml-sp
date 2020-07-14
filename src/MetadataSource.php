@@ -24,9 +24,12 @@
 
 namespace fkooman\SAML\SP;
 
+use DateInterval;
+use DateTime;
 use DOMDocument;
 use DOMElement;
-use fkooman\SAML\SP\Exception\MetadataSourceException;
+use fkooman\SAML\SP\Exception\CryptoException;
+use fkooman\SAML\SP\Exception\HttpClientException;
 use RuntimeException;
 
 /**
@@ -35,15 +38,29 @@ use RuntimeException;
  */
 class MetadataSource implements IdpSourceInterface
 {
-    /** @var array<string> */
-    private $metadataDirList = [];
+    /** @var \DateTime */
+    protected $dateTime;
+
+    /** @var string */
+    private $staticDir;
+
+    /** @var string */
+    private $dynamicDir;
 
     /**
-     * @param array<string> $metadataDirList
+     * @param string $staticDir
+     * @param string $dynamicDir
      */
-    public function __construct(array $metadataDirList)
+    public function __construct($staticDir, $dynamicDir)
     {
-        $this->metadataDirList = $metadataDirList;
+        $this->dateTime = new DateTime();
+        $this->staticDir = $staticDir;
+        if (false === @\file_exists($dynamicDir)) {
+            if (false === @\mkdir($dynamicDir, 0711, true)) {
+                throw new RuntimeException(\sprintf('unable to create "%s"', $dynamicDir));
+            }
+        }
+        $this->dynamicDir = $dynamicDir;
     }
 
     /**
@@ -86,22 +103,85 @@ class MetadataSource implements IdpSourceInterface
     }
 
     /**
-     * @param string           $metadataFile
+     * Fetch the SAML metadata if it is about to expire, verify it and write it
+     * to the dynamic directory.
+     *
+     * @param array<string,array<string>> $metadataUrlKeyList
+     *
+     * @return void
+     */
+    public function importMetadata(HttpClientInterface $httpClient, array $metadataUrlKeyList)
+    {
+        // Algorithm, for each URL in metadataUrlKeyList
+        // 1. do we have the metadata file already locally?
+        //    1a: YES: go to 2
+        //    1b: NO: go to 3
+        // 2. is validUntil approaching?
+        //    2a: YES: go to 3
+        //    2b: NO: next URL
+        // 3. fetch URL
+        // 4. verify the XML schema
+        // 5. verify the signature
+        // 6. write to disk
+        foreach ($metadataUrlKeyList as $metadataUrl => $publicKeyFileList) {
+            try {
+                $metadataFile = \sprintf('%s/%s.xml', $this->dynamicDir, \base64_encode($metadataUrl));
+                if (false !== $metadataString = @\file_get_contents($metadataFile)) {
+                    $xmlDocument = XmlDocument::fromMetadata($metadataString, false);
+                    $rootDomElement = XmlDocument::requireDomElement(
+                        XmlDocument::requireDomNodeList(
+                            $xmlDocument->domXPath->query('/*')
+                        )->item(0)
+                    );
+                    $validUntil = $rootDomElement->getAttribute('validUntil');
+                    if ('' !== $validUntil) {
+                        // XXX write a proper test for this!
+                        $validUntilDateTime = new DateTime($validUntil);
+                        $refreshThreshhold = \date_add(clone $this->dateTime, new DateInterval('PT4H'));
+                        if ($refreshThreshhold->getTimestamp() < $validUntilDateTime->getTimestamp()) {
+                            // still valid for a while, go to next URL
+                            continue;
+                        }
+                    }
+                }
+                // either metadata does not yet exist, we didn't find validUntil,
+                // or the metadata needs refreshing...
+                $freshMetadataString = $httpClient->get($metadataUrl);
+                $publicKeyList = [];
+                foreach ($publicKeyFileList as $publicKeyFile) {
+                    $publicKeyList[] = PublicKey::fromFile($this->staticDir.'/keys/'.$publicKeyFile);
+                }
+
+                self::validateMetadata($freshMetadataString, $publicKeyList);
+                $tmpFile = \tempnam(\sys_get_temp_dir(), 'php-saml-sp');
+                if (false === @\file_put_contents($tmpFile, $freshMetadataString)) {
+                    throw new RuntimeException(\sprintf('unable to write "%s"', $tmpFile));
+                }
+                // write fresh metadata
+                if (false === @\rename($tmpFile, $metadataFile)) {
+                    throw new RuntimeException(\sprintf('unable to mvoe "%s" to "%s"', $tmpFile, $metadataFile));
+                }
+            } catch (CryptoException $e) {
+                // unable to verify signature, go to next entry, but log it
+                // XXX implement logging
+            } catch (HttpClientException $e) {
+                // unable to retrieve new metadata, go to next entry, but log
+                // it
+                // XXX implement logging
+            }
+        }
+    }
+
+    /**
+     * @param string           $metadataString
      * @param array<PublicKey> $publicKeyList
      *
      * @return void
      */
-    public static function validateMetadataFile($metadataFile, array $publicKeyList)
+    private static function validateMetadata($metadataString, array $publicKeyList)
     {
-        if (0 === \count($publicKeyList)) {
-            throw new MetadataSourceException('need at least one PublicKey to verify metadata');
-        }
-        if (false === $metadataStr = @\file_get_contents($metadataFile)) {
-            throw new MetadataSourceException(\sprintf('unable to read "%s"', $metadataFile));
-        }
-
         // read metadata file and validate its XML schema
-        $xmlDocument = XmlDocument::fromMetadata($metadataStr, true);
+        $xmlDocument = XmlDocument::fromMetadata($metadataString, true);
         // XXX make sure "/*" can only match either EntityDescriptor or
         // EntitiesDescriptor...
         $rootDomElement = XmlDocument::requireDomElement(
@@ -119,12 +199,11 @@ class MetadataSource implements IdpSourceInterface
      */
     private function forEachIdP(callable $c, $entityId)
     {
-        foreach ($this->metadataDirList as $metadataDir) {
+        foreach ([$this->staticDir, $this->dynamicDir] as $metadataDir) {
             if (!@\file_exists($metadataDir) || !@\is_dir($metadataDir)) {
                 // does not exist, or is not a folder
                 continue;
             }
-
             if (false === $metadataFileList = \glob($metadataDir.'/*.xml')) {
                 throw new RuntimeException(\sprintf('unable to list files in directory "%s"', $metadataDir));
             }

@@ -55,7 +55,7 @@ class SPTest extends TestCase
         $spInfo->setSloUrl('http://localhost:8081/slo');
         $this->sp = new TestSP(
             $spInfo,
-            new MetadataSource([__DIR__.'/data/metadata']),
+            new MetadataSource(__DIR__.'/data/metadata', \sys_get_temp_dir()),
             new TestSession()
         );
         $this->sp->setDateTime(new DateTime('2018-01-01 08:00:00'));

@@ -103,6 +103,10 @@ class Crypto
      */
     public static function verify($inStr, $inSig, array $publicKeys)
     {
+        if (0 === \count($publicKeys)) {
+            throw new CryptoException('no public key(s) provided');
+        }
+
         foreach ($publicKeys as $publicKey) {
             if (1 === \openssl_verify($inStr, $inSig, $publicKey->raw(), self::SIGN_OPENSSL_ALGO)) {
                 // signature verified

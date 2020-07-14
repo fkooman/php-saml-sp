@@ -196,7 +196,7 @@ class Config
     /**
      * @return array<string,array<string>>
      */
-    public function getMetadataList()
+    public function getMetadataKeyList()
     {
         if (null === $metadataList = $this->get('metadataList')) {
             return [];

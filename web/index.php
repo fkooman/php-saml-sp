@@ -61,7 +61,7 @@ try {
     $tpl->setLanguageCode($languageCode);
     $tpl->addDefault(['secureCookie' => $secureCookie, 'enabledLanguages' => $config->getEnabledLanguages(), 'serviceName' => $config->getServiceName($languageCode)]);
 
-    $idpSource = new MetadataSource([$baseDir.'/config/metadata', $dataDir.'/metadata/verified']);
+    $idpSource = new MetadataSource($baseDir.'/config/metadata', $dataDir.'/metadata');
 
     $request = new Request($_SERVER, $_GET, $_POST);
 

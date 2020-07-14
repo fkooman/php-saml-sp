@@ -24,43 +24,12 @@
 
 namespace fkooman\SAML\SP;
 
-use fkooman\SAML\SP\Exception\HttpClientException;
-use RuntimeException;
-
-class CurlHttpClient implements HttpClientInterface
+interface HttpClientInterface
 {
     /**
      * @param string $requestUrl
      *
      * @return string
      */
-    public function get($requestUrl)
-    {
-        if (false === $curlChannel = \curl_init()) {
-            throw new RuntimeException('unable to create cURL channel');
-        }
-
-        $curlOptions = [
-            CURLOPT_URL => $requestUrl,
-            CURLOPT_HEADER => false,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FOLLOWLOCATION => false,
-            CURLOPT_CONNECTTIMEOUT => 10,
-            CURLOPT_TIMEOUT => 15,
-            CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
-        ];
-
-        if (false === \curl_setopt_array($curlChannel, $curlOptions)) {
-            throw new RuntimeException('unable to set cURL options');
-        }
-
-        $responseData = \curl_exec($curlChannel);
-        if (!\is_string($responseData)) {
-            throw new HttpClientException(\sprintf('failure performing the HTTP request: "%s"', \curl_error($curlChannel)));
-        }
-
-        \curl_close($curlChannel);
-
-        return $responseData;
-    }
+    public function get($requestUrl);
 }

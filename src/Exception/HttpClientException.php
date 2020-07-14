@@ -22,25 +22,8 @@
  * SOFTWARE.
  */
 
-require_once \dirname(__DIR__).'/vendor/autoload.php';
+namespace fkooman\SAML\SP\Exception;
 
-use fkooman\SAML\SP\CurlHttpClient;
-use fkooman\SAML\SP\MetadataSource;
-use fkooman\SAML\SP\Web\Config;
-
-$baseDir = \dirname(__DIR__);
-
-try {
-    $config = Config::fromFile($baseDir.'/config/config.php');
-    $metadataSource = new MetadataSource(
-        $baseDir.'/config/metadata',
-        $baseDir.'/data/metadata'
-    );
-    $metadataSource->importMetadata(
-        new CurlHttpClient(),
-        $config->getMetadataKeyList()
-    );
-} catch (Exception $e) {
-    echo 'ERROR: ['.\get_class($e).'] '.$e->getMessage().PHP_EOL;
-    exit(1);
+class HttpClientException extends SamlException
+{
 }
