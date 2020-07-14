@@ -22,6 +22,9 @@
 
 ## After 1.0
 
+- some IdPs also rollover the metadata signing keys (ADFS) it seems, so we have
+  to extract any new certificates found in the metadata and put them in the 
+  "trust store" as well
 - implementing caching for eduGAIN purpose with 2k+ IdPs
 - validate schema of outgoing SAML messages (`AuthnRequest`, `LogoutRequest`, `Metadata`)?
 - `ForceAuthn` in `AuthnRequest` (is anyone actually using this?)
