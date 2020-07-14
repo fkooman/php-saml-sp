@@ -25,6 +25,7 @@
 require_once \dirname(__DIR__).'/vendor/autoload.php';
 
 use fkooman\SAML\SP\CryptoKeys;
+use fkooman\SAML\SP\Log\NullLogger;
 use fkooman\SAML\SP\MetadataSource;
 use fkooman\SAML\SP\SeSession;
 use fkooman\SAML\SP\SP;
@@ -61,7 +62,7 @@ try {
     $tpl->setLanguageCode($languageCode);
     $tpl->addDefault(['secureCookie' => $secureCookie, 'enabledLanguages' => $config->getEnabledLanguages(), 'serviceName' => $config->getServiceName($languageCode)]);
 
-    $idpSource = new MetadataSource($baseDir.'/config/metadata', $dataDir.'/metadata');
+    $idpSource = new MetadataSource(new NullLogger(), $baseDir.'/config/metadata', $dataDir.'/metadata');
 
     $request = new Request($_SERVER, $_GET, $_POST);
 

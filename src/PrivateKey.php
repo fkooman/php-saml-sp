@@ -70,8 +70,7 @@ class PrivateKey
      */
     public static function fromFile($fileName)
     {
-        $fileData = \file_get_contents($fileName);
-        if (false === $fileData) {
+        if (false === $fileData = @\file_get_contents($fileName)) {
             throw new RuntimeException(\sprintf('unable to read key file "%s"', $fileName));
         }
 

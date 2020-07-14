@@ -22,30 +22,28 @@
  * SOFTWARE.
  */
 
-require_once \dirname(__DIR__).'/vendor/autoload.php';
+namespace fkooman\SAML\SP\Log;
 
-use fkooman\SAML\SP\CurlHttpClient;
-use fkooman\SAML\SP\Log\SyslogLogger;
-use fkooman\SAML\SP\MetadataSource;
-use fkooman\SAML\SP\Web\Config;
+interface LoggerInterface
+{
+    /**
+     * @param string $logMessage
+     *
+     * @return void
+     */
+    public function warning($logMessage);
 
-$baseDir = \dirname(__DIR__);
-$logger = new SyslogLogger(\basename($argv[0]));
+    /**
+     * @param string $logMessage
+     *
+     * @return void
+     */
+    public function error($logMessage);
 
-try {
-    $config = Config::fromFile($baseDir.'/config/config.php');
-    $metadataSource = new MetadataSource(
-        $logger,
-        $baseDir.'/config/metadata',
-        $baseDir.'/data/metadata'
-    );
-    $metadataSource->importMetadata(
-        new CurlHttpClient(),
-        $config->getMetadataKeyList()
-    );
-} catch (Exception $e) {
-    $logMessage = 'ERROR: ['.\get_class($e).'] '.$e->getMessage();
-    $logger->error($logMessage);
-    echo $logMessage.PHP_EOL;
-    exit(1);
+    /**
+     * @param string $logMessage
+     *
+     * @return void
+     */
+    public function notice($logMessage);
 }

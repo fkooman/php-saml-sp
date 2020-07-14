@@ -30,6 +30,8 @@ use DOMDocument;
 use DOMElement;
 use fkooman\SAML\SP\Exception\CryptoException;
 use fkooman\SAML\SP\Exception\HttpClientException;
+use fkooman\SAML\SP\Exception\XmlDocumentException;
+use fkooman\SAML\SP\Log\LoggerInterface;
 use RuntimeException;
 
 /**
@@ -41,6 +43,9 @@ class MetadataSource implements IdpSourceInterface
     /** @var \DateTime */
     protected $dateTime;
 
+    /** @var Log\LoggerInterface */
+    private $logger;
+
     /** @var string */
     private $staticDir;
 
@@ -51,9 +56,10 @@ class MetadataSource implements IdpSourceInterface
      * @param string $staticDir
      * @param string $dynamicDir
      */
-    public function __construct($staticDir, $dynamicDir)
+    public function __construct(LoggerInterface $logger, $staticDir, $dynamicDir)
     {
         $this->dateTime = new DateTime();
+        $this->logger = $logger;
         $this->staticDir = $staticDir;
         if (false === @\file_exists($dynamicDir)) {
             if (false === @\mkdir($dynamicDir, 0711, true)) {
@@ -125,7 +131,7 @@ class MetadataSource implements IdpSourceInterface
         // 6. write to disk
         foreach ($metadataUrlKeyList as $metadataUrl => $publicKeyFileList) {
             try {
-                $metadataFile = \sprintf('%s/%s.xml', $this->dynamicDir, \base64_encode($metadataUrl));
+                $metadataFile = \sprintf('%s/%s.xml', $this->dynamicDir, self::encodeString($metadataUrl));
                 if (false !== $metadataString = @\file_get_contents($metadataFile)) {
                     $xmlDocument = XmlDocument::fromMetadata($metadataString, false);
                     $rootDomElement = XmlDocument::requireDomElement(
@@ -140,12 +146,14 @@ class MetadataSource implements IdpSourceInterface
                         $refreshThreshhold = \date_add(clone $this->dateTime, new DateInterval('PT4H'));
                         if ($refreshThreshhold->getTimestamp() < $validUntilDateTime->getTimestamp()) {
                             // still valid for a while, go to next URL
+                            $this->logger->notice(\sprintf('metadata "%s" is recent enough', $metadataUrl));
                             continue;
                         }
                     }
                 }
                 // either metadata does not yet exist, we didn't find validUntil,
                 // or the metadata needs refreshing...
+                $this->logger->notice(\sprintf('fetching metadata from "%s"', $metadataUrl));
                 $freshMetadataString = $httpClient->get($metadataUrl);
                 $publicKeyList = [];
                 foreach ($publicKeyFileList as $publicKeyFile) {
@@ -159,15 +167,16 @@ class MetadataSource implements IdpSourceInterface
                 }
                 // write fresh metadata
                 if (false === @\rename($tmpFile, $metadataFile)) {
-                    throw new RuntimeException(\sprintf('unable to mvoe "%s" to "%s"', $tmpFile, $metadataFile));
+                    throw new RuntimeException(\sprintf('unable to move "%s" to "%s"', $tmpFile, $metadataFile));
                 }
             } catch (CryptoException $e) {
-                // unable to verify signature, go to next entry, but log it
-                // XXX implement logging
+                // log, but continue with next metadataUrl
+                $this->logger->warning(\sprintf('unable to verify signature of metadata "%s": %s', $metadataUrl, $e->getMessage()));
             } catch (HttpClientException $e) {
-                // unable to retrieve new metadata, go to next entry, but log
-                // it
-                // XXX implement logging
+                // log, but continue with next metadataUrl
+                $this->logger->warning(\sprintf('unable to retrieve metadata from "%s": %s', $metadataUrl, $e->getMessage()));
+            } catch (XmlDocumentException $e) {
+                $this->logger->warning(\sprintf('unable to validate XML (schema) from "%s": %s', $metadataUrl, $e->getMessage()));
             }
         }
     }
@@ -235,5 +244,24 @@ class MetadataSource implements IdpSourceInterface
                 }
             }
         }
+    }
+
+    /**
+     * Base64UrlSafe encoding.
+     *
+     * @param string $inputStr
+     *
+     * @return string
+     */
+    private static function encodeString($inputStr)
+    {
+        return \rtrim(
+            \str_replace(
+                ['+', '/'],
+                ['-', '_'],
+                \base64_encode($inputStr)
+            ),
+            '='
+        );
     }
 }
