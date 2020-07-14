@@ -32,26 +32,39 @@ use fkooman\SAML\SP\Web\Config;
 $baseDir = \dirname(__DIR__);
 $dataDir = $baseDir.'/data';
 $configDir = $baseDir.'/config';
+$keyDir = $configDir.'/metadata/keys/';
 $verifiedMetadataDir = $dataDir.'/metadata/verified';
-$unverifiedMetadataDir = $dataDir.'/metadata';
+$metadataDir = $dataDir.'/metadata';
 
 try {
     $config = Config::fromFile($configDir.'/config.php');
-    \mkdir($unverifiedMetadataDir, 0755);
-    \mkdir($verifiedMetadataDir, 0755);
+    if (!@\file_exists($metadataDir)) {
+        if (false === @\mkdir($metadataDir, 0755, true)) {
+            throw new RuntimeException(\sprintf('unable to create directory "%s"', $metadataDir));
+        }
+    }
+    if (!@\file_exists($verifiedMetadataDir)) {
+        if (false === @\mkdir($verifiedMetadataDir, 0755, true)) {
+            throw new RuntimeException(\sprintf('unable to create directory "%s"', $verifiedMetadataDir));
+        }
+    }
 
     foreach ($config->getMetadataList() as $metadataUrl => $publicKeyFileList) {
         // get the metadata
         $metadataString = CurlHttpClient::get($metadataUrl);
-        $unverifiedFile = $unverifiedMetadataDir.'/'.\base64_encode($metadataUrl).'.xml';
+        $metadataFile = $metadataDir.'/'.\base64_encode($metadataUrl).'.xml';
         $verifiedFile = $verifiedMetadataDir.'/'.\base64_encode($metadataUrl).'.xml';
-        \file_put_contents($unverifiedFile, $metadataString);
+        if (false === @\file_put_contents($metadataFile, $metadataString)) {
+            throw new RuntimeException(\sprintf('unable to write "%s"', $metadataFile));
+        }
         $publicKeyList = [];
         foreach ($publicKeyFileList as $publicKeyFile) {
-            $publicKeyList[] = PublicKey::fromFile($publicKeyFile);
+            $publicKeyList[] = PublicKey::fromFile($keyDir.'/'.$publicKeyFile);
         }
-        MetadataSource::validateMetadataFile($unverifiedFile, $publicKeyList);
-        \rename($unverifiedFile, $verifiedFile);
+        MetadataSource::validateMetadataFile($metadataFile, $publicKeyList);
+        if (false === @\rename($metadataFile, $verifiedFile)) {
+            throw new RuntimeException(\sprintf('unable to mvoe "%s" to "%s"', $metadataFile, $verifiedFile));
+        }
     }
 } catch (Exception $e) {
     echo 'ERROR: ['.\get_class($e).'] '.$e->getMessage().PHP_EOL;

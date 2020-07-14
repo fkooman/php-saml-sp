@@ -34,8 +34,17 @@ return [
     //'discoUrl' => 'https://discovery.example.org/',
 
     // list of IdP entityIDs that are allowed for authentication to this SP
-    // their metadata MUST be provided in config/metadata as XML file(s)
-    'idpList' => [
-        //'https://x509idp.moonshot.utr.surfcloud.nl/metadata',
-    ],
+    // their metadata MUST be provided in config/metadata as XML file(s), or
+    // available through the metadataList configured below. If left unspecified
+    // all IdPs available through metadata are accepted. If left empty, no IdP
+    // is allowed...
+    //'idpList' => [
+    //    //'https://x509idp.moonshot.utr.surfcloud.nl/metadata',
+    //],
+
+    // list of SAML metadata that will be automatically obtained and verified
+    //'metadataList' => [
+    //    'https://metadata.wayf.dk/wayf-metadata.xml' => ['wayf.dk.crt'],
+    //    'https://metadata.surfconext.nl/idp-metadata.xml' => ['SURFconext-metadata-signer.pem'],
+    //],
 ];

@@ -24,7 +24,9 @@
 
 namespace fkooman\SAML\SP\Tests;
 
+use Exception;
 use fkooman\SAML\SP\MetadataSource;
+use fkooman\SAML\SP\PublicKey;
 use PHPUnit\Framework\TestCase;
 
 class MetadataSourceTest extends TestCase
@@ -68,5 +70,23 @@ class MetadataSourceTest extends TestCase
         $this->assertSame('http://sts.stc-r.nl/adfs/services/trust', $idpInfo->getEntityId());
         $this->assertSame('https://sts.stc-r.nl/adfs/ls/', $idpInfo->getSsoUrl());
         $this->assertSame('https://sts.stc-r.nl/adfs/ls/', $idpInfo->getSloUrl());
+    }
+
+    /**
+     * @return void
+     */
+    public function testValidation()
+    {
+        try {
+            MetadataSource::validateMetadataFile(
+                __DIR__.'/data/metadata/idp-metadata.xml',
+                [
+                    PublicKey::fromFile(__DIR__.'/data/metadata/keys/SURFconext-metadata-signer.pem'),
+                ]
+            );
+            $this->assertTrue(true);
+        } catch (Exception $e) {
+            $this->fail();
+        }
     }
 }

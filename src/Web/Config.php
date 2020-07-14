@@ -24,6 +24,7 @@
 
 namespace fkooman\SAML\SP\Web;
 
+use fkooman\SAML\SP\Web\Exception\ConfigException;
 use RuntimeException;
 
 class Config
@@ -98,7 +99,7 @@ class Config
         }
         $configData = include $configFile;
         if (!\is_array($configData)) {
-            throw new RuntimeException('invalid configuration file format');
+            throw new ConfigException('invalid configuration file format');
         }
 
         return new self($configData);
@@ -121,12 +122,12 @@ class Config
     }
 
     /**
-     * @return array<string>
+     * @return array<string>|null
      */
     public function getIdpList()
     {
         if (null === $idpList = $this->get('idpList')) {
-            return [];
+            null;
         }
 
         return $idpList;
@@ -199,6 +200,20 @@ class Config
     {
         if (null === $metadataList = $this->get('metadataList')) {
             return [];
+        }
+        if (!\is_array($metadataList)) {
+            throw new ConfigException('metadataList: MUST be array');
+        }
+        foreach ($metadataList as $metadataUrl => $certList) {
+            if (!\is_string($metadataUrl)) {
+                throw new ConfigException('metadataList: key MUST be string');
+            }
+            if (!\is_array($certList)) {
+                throw new ConfigException('metadataList: value MUST be array');
+            }
+            // we just assume for now the values of certList are string, but if
+            // not, trying to read the file will fail in the caller of this
+            // method...
         }
 
         return $metadataList;

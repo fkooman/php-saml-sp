@@ -247,10 +247,9 @@ class Service
      */
     private function getAvailableIdpInfoList()
     {
-        $configIdpList = $this->config->getIdpList();
-        if (0 === \count($configIdpList)) {
-            // all IdPs available in the metadata can be used for
-            // authentication
+        if (null === $configIdpList = $this->config->getIdpList()) {
+            // the "idpList" entry is NOT specified, so all IdPs are allowed
+            // that can be found through available SAML metadata
             return $this->sp->getIdpSource()->getAll();
         }
 
