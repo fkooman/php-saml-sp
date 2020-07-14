@@ -30,22 +30,18 @@ use fkooman\SAML\SP\PublicKey;
 use fkooman\SAML\SP\Web\Config;
 
 $baseDir = \dirname(__DIR__);
-$dataDir = $baseDir.'/data';
 $configDir = $baseDir.'/config';
-$keyDir = $configDir.'/metadata/keys/';
-$verifiedMetadataDir = $dataDir.'/metadata/verified';
-$metadataDir = $dataDir.'/metadata';
+$keyDir = $baseDir.'/config/metadata/keys';
+$verifiedMetadataDir = $baseDir.'/data/metadata/verified';
+$metadataDir = $baseDir.'/data/metadata';
 
 try {
     $config = Config::fromFile($configDir.'/config.php');
-    if (!@\file_exists($metadataDir)) {
-        if (false === @\mkdir($metadataDir, 0755, true)) {
-            throw new RuntimeException(\sprintf('unable to create directory "%s"', $metadataDir));
-        }
-    }
-    if (!@\file_exists($verifiedMetadataDir)) {
-        if (false === @\mkdir($verifiedMetadataDir, 0755, true)) {
-            throw new RuntimeException(\sprintf('unable to create directory "%s"', $verifiedMetadataDir));
+    foreach ([$metadataDir, $verifiedMetadataDir] as $dirName) {
+        if (!@\file_exists($dirName)) {
+            if (false === @\mkdir($dirName, 0755, true)) {
+                throw new RuntimeException(\sprintf('unable to create "%s"', $dirName));
+            }
         }
     }
 
