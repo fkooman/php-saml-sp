@@ -25,7 +25,7 @@
 require_once \dirname(__DIR__).'/vendor/autoload.php';
 
 use fkooman\SAML\SP\CryptoKeys;
-use fkooman\SAML\SP\Log\NullLogger;
+use fkooman\SAML\SP\Log\SyslogLogger;
 use fkooman\SAML\SP\MetadataSource;
 use fkooman\SAML\SP\SeSession;
 use fkooman\SAML\SP\SP;
@@ -39,6 +39,7 @@ use fkooman\SAML\SP\Web\Tpl;
 
 $baseDir = \dirname(__DIR__);
 $dataDir = $baseDir.'/data';
+$logger = new SyslogLogger('php-saml-sp');
 
 try {
     $config = Config::fromFile($baseDir.'/config/config.php');
@@ -62,7 +63,7 @@ try {
     $tpl->setLanguageCode($languageCode);
     $tpl->addDefault(['secureCookie' => $secureCookie, 'enabledLanguages' => $config->getEnabledLanguages(), 'serviceName' => $config->getServiceName($languageCode)]);
 
-    $idpSource = new MetadataSource(new NullLogger(), $baseDir.'/config/metadata', $dataDir.'/metadata');
+    $idpSource = new MetadataSource($logger, $baseDir.'/config/metadata', $dataDir.'/metadata');
 
     $request = new Request($_SERVER, $_GET, $_POST);
 
@@ -86,6 +87,8 @@ try {
     $request = new Request($_SERVER, $_GET, $_POST);
     $service->run($request)->send();
 } catch (Exception $e) {
-    $response = new Response(500, [], 'Error: '.$e->getMessage());
+    $logMessage = 'ERROR: ['.\get_class($e).'] '.$e->getMessage();
+    $logger->error($logMessage);
+    $response = new Response(500, [], $logMessage);
     $response->send();
 }
