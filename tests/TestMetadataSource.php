@@ -22,30 +22,21 @@
  * SOFTWARE.
  */
 
-require_once \dirname(__DIR__).'/vendor/autoload.php';
+namespace fkooman\SAML\SP\Tests;
 
-use fkooman\SAML\SP\CurlHttpClient;
-use fkooman\SAML\SP\Log\SyslogLogger;
+use DateTime;
+use fkooman\SAML\SP\Log\NullLogger;
 use fkooman\SAML\SP\MetadataSource;
-use fkooman\SAML\SP\Web\Config;
 
-$baseDir = \dirname(__DIR__);
-$logger = new SyslogLogger(\basename($argv[0]));
-
-try {
-    $config = Config::fromFile($baseDir.'/config/config.php');
-    $metadataSource = new MetadataSource(
-        $logger,
-        $baseDir.'/config/metadata',
-        $baseDir.'/data/metadata'
-    );
-    $metadataSource->importAllMetadata(
-        new CurlHttpClient(),
-        $config->getMetadataKeyList()
-    );
-} catch (Exception $e) {
-    $logMessage = 'ERROR: ['.\get_class($e).'] '.$e->getMessage();
-    $logger->error($logMessage);
-    echo $logMessage.PHP_EOL;
-    exit(1);
+class TestMetadataSource extends MetadataSource
+{
+    /**
+     * @param string $staticDir
+     * @param string $dynamicDir
+     */
+    public function __construct($staticDir, $dynamicDir, DateTime $dateTime)
+    {
+        parent::__construct(new NullLogger(), $staticDir, $dynamicDir);
+        $this->dateTime = $dateTime;
+    }
 }

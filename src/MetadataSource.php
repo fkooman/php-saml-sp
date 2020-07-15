@@ -116,7 +116,7 @@ class MetadataSource implements IdpSourceInterface
      *
      * @return void
      */
-    public function importMetadata(HttpClientInterface $httpClient, array $metadataUrlKeyList)
+    public function importAllMetadata(HttpClientInterface $httpClient, array $metadataUrlKeyList)
     {
         // Algorithm, for each URL in metadataUrlKeyList
         // 1. do we have the metadata file already locally?
@@ -131,53 +131,62 @@ class MetadataSource implements IdpSourceInterface
         // 6. write to disk
         foreach ($metadataUrlKeyList as $metadataUrl => $publicKeyFileList) {
             try {
-                $metadataFile = \sprintf('%s/%s.xml', $this->dynamicDir, self::encodeString($metadataUrl));
-                if (false !== $metadataString = @\file_get_contents($metadataFile)) {
-                    $xmlDocument = XmlDocument::fromMetadata($metadataString, false);
-                    $rootDomElement = XmlDocument::requireDomElement(
-                        XmlDocument::requireDomNodeList(
-                            $xmlDocument->domXPath->query('/*')
-                        )->item(0)
-                    );
-                    $validUntil = $rootDomElement->getAttribute('validUntil');
-                    if ('' !== $validUntil) {
-                        // XXX write a proper test for this!
-                        $validUntilDateTime = new DateTime($validUntil);
-                        $refreshThreshhold = \date_add(clone $this->dateTime, new DateInterval('PT4H'));
-                        if ($refreshThreshhold->getTimestamp() < $validUntilDateTime->getTimestamp()) {
-                            // still valid for a while, go to next URL
-                            $this->logger->notice(\sprintf('metadata "%s" is recent enough', $metadataUrl));
-                            continue;
-                        }
-                    }
-                }
-                // either metadata does not yet exist, we didn't find validUntil,
-                // or the metadata needs refreshing...
-                $this->logger->notice(\sprintf('fetching metadata from "%s"', $metadataUrl));
-                $freshMetadataString = $httpClient->get($metadataUrl);
-                $publicKeyList = [];
-                foreach ($publicKeyFileList as $publicKeyFile) {
-                    $publicKeyList[] = PublicKey::fromFile($this->staticDir.'/keys/'.$publicKeyFile);
-                }
-
-                self::validateMetadata($freshMetadataString, $publicKeyList);
-                $tmpFile = \tempnam(\sys_get_temp_dir(), 'php-saml-sp');
-                if (false === @\file_put_contents($tmpFile, $freshMetadataString)) {
-                    throw new RuntimeException(\sprintf('unable to write "%s"', $tmpFile));
-                }
-                // write fresh metadata
-                if (false === @\rename($tmpFile, $metadataFile)) {
-                    throw new RuntimeException(\sprintf('unable to move "%s" to "%s"', $tmpFile, $metadataFile));
-                }
+                $this->importMetadata($httpClient, $metadataUrl, $publicKeyFileList);
             } catch (CryptoException $e) {
-                // log, but continue with next metadataUrl
                 $this->logger->warning(\sprintf('unable to verify signature of metadata "%s": %s', $metadataUrl, $e->getMessage()));
             } catch (HttpClientException $e) {
-                // log, but continue with next metadataUrl
                 $this->logger->warning(\sprintf('unable to retrieve metadata from "%s": %s', $metadataUrl, $e->getMessage()));
             } catch (XmlDocumentException $e) {
                 $this->logger->warning(\sprintf('unable to validate XML (schema) from "%s": %s', $metadataUrl, $e->getMessage()));
             }
+        }
+    }
+
+    /**
+     * @param string        $metadataUrl
+     * @param array<string> $publicKeyFileList
+     *
+     * @return void
+     */
+    public function importMetadata(HttpClientInterface $httpClient, $metadataUrl, array $publicKeyFileList)
+    {
+        $metadataFile = \sprintf('%s/%s.xml', $this->dynamicDir, self::encodeString($metadataUrl));
+        if (false !== $metadataString = @\file_get_contents($metadataFile)) {
+            $xmlDocument = XmlDocument::fromMetadata($metadataString, false);
+            $rootDomElement = XmlDocument::requireDomElement(
+                XmlDocument::requireDomNodeList(
+                    $xmlDocument->domXPath->query('/*')
+                )->item(0)
+            );
+            $validUntil = $rootDomElement->getAttribute('validUntil');
+            if ('' !== $validUntil) {
+                $validUntilDateTime = new DateTime($validUntil);
+                $refreshThreshhold = \date_add(clone $this->dateTime, new DateInterval('PT4H'));
+                if ($refreshThreshhold->getTimestamp() < $validUntilDateTime->getTimestamp()) {
+                    // still valid for a while, go to next URL
+                    $this->logger->notice(\sprintf('metadata "%s" is recent enough', $metadataUrl));
+
+                    return;
+                }
+            }
+        }
+        // either metadata does not yet exist, we didn't find validUntil,
+        // or the metadata needs refreshing...
+        $this->logger->notice(\sprintf('fetching metadata from "%s"', $metadataUrl));
+        $freshMetadataString = $httpClient->get($metadataUrl);
+        $publicKeyList = [];
+        foreach ($publicKeyFileList as $publicKeyFile) {
+            $publicKeyList[] = PublicKey::fromFile($this->staticDir.'/keys/'.$publicKeyFile);
+        }
+
+        self::validateMetadata($freshMetadataString, $publicKeyList);
+        $tmpFile = \tempnam(\sys_get_temp_dir(), 'php-saml-sp');
+        if (false === @\file_put_contents($tmpFile, $freshMetadataString)) {
+            throw new RuntimeException(\sprintf('unable to write "%s"', $tmpFile));
+        }
+        // write fresh metadata
+        if (false === @\rename($tmpFile, $metadataFile)) {
+            throw new RuntimeException(\sprintf('unable to move "%s" to "%s"', $tmpFile, $metadataFile));
         }
     }
 

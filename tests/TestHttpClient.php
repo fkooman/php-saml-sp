@@ -22,30 +22,32 @@
  * SOFTWARE.
  */
 
-require_once \dirname(__DIR__).'/vendor/autoload.php';
+namespace fkooman\SAML\SP\Tests;
 
-use fkooman\SAML\SP\CurlHttpClient;
-use fkooman\SAML\SP\Log\SyslogLogger;
-use fkooman\SAML\SP\MetadataSource;
-use fkooman\SAML\SP\Web\Config;
+use fkooman\SAML\SP\Exception\HttpClientException;
+use fkooman\SAML\SP\HttpClientInterface;
 
-$baseDir = \dirname(__DIR__);
-$logger = new SyslogLogger(\basename($argv[0]));
+class TestHttpClient implements HttpClientInterface
+{
+    /** @var array<string,string> */
+    private $urlFileMapping;
 
-try {
-    $config = Config::fromFile($baseDir.'/config/config.php');
-    $metadataSource = new MetadataSource(
-        $logger,
-        $baseDir.'/config/metadata',
-        $baseDir.'/data/metadata'
-    );
-    $metadataSource->importAllMetadata(
-        new CurlHttpClient(),
-        $config->getMetadataKeyList()
-    );
-} catch (Exception $e) {
-    $logMessage = 'ERROR: ['.\get_class($e).'] '.$e->getMessage();
-    $logger->error($logMessage);
-    echo $logMessage.PHP_EOL;
-    exit(1);
+    public function __construct(array $urlFileMapping)
+    {
+        $this->urlFileMapping = $urlFileMapping;
+    }
+
+    /**
+     * @param string $requestUrl
+     *
+     * @return string
+     */
+    public function get($requestUrl)
+    {
+        if (\array_key_exists($requestUrl, $this->urlFileMapping)) {
+            return $this->urlFileMapping[$requestUrl];
+        }
+
+        throw new HttpClientException(\sprintf('URL "%s" not configured', $requestUrl));
+    }
 }

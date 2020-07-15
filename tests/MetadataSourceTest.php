@@ -24,10 +24,10 @@
 
 namespace fkooman\SAML\SP\Tests;
 
+use DateTime;
 use Exception;
 use fkooman\SAML\SP\Log\NullLogger;
 use fkooman\SAML\SP\MetadataSource;
-use fkooman\SAML\SP\PublicKey;
 use PHPUnit\Framework\TestCase;
 
 class MetadataSourceTest extends TestCase
@@ -73,21 +73,27 @@ class MetadataSourceTest extends TestCase
         $this->assertSame('https://sts.stc-r.nl/adfs/ls/', $idpInfo->getSloUrl());
     }
 
-//    /**
-//     * @return void
-//     */
-//    public function testValidation()
-//    {
-//        try {
-//            MetadataSource::validateMetadata(
-//                file_get_contents(__DIR__.'/data/metadata/idp-metadata.xml'),
-//                [
-//                    PublicKey::fromFile(__DIR__.'/data/metadata/keys/SURFconext-metadata-signer.pem'),
-//                ]
-//            );
-//            $this->assertTrue(true);
-//        } catch (Exception $e) {
-//            $this->fail();
-//        }
-//    }
+    /**
+     * @return void
+     */
+    public function testMetadataImport()
+    {
+        // XXX make sure it actually triggers validation, now it is not old enough yet
+        // extends class with different datetime
+        try {
+            $idpSource = new TestMetadataSource(__DIR__.'/data/metadata', \sys_get_temp_dir(), new DateTime('2020-09-09'));
+            $idpSource->importMetadata(
+                new TestHttpClient(
+                    [
+                        'https://metadata.test.surfconext.nl/idp-metadata.xml' => \file_get_contents(__DIR__.'/data/metadata/idp-metadata.xml'),
+                    ]
+                ),
+                'https://metadata.test.surfconext.nl/idp-metadata.xml',
+                ['SURFconext-metadata-signer.pem']
+            );
+            $this->assertTrue(true);
+        } catch (Exception $e) {
+            $this->fail();
+        }
+    }
 }
