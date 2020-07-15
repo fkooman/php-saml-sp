@@ -24,7 +24,6 @@
 
 namespace fkooman\SAML\SP\Tests;
 
-use fkooman\SAML\SP\Exception\SessionException;
 use fkooman\SAML\SP\SessionInterface;
 
 class TestSession implements SessionInterface
@@ -42,35 +41,21 @@ class TestSession implements SessionInterface
     /**
      * @param string $key
      *
-     * @return bool
-     */
-    public function has($key)
-    {
-        return \array_key_exists($key, $this->sessionData);
-    }
-
-    /**
-     * Return the value of the session key.
-     *
-     * @param string $key
-     *
-     * @return string
+     * @return string|null
      */
     public function get($key)
     {
-        if (!$this->has($key)) {
-            throw new SessionException(\sprintf('key "%s" not found in session', $key));
+        if (!\array_key_exists($key, $this->sessionData)) {
+            return null;
         }
 
         return $this->sessionData[$key];
     }
 
     /**
-     * Return the value of the session key and delete the key.
-     *
      * @param string $key
      *
-     * @return string
+     * @return string|null
      */
     public function take($key)
     {

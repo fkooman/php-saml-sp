@@ -248,5 +248,7 @@ class IdpInfo
 
             return \trim($nameNode->textContent);
         }
+
+        return null;
     }
 }

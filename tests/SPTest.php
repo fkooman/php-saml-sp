@@ -367,6 +367,6 @@ EOF;
         );
         $returnTo = $this->sp->handleLogoutResponse($queryString);
         $this->assertSame('http://localhost:8081/', $returnTo);
-        $this->assertFalse($session->has(TestSP::SESSION_KEY_PREFIX.'+/M7/sd8CgDR7BXVpw2lqgsalw54taH0E2eYa2RrZcI='));
+        $this->assertNull($session->get(TestSP::SESSION_KEY_PREFIX.'+/M7/sd8CgDR7BXVpw2lqgsalw54taH0E2eYa2RrZcI='));
     }
 }

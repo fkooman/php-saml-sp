@@ -76,6 +76,7 @@ class MetadataSource implements IdpSourceInterface
      */
     public function get($entityId)
     {
+        /** @var array<IdpInfo> $idpInfoList */
         $idpInfoList = [];
         $this->foreachIdp(function (DOMElement $entityDescriptorDomElement) use (&$idpInfoList) {
             $entityDocument = new DOMDocument('1.0', 'UTF-8');
@@ -180,7 +181,9 @@ class MetadataSource implements IdpSourceInterface
         }
 
         self::validateMetadata($freshMetadataString, $publicKeyList);
-        $tmpFile = \tempnam(\sys_get_temp_dir(), 'php-saml-sp');
+        if (false === $tmpFile = \tempnam(\sys_get_temp_dir(), 'php-saml-sp')) {
+            throw new RuntimeException('unable to generate a temporary file');
+        }
         if (false === @\file_put_contents($tmpFile, $freshMetadataString)) {
             throw new RuntimeException(\sprintf('unable to write "%s"', $tmpFile));
         }

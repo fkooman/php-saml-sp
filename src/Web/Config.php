@@ -127,7 +127,7 @@ class Config
     public function getIdpList()
     {
         if (null === $idpList = $this->get('idpList')) {
-            null;
+            return null;
         }
 
         return $idpList;
