@@ -6,13 +6,13 @@
 
 - include DomNode/Element in error message so we know where the problem is in
   the XML
-- implement automatic metadata refresh and verify it using its XML
-  signature
-  - mostly done now, only need to consider `validUntil` or "caching" info in 
-    metadata on *when* to refresh exactly instead of forcing it every hour...
+- figure out why eduGAIN metadata import/schema validation/signature check 
+  takes forever (it doesn't seem to ever finish)
 
 ### Fixes / Security Audit
 
+- figure out why eduGAIN metadata import takes forever (it doesn't seem to ever
+  finish)
 - input validation on ALL (public) methods
 - make absolutely sure we verify the assertion with the right public key as to
   avoid allowing one IdP to pretend to be another IdP
@@ -25,7 +25,7 @@
 - some IdPs also rollover the metadata signing keys (ADFS) it seems, so we have
   to extract any new certificates found in the metadata and put them in the 
   "trust store" as well
-- implementing caching for eduGAIN purpose with 2k+ IdPs
+- implementing (SQLite?) caching for eduGAIN purpose with 2k+ IdPs
 - validate schema of outgoing SAML messages (`AuthnRequest`, `LogoutRequest`, `Metadata`)?
 - `ForceAuthn` in `AuthnRequest` (is anyone actually using this?)
 - Implement a way to have multiple SP certificates
