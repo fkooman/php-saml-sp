@@ -124,6 +124,7 @@ class Crypto
      */
     public static function decryptXml(XmlDocument $xmlDocument, DOMElement $domElement, PrivateKey $privateKey)
     {
+        // XXX remove the need for DOMElement parameter if possible!
         if (!self::hasDecryptionSupport()) {
             throw new CryptoException('"<EncryptedAssertion>" is not supported on this system');
         }

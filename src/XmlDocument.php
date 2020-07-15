@@ -24,6 +24,7 @@
 
 namespace fkooman\SAML\SP;
 
+use DOMAttr;
 use DOMDocument;
 use DOMElement;
 use DOMNodeList;
@@ -96,12 +97,28 @@ class XmlDocument
      *
      * @throws \fkooman\SAML\SP\Exception\XmlDocumentException
      *
+     * @return \DOMAttr
+     */
+    public static function requireDomAttr($inputVar)
+    {
+        if (!($inputVar instanceof DOMAttr)) {
+            throw new XmlDocumentException('expected "DOMAttr"');
+        }
+
+        return $inputVar;
+    }
+
+    /**
+     * @param mixed $inputVar
+     *
+     * @throws \fkooman\SAML\SP\Exception\XmlDocumentException
+     *
      * @return \DOMNodeList
      */
     public static function requireDomNodeList($inputVar)
     {
         if (!($inputVar instanceof DOMNodeList)) {
-            throw new XmlDocumentException('expected "DOMNodeList"');
+            throw new XmlDocumentException(\sprintf('expected "DOMNodeList", got "%s"', \get_class($inputVar)));
         }
 
         return $inputVar;
@@ -141,6 +158,118 @@ class XmlDocument
         }
 
         return $inputVar;
+    }
+
+    /**
+     * @param string $xPathQuery
+     *
+     * @return \DOMElement
+     */
+    public function requireOneDomElement($xPathQuery)
+    {
+        $domNodeList = self::requireDomNodeList($this->domXPath->query($xPathQuery));
+        if (1 !== $domNodeList->length) {
+            throw new XmlDocumentException(\sprintf('Q: "%s": expected exactly 1 DOMElement, got %d', $xPathQuery, $domNodeList->length));
+        }
+
+        return self::requireDomElement($domNodeList->item(0));
+    }
+
+    /**
+     * @param string $xPathQuery
+     *
+     * @return \DOMElement|null
+     */
+    public function optionalOneDomElement($xPathQuery)
+    {
+        $domNodeList = self::requireDomNodeList($this->domXPath->query($xPathQuery));
+        if (1 !== $domNodeList->length) {
+            return null;
+        }
+
+        return $this->requireOneDomElement($xPathQuery);
+    }
+
+    /**
+     * @param string $xPathQuery
+     *
+     * @return string
+     */
+    public function requireOneDomAttrValue($xPathQuery)
+    {
+        $domNodeList = self::requireDomNodeList($this->domXPath->query($xPathQuery));
+        if (1 !== $domNodeList->length) {
+            throw new XmlDocumentException(\sprintf('Q: "%s": expected exactly 1 DOMElement, got %d', $xPathQuery, $domNodeList->length));
+        }
+
+        return self::requireNonEmptyString(self::requireDomAttr($domNodeList->item(0))->value);
+    }
+
+    /**
+     * @param string $xPathQuery
+     *
+     * @return void
+     */
+    public function forEachDomAttrValue($xPathQuery, callable $c)
+    {
+        $domNodeList = self::requireDomNodeList($this->domXPath->query($xPathQuery));
+        foreach ($domNodeList as $domNode) {
+            $c(self::requireNonEmptyString(self::requireDomAttr($domNode)->value));
+        }
+    }
+
+    /**
+     * @param string $xPathQuery
+     *
+     * @return void
+     */
+    public function forEachDomElementTextContent($xPathQuery, callable $c)
+    {
+        $domNodeList = self::requireDomNodeList($this->domXPath->query($xPathQuery));
+        foreach ($domNodeList as $domNode) {
+            $c(self::requireNonEmptyString($domNode->textContent));
+        }
+    }
+
+    /**
+     * @param string $xPathQuery
+     *
+     * @return string|null
+     */
+    public function optionalOneDomAttrValue($xPathQuery)
+    {
+        $domNodeList = self::requireDomNodeList($this->domXPath->query($xPathQuery));
+        if (1 !== $domNodeList->length) {
+            return null;
+        }
+
+        return $this->requireOneDomAttrValue($xPathQuery);
+    }
+
+    /**
+     * @param string $xPathQuery
+     *
+     * @return string
+     */
+    public function requireOneDomElementTextContent($xPathQuery)
+    {
+        $domElement = $this->requireOneDomElement($xPathQuery);
+
+        return self::requireNonEmptyString($domElement->textContent);
+    }
+
+    /**
+     * @param string $xPathQuery
+     *
+     * @return string|null
+     */
+    public function optionalOneDomElementTextContent($xPathQuery)
+    {
+        if (null === $domElement = $this->optionalOneDomElement($xPathQuery)) {
+            return null;
+        }
+
+        return $this->requireOneDomElementTextContent($xPathQuery);
     }
 
     /**
