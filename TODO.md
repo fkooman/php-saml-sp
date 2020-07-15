@@ -6,8 +6,6 @@
 
 - include DomNode/Element in error message so we know where the problem is in
   the XML
-- figure out why eduGAIN metadata import/schema validation/signature check 
-  takes forever (it doesn't seem to ever finish)
 
 ### Fixes / Security Audit
 

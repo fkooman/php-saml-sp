@@ -75,11 +75,10 @@ class Crypto
         $canonicalSignedInfo = $signedInfoElement->C14N(true, false);
         $signatureElement = XmlDocument::requireDomElement($xmlDocument->domXPath->query('ds:Signature', $domElement)->item(0));
         $domElement->removeChild($signatureElement);
-
         $rootElementDigest = Base64::encode(
             \hash(
                 self::SIGN_HASH_ALGO,
-                $domElement->C14N(true, false),
+                self::canonicalizeElement($domElement),
                 true
             )
         );
@@ -207,6 +206,23 @@ class Crypto
         }
 
         return true;
+    }
+
+    /**
+     * @return string
+     */
+    private static function canonicalizeElement(DOMElement $domElement)
+    {
+        // canonicalizing a DOMElement can be *very* slow, however,
+        // canonicalizing a *DOMDocument* is fast in PHP
+        // @see https://groups.google.com/forum/#!msg/simplesamlphp/b6fTf53iq4w/uNhw_NBNzxkJ
+        if (null !== $ownerDocument = $domElement->ownerDocument) {
+            if ($domElement === $ownerDocument->documentElement) {
+                return $ownerDocument->C14N(true, false);
+            }
+        }
+
+        return $domElement->C14N(true, false);
     }
 
     /**
