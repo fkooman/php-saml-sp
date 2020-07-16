@@ -153,14 +153,8 @@ class MetadataSource implements IdpSourceInterface
     {
         $metadataFile = \sprintf('%s/%s.xml', $this->dynamicDir, self::encodeString($metadataUrl));
         if (false !== $metadataString = @\file_get_contents($metadataFile)) {
-            $xmlDocument = XmlDocument::fromMetadata($metadataString, false);
-            $rootDomElement = XmlDocument::requireDomElement(
-                XmlDocument::requireDomNodeList(
-                    $xmlDocument->domXPath->query('/*')
-                )->item(0)
-            );
-            $validUntil = $rootDomElement->getAttribute('validUntil');
-            if ('' !== $validUntil) {
+            $metadataDocument = XmlDocument::fromMetadata($metadataString, false);
+            if (null !== $validUntil = $metadataDocument->optionalOneDomAttrValue('self::node()/@validUntil')) {
                 $validUntilDateTime = new DateTime($validUntil);
                 $refreshThreshhold = \date_add(clone $this->dateTime, new DateInterval('PT4H'));
                 if ($refreshThreshhold->getTimestamp() < $validUntilDateTime->getTimestamp()) {
@@ -226,26 +220,15 @@ class MetadataSource implements IdpSourceInterface
                     throw new RuntimeException(\sprintf('unable to read "%s"', $metadataFile));
                 }
 
-                $xmlDocument = XmlDocument::fromMetadata($xmlData, false);
+                $metadataDocument = XmlDocument::fromMetadata($xmlData, false);
 
                 // we use "//" because "EntityDescriptor" could be in
                 // the root of the XML document, or inside a (nested)
                 // "EntitiesDescriptor"
-                $xPathQuery = null === $entityId ? '//md:EntityDescriptor' : \sprintf('//md:EntityDescriptor[@entityID="%s"]', $entityId);
-
-                $entityDescriptorDomNodeList = XmlDocument::requireDomNodeList(
-                    $xmlDocument->domXPath->query($xPathQuery)
-                );
-
-                foreach ($entityDescriptorDomNodeList as $entityDescriptorDomNode) {
-                    $entityDescriptorDomElement = XmlDocument::requireDomElement($entityDescriptorDomNode);
-                    $idpSsoDescriptorDomNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query('md:IDPSSODescriptor', $entityDescriptorDomElement));
-                    if (0 === $idpSsoDescriptorDomNodeList->length) {
-                        // not an IdP
-                        continue;
-                    }
-
-                    $c($entityDescriptorDomElement);
+                $xPathQuery = null === $entityId ? '//md:EntityDescriptor/md:IDPSSODescriptor/parent::node()' : \sprintf('//md:EntityDescriptor[@entityID="%s"]/md:IDPSSODescriptor/parent::node()', $entityId);
+                $domElementList = $metadataDocument->allDomElement($xPathQuery);
+                foreach ($domElementList as $domElement) {
+                    $c($domElement);
                 }
             }
         }

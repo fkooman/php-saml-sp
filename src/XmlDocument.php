@@ -34,10 +34,10 @@ use fkooman\SAML\SP\Exception\XmlDocumentException;
 class XmlDocument
 {
     /** @var \DOMDocument */
-    public $domDocument;
+    private $domDocument;
 
     /** @var \DOMXPath */
-    public $domXPath;
+    private $domXPath;
 
     private function __construct(DOMDocument $domDocument)
     {
@@ -74,90 +74,6 @@ class XmlDocument
             $metadataStr,
             $validateSchema ? ['__metadata.xsd'] : []
         );
-    }
-
-    /**
-     * @param mixed $inputVar
-     *
-     * @throws \fkooman\SAML\SP\Exception\XmlDocumentException
-     *
-     * @return \DOMElement
-     */
-    public static function requireDomElement($inputVar)
-    {
-        if (!($inputVar instanceof DOMElement)) {
-            throw new XmlDocumentException('expected "DOMElement"');
-        }
-
-        return $inputVar;
-    }
-
-    /**
-     * @param mixed $inputVar
-     *
-     * @throws \fkooman\SAML\SP\Exception\XmlDocumentException
-     *
-     * @return \DOMAttr
-     */
-    public static function requireDomAttr($inputVar)
-    {
-        if (!($inputVar instanceof DOMAttr)) {
-            throw new XmlDocumentException('expected "DOMAttr"');
-        }
-
-        return $inputVar;
-    }
-
-    /**
-     * @param mixed $inputVar
-     *
-     * @throws \fkooman\SAML\SP\Exception\XmlDocumentException
-     *
-     * @return \DOMNodeList
-     */
-    public static function requireDomNodeList($inputVar)
-    {
-        if (!($inputVar instanceof DOMNodeList)) {
-            throw new XmlDocumentException(\sprintf('expected "DOMNodeList", got "%s"', \get_class($inputVar)));
-        }
-
-        return $inputVar;
-    }
-
-    /**
-     * @param mixed $inputVar
-     *
-     * @throws \fkooman\SAML\SP\Exception\XmlDocumentException
-     *
-     * @return string
-     */
-    public static function requireString($inputVar)
-    {
-        if (!\is_string($inputVar)) {
-            throw new XmlDocumentException('expected "string"');
-        }
-
-        return $inputVar;
-    }
-
-    /**
-     * @param mixed $inputVar
-     *
-     * @throws \fkooman\SAML\SP\Exception\XmlDocumentException
-     *
-     * @return string
-     */
-    public static function requireNonEmptyString($inputVar)
-    {
-        if (!\is_string($inputVar)) {
-            throw new XmlDocumentException('expected "string"');
-        }
-
-        if ('' === $inputVar) {
-            throw new XmlDocumentException('expected non-empty "string"');
-        }
-
-        return $inputVar;
     }
 
     /**
@@ -223,6 +139,36 @@ class XmlDocument
     /**
      * @param string $xPathQuery
      *
+     * @return void
+     */
+    public function forEachDomElementTextContent($xPathQuery, callable $c)
+    {
+        $domNodeList = self::requireDomNodeList($this->domXPath->query($xPathQuery));
+        foreach ($domNodeList as $domNode) {
+            // XXX do we need to trim the value?
+            $c(self::requireNonEmptyString($domNode->textContent));
+        }
+    }
+
+    /**
+     * @param string $xPathQuery
+     *
+     * @return array<\DOMElement>
+     */
+    public function allDomElement($xPathQuery)
+    {
+        $domElementList = [];
+        $domNodeList = self::requireDomNodeList($this->domXPath->query($xPathQuery));
+        foreach ($domNodeList as $domNode) {
+            $domElementList[] = self::requireDomElement($domNode);
+        }
+
+        return $domElementList;
+    }
+
+    /**
+     * @param string $xPathQuery
+     *
      * @return array<string>
      */
     public function allDomAttrValue($xPathQuery)
@@ -235,20 +181,6 @@ class XmlDocument
         }
 
         return $attributeValueList;
-    }
-
-    /**
-     * @param string $xPathQuery
-     *
-     * @return void
-     */
-    public function forEachDomElementTextContent($xPathQuery, callable $c)
-    {
-        $domNodeList = self::requireDomNodeList($this->domXPath->query($xPathQuery));
-        foreach ($domNodeList as $domNode) {
-            // XXX do we need to trim the value?
-            $c(self::requireNonEmptyString($domNode->textContent));
-        }
     }
 
     /**
@@ -307,6 +239,90 @@ class XmlDocument
         }
 
         return $this->requireOneDomElementTextContent($xPathQuery);
+    }
+
+    /**
+     * @param mixed $inputVar
+     *
+     * @throws \fkooman\SAML\SP\Exception\XmlDocumentException
+     *
+     * @return \DOMElement
+     */
+    private static function requireDomElement($inputVar)
+    {
+        if (!($inputVar instanceof DOMElement)) {
+            throw new XmlDocumentException('expected "DOMElement"');
+        }
+
+        return $inputVar;
+    }
+
+    /**
+     * @param mixed $inputVar
+     *
+     * @throws \fkooman\SAML\SP\Exception\XmlDocumentException
+     *
+     * @return \DOMAttr
+     */
+    private static function requireDomAttr($inputVar)
+    {
+        if (!($inputVar instanceof DOMAttr)) {
+            throw new XmlDocumentException('expected "DOMAttr"');
+        }
+
+        return $inputVar;
+    }
+
+    /**
+     * @param mixed $inputVar
+     *
+     * @throws \fkooman\SAML\SP\Exception\XmlDocumentException
+     *
+     * @return \DOMNodeList
+     */
+    private static function requireDomNodeList($inputVar)
+    {
+        if (!($inputVar instanceof DOMNodeList)) {
+            throw new XmlDocumentException(\sprintf('expected "DOMNodeList", got "%s"', \get_class($inputVar)));
+        }
+
+        return $inputVar;
+    }
+
+    /**
+     * @param mixed $inputVar
+     *
+     * @throws \fkooman\SAML\SP\Exception\XmlDocumentException
+     *
+     * @return string
+     */
+    private static function requireString($inputVar)
+    {
+        if (!\is_string($inputVar)) {
+            throw new XmlDocumentException('expected "string"');
+        }
+
+        return $inputVar;
+    }
+
+    /**
+     * @param mixed $inputVar
+     *
+     * @throws \fkooman\SAML\SP\Exception\XmlDocumentException
+     *
+     * @return string
+     */
+    private static function requireNonEmptyString($inputVar)
+    {
+        if (!\is_string($inputVar)) {
+            throw new XmlDocumentException('expected "string"');
+        }
+
+        if ('' === $inputVar) {
+            throw new XmlDocumentException('expected non-empty "string"');
+        }
+
+        return $inputVar;
     }
 
     /**

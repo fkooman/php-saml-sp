@@ -125,7 +125,6 @@ class Crypto
      */
     public static function decryptXml(XmlDocument $xmlDocument, PrivateKey $privateKey)
     {
-        // XXX remove DOMELement parameter!
         if (!self::hasDecryptionSupport()) {
             throw new CryptoException('XML decryption is not supported on this system');
         }
