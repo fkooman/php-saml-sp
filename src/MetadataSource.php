@@ -32,6 +32,7 @@ use fkooman\SAML\SP\Exception\CryptoException;
 use fkooman\SAML\SP\Exception\HttpClientException;
 use fkooman\SAML\SP\Exception\XmlDocumentException;
 use fkooman\SAML\SP\Log\LoggerInterface;
+use ParagonIE\ConstantTime\Base64UrlSafe;
 use RuntimeException;
 
 /**
@@ -151,7 +152,7 @@ class MetadataSource implements IdpSourceInterface
      */
     public function importMetadata(HttpClientInterface $httpClient, $metadataUrl, array $publicKeyFileList)
     {
-        $metadataFile = \sprintf('%s/%s.xml', $this->dynamicDir, self::encodeString($metadataUrl));
+        $metadataFile = \sprintf('%s/%s.xml', $this->dynamicDir, Base64UrlSafe::encode($metadataUrl));
         if (false !== $metadataString = @\file_get_contents($metadataFile)) {
             $metadataDocument = XmlDocument::fromMetadata($metadataString, false);
             if (null !== $validUntil = $metadataDocument->optionalOneDomAttrValue('self::node()/@validUntil')) {
@@ -232,24 +233,5 @@ class MetadataSource implements IdpSourceInterface
                 }
             }
         }
-    }
-
-    /**
-     * Base64UrlSafe encoding.
-     *
-     * @param string $inputStr
-     *
-     * @return string
-     */
-    private static function encodeString($inputStr)
-    {
-        return \rtrim(
-            \str_replace(
-                ['+', '/'],
-                ['-', '_'],
-                \base64_encode($inputStr)
-            ),
-            '='
-        );
     }
 }
