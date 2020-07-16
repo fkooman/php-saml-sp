@@ -302,7 +302,7 @@ EOF;
 
         $domDocument = new DOMDocument();
         $domDocument->loadXML('<NameID SPNameQualifier="http://localhost:8081/metadata" Format="urn:oasis:names:tc:SAML:2.0:nameid-format:transient">LtrfxjC6GOQ5pywYueOfXJDwfhQ7dZ4t9k3yGEB1WhY</NameID>');
-        $nameId = new NameId('', 'http://localhost:8081/metadata', $domDocument->firstChild);
+        $nameId = new NameId('', 'http://localhost:8081/metadata', $domDocument->documentElement);
 
         $samlAssertion = new Assertion(
             'http://localhost:8080/metadata.php',
