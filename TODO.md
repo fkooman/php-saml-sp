@@ -2,7 +2,7 @@
 
 ## 1.0
 
-### Fixes / Security Audit
+### Pre Audit
 
 - input validation on ALL (public) methods
 - make absolutely sure we verify the assertion with the right public key as to
@@ -16,6 +16,10 @@
         <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
     </ds:Transforms>
 ```
+
+### Post Audit 
+
+- update CSS style
 
 ## 2.0
 
