@@ -20,6 +20,9 @@
 ### Post Audit 
 
 - update CSS style
+- switch to systemd timer instead of cron
+  - hopefully systemd timer can prevent from running the script >1 at the same
+    time
 
 ## 2.0
 

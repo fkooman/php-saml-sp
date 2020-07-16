@@ -77,7 +77,6 @@ class MetadataSource implements IdpSourceInterface
      */
     public function get($entityId)
     {
-        /** @var array<IdpInfo> $idpInfoList */
         $idpInfoList = [];
         $this->foreachIdp(function (DOMElement $entityDescriptorDomElement) use (&$idpInfoList) {
             $entityDocument = new DOMDocument('1.0', 'UTF-8');
@@ -157,7 +156,8 @@ class MetadataSource implements IdpSourceInterface
             $metadataDocument = XmlDocument::fromMetadata($metadataString, false);
             if (null !== $validUntil = $metadataDocument->optionalOneDomAttrValue('self::node()/@validUntil')) {
                 $validUntilDateTime = new DateTime($validUntil);
-                $refreshThreshhold = \date_add(clone $this->dateTime, new DateInterval('PT4H'));
+                $refreshThreshhold = clone $this->dateTime;
+                $refreshThreshhold->add(new DateInterval('PT4H'));
                 if ($refreshThreshhold->getTimestamp() < $validUntilDateTime->getTimestamp()) {
                     // still valid for a while, go to next URL
                     $this->logger->notice(\sprintf('metadata "%s" is recent enough', $metadataUrl));

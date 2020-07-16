@@ -35,7 +35,10 @@ try {
         exit(1);
     }
     echo 'Verifying XML schema...';
-    $xmlDocument = XmlDocument::fromMetadata(\file_get_contents($argv[1]), true);
+    if (false === $fileContent = @\file_get_contents($argv[1])) {
+        throw new RuntimeException(\sprintf('unable to read "%s"', $argv[1]));
+    }
+    $xmlDocument = XmlDocument::fromMetadata($fileContent, true);
     echo ' OK!'.PHP_EOL;
     if ($argc > 2) {
         $publicKey = PublicKey::fromFile($argv[2]);

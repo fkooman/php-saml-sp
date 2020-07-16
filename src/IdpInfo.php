@@ -184,6 +184,8 @@ class IdpInfo
     }
 
     /**
+     * @suppress PhanUnusedVariableCaughtException
+     *
      * @return array<PublicKey>
      */
     private static function extractPublicKeys(XmlDocument $xmlDocument)

@@ -33,15 +33,11 @@ use fkooman\SAML\SP\Exception\XmlDocumentException;
 
 class XmlDocument
 {
-    /** @var \DOMDocument */
-    private $domDocument;
-
     /** @var \DOMXPath */
     private $domXPath;
 
     private function __construct(DOMDocument $domDocument)
     {
-        $this->domDocument = $domDocument;
         $this->domXPath = new DOMXPath($domDocument);
         $this->domXPath->registerNamespace('samlp', 'urn:oasis:names:tc:SAML:2.0:protocol');
         $this->domXPath->registerNamespace('saml', 'urn:oasis:names:tc:SAML:2.0:assertion');
@@ -203,7 +199,7 @@ class XmlDocument
      */
     public function optionalOneDomElementTextContent($xPathQuery)
     {
-        if (null === $domElement = $this->optionalOneDomElement($xPathQuery)) {
+        if (null === $this->optionalOneDomElement($xPathQuery)) {
             return null;
         }
 
@@ -219,7 +215,7 @@ class XmlDocument
     private static function requireDomElement($xPathQuery, $inputVar)
     {
         if (!($inputVar instanceof DOMElement)) {
-            throw new XmlDocumentException('expected "DOMElement"');
+            throw new XmlDocumentException(\sprintf('[%s] expected "DOMElement"', $xPathQuery));
         }
 
         return $inputVar;
@@ -234,7 +230,7 @@ class XmlDocument
     private static function requireDomAttr($xPathQuery, $inputVar)
     {
         if (!($inputVar instanceof DOMAttr)) {
-            throw new XmlDocumentException('expected "DOMAttr"');
+            throw new XmlDocumentException(\sprintf('[%s] expected "DOMAttr"', $xPathQuery));
         }
 
         return $inputVar;
@@ -249,22 +245,7 @@ class XmlDocument
     private static function requireDomNodeList($xPathQuery, $inputVar)
     {
         if (!($inputVar instanceof DOMNodeList)) {
-            throw new XmlDocumentException('expected "DOMNodeList"');
-        }
-
-        return $inputVar;
-    }
-
-    /**
-     * @param string $xPathQuery
-     * @param mixed  $inputVar
-     *
-     * @return string
-     */
-    private static function requireString($xPathQuery, $inputVar)
-    {
-        if (!\is_string($inputVar)) {
-            throw new XmlDocumentException('expected "string"');
+            throw new XmlDocumentException(\sprintf('[%s] expected "DOMNodeList"', $xPathQuery));
         }
 
         return $inputVar;
@@ -279,13 +260,13 @@ class XmlDocument
     private static function requireNonEmptyString($xPathQuery, $inputVar)
     {
         if (!\is_string($inputVar)) {
-            throw new XmlDocumentException('expected "string"');
+            throw new XmlDocumentException(\sprintf('[%s] expected "string"', $xPathQuery));
         }
 
         $trimmedString = \trim($inputVar);
 
         if ('' === $trimmedString) {
-            throw new XmlDocumentException('expected non-empty "string"');
+            throw new XmlDocumentException(\sprintf('[%s] expected non-empty "string"', $xPathQuery));
         }
 
         return $trimmedString;

@@ -34,9 +34,10 @@ class DateTimeValidator
      */
     public static function isBefore(DateTime $currentDateTime, DateTime $dateTime)
     {
-        $lowerLimit = \date_sub(clone $dateTime, new DateInterval('PT180S'));
+        $lowerLimit = clone $dateTime;
+        $lowerLimit->sub(new DateInterval('PT180S'));
 
-        return $currentDateTime < $lowerLimit;
+        return $currentDateTime->getTimestamp() < $lowerLimit->getTimestamp();
     }
 
     /**
@@ -44,8 +45,9 @@ class DateTimeValidator
      */
     public static function isOnOrAfter(DateTime $currentDateTime, DateTime $dateTime)
     {
-        $upperLimit = \date_add(clone $dateTime, new DateInterval('PT180S'));
+        $upperLimit = clone $dateTime;
+        $upperLimit->add(new DateInterval('PT180S'));
 
-        return $currentDateTime >= $upperLimit;
+        return $currentDateTime->getTimestamp() >= $upperLimit->getTimestamp();
     }
 }

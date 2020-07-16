@@ -42,7 +42,7 @@ class ResponseBench
     {
         $response = new Response(new DateTime('2019-02-23T17:04:21Z'));
         $samlResponse = \file_get_contents(\dirname(__DIR__).'/tests/data/assertion/FrkoIdP.xml');
-        $samlAssertion = $response->verify(
+        $response->verify(
             new SpInfo(
                 'http://localhost:8081/metadata',
                 CryptoKeys::load(\dirname(__DIR__).'/tests/data/certs'),

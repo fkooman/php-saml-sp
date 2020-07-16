@@ -31,16 +31,16 @@ class Request
     /** @var array<string,mixed> */
     private $serverData;
 
-    /** @var array<string,string|string[]> */
+    /** @var array<string,string|array<string>> */
     private $getData;
 
-    /** @var array<string,string|string[]> */
+    /** @var array<string,string|array<string>> */
     private $postData;
 
     /**
-     * @param array<string,mixed>           $serverData
-     * @param array<string,string|string[]> $getData
-     * @param array<string,string|string[]> $postData
+     * @param array<string,mixed>                $serverData
+     * @param array<string,string|array<string>> $getData
+     * @param array<string,string|array<string>> $postData
      */
     public function __construct(array $serverData, array $getData = [], array $postData = [])
     {
@@ -100,12 +100,20 @@ class Request
 
         // remove script_name (if it is part of request_uri
         if (0 === \strpos($requestUri, $scriptName)) {
-            return \substr($requestUri, \strlen($scriptName));
+            if (false === $pathInfo = \substr($requestUri, \strlen($scriptName))) {
+                throw new HttpException(500, 'unable to remove SCRIPT_NAME');
+            }
+
+            return $pathInfo;
         }
 
         // remove the root
         if ('/' !== $this->getRoot()) {
-            return \substr($requestUri, \strlen($this->getRoot()) - 1);
+            if (false === $pathInfo = \substr($requestUri, \strlen($this->getRoot()) - 1)) {
+                throw new HttpException(500, 'unable to remove root');
+            }
+
+            return $pathInfo;
         }
 
         return $requestUri;
@@ -135,11 +143,12 @@ class Request
         if (!\array_key_exists($queryKey, $this->getData)) {
             throw new HttpException(400, \sprintf('missing query parameter "%s"', $queryKey));
         }
-        if (!\is_string($this->getData[$queryKey])) {
+        $queryValue = $this->getData[$queryKey];
+        if (!\is_string($queryValue)) {
             throw new HttpException(400, \sprintf('value of query parameter "%s" MUST be string', $queryKey));
         }
 
-        return $this->getData[$queryKey];
+        return $queryValue;
     }
 
     /**
@@ -166,11 +175,12 @@ class Request
         if (!\array_key_exists($postKey, $this->postData)) {
             throw new HttpException(400, \sprintf('missing post parameter "%s"', $postKey));
         }
-        if (!\is_string($this->postData[$postKey])) {
+        $postValue = $this->postData[$postKey];
+        if (!\is_string($postValue)) {
             throw new HttpException(400, \sprintf('value of post parameter "%s" MUST be string', $postKey));
         }
 
-        return $this->postData[$postKey];
+        return $postValue;
     }
 
     /**

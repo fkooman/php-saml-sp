@@ -51,7 +51,7 @@ class XmlIdpInfoSourceBench
      */
     public function benchFromMetadataSchemaValidate()
     {
-        $xmlDocument = XmlDocument::fromMetadata(
+        XmlDocument::fromMetadata(
             \file_get_contents(\dirname(__DIR__).'/tests/data/metadata/localhost.xml'),
             true
         );

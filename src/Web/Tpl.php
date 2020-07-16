@@ -24,8 +24,6 @@
 
 namespace fkooman\SAML\SP\Web;
 
-use DateTime;
-use DateTimeZone;
 use fkooman\SAML\SP\Web\Exception\TplException;
 
 class Tpl
@@ -108,10 +106,14 @@ class Tpl
     {
         $this->templateVariables = \array_merge($this->templateVariables, $templateVariables);
         \extract($this->templateVariables);
-        \ob_start();
+        if (false === \ob_start()) {
+            throw new TplException('unable to start output buffering');
+        }
         /** @psalm-suppress UnresolvableInclude */
         include $this->templatePath($templateName);
-        $templateStr = \ob_get_clean();
+        if (false === $templateStr = \ob_get_clean()) {
+            throw new TplException('unable to end output buffering');
+        }
         if (0 === \count($this->layoutList)) {
             // we have no layout defined, so simple template...
             return $templateStr;
@@ -192,7 +194,10 @@ class Tpl
             throw new TplException(\sprintf('attempted to end section "%s" but current section is "%s"', $sectionName, $this->activeSectionName));
         }
 
-        $this->sectionList[$this->activeSectionName] = \ob_get_clean();
+        if (false === $outputBuffer = \ob_get_clean()) {
+            throw new TplException('unable to end output buffering');
+        }
+        $this->sectionList[$this->activeSectionName] = $outputBuffer;
         $this->activeSectionName = null;
     }
 
@@ -261,22 +266,6 @@ class Tpl
         }
 
         return $v;
-    }
-
-    /**
-     * Format a date.
-     *
-     * @param string $dateString
-     * @param string $dateFormat
-     *
-     * @return string
-     */
-    private function d($dateString, $dateFormat = 'Y-m-d H:i:s')
-    {
-        $dateTime = new DateTime($dateString);
-        $dateTime->setTimeZone(new DateTimeZone(\date_default_timezone_get()));
-
-        return $this->e(\date_format($dateTime, $dateFormat));
     }
 
     /**

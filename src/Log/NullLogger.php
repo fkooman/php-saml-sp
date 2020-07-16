@@ -27,6 +27,8 @@ namespace fkooman\SAML\SP\Log;
 class NullLogger implements LoggerInterface
 {
     /**
+     * @suppress PhanUnusedPublicMethodParameter
+     *
      * @param string $logMessage
      *
      * @return void
@@ -36,6 +38,8 @@ class NullLogger implements LoggerInterface
     }
 
     /**
+     * @suppress PhanUnusedPublicMethodParameter
+     *
      * @param string $logMessage
      *
      * @return void
@@ -45,6 +49,8 @@ class NullLogger implements LoggerInterface
     }
 
     /**
+     * @suppress PhanUnusedPublicMethodParameter
+     *
      * @param string $logMessage
      *
      * @return void

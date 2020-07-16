@@ -127,7 +127,8 @@ class Response
         $assertionAuthnInstant = new DateTime($assertionDocument->requireOneDomAttrValue('/saml:Assertion/saml:AuthnStatement/@AuthnInstant'));
 
         // SessionNotOnOrAfter (Optional)
-        $sessionNotOnOrAfter = \date_add(clone $this->dateTime, new DateInterval('PT8H'));
+        $sessionNotOnOrAfter = clone $this->dateTime;
+        $sessionNotOnOrAfter->add(new DateInterval('PT8H'));
         if (null !== $assertionSessionNotOnOrAfter = $assertionDocument->optionalOneDomAttrValue('/saml:Assertion/saml:AuthnStatement/@SessionNotOnOrAfter')) {
             $sessionNotOnOrAfter = new DateTime($assertionSessionNotOnOrAfter);
         }

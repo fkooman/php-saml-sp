@@ -314,7 +314,7 @@ class SP
 
         // make sure the SAML session is still valid
         $sessionNotOnOrAfter = $samlAssertion->getSessionNotOnOrAfter();
-        if ($sessionNotOnOrAfter <= $this->dateTime) {
+        if ($sessionNotOnOrAfter->getTimestamp() <= $this->dateTime->getTimestamp()) {
             $this->session->remove(self::SESSION_KEY_PREFIX.'assertion');
 
             return null;
