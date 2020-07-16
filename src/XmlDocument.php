@@ -118,7 +118,6 @@ class XmlDocument
             throw new XmlDocumentException(\sprintf('Q: "%s": expected exactly 1 DOMElement, got %d', $xPathQuery, $domNodeList->length));
         }
 
-        // XXX do we need to trim the value?
         return self::requireNonEmptyString(self::requireDomAttr($domNodeList->item(0))->value);
     }
 
@@ -129,8 +128,8 @@ class XmlDocument
      */
     public function allDomElement($xPathQuery)
     {
-        $domElementList = [];
         $domNodeList = self::requireDomNodeList($this->domXPath->query($xPathQuery));
+        $domElementList = [];
         foreach ($domNodeList as $domNode) {
             $domElementList[] = self::requireDomElement($domNode);
         }
@@ -148,7 +147,6 @@ class XmlDocument
         $domNodeList = self::requireDomNodeList($this->domXPath->query($xPathQuery));
         $attributeValueList = [];
         foreach ($domNodeList as $domNode) {
-            // XXX do we need to trim the value?
             $attributeValueList[] = self::requireNonEmptyString(self::requireDomAttr($domNode)->value);
         }
 
@@ -165,7 +163,6 @@ class XmlDocument
         $domNodeList = self::requireDomNodeList($this->domXPath->query($xPathQuery));
         $textValueList = [];
         foreach ($domNodeList as $domNode) {
-            // XXX do we need to trim the value?
             $textValueList[] = self::requireNonEmptyString($domNode->textContent);
         }
 
@@ -216,8 +213,6 @@ class XmlDocument
     /**
      * @param mixed $inputVar
      *
-     * @throws \fkooman\SAML\SP\Exception\XmlDocumentException
-     *
      * @return \DOMElement
      */
     private static function requireDomElement($inputVar)
@@ -231,8 +226,6 @@ class XmlDocument
 
     /**
      * @param mixed $inputVar
-     *
-     * @throws \fkooman\SAML\SP\Exception\XmlDocumentException
      *
      * @return \DOMAttr
      */
@@ -248,14 +241,12 @@ class XmlDocument
     /**
      * @param mixed $inputVar
      *
-     * @throws \fkooman\SAML\SP\Exception\XmlDocumentException
-     *
      * @return \DOMNodeList
      */
     private static function requireDomNodeList($inputVar)
     {
         if (!($inputVar instanceof DOMNodeList)) {
-            throw new XmlDocumentException(\sprintf('expected "DOMNodeList", got "%s"', \get_class($inputVar)));
+            throw new XmlDocumentException('expected "DOMNodeList"');
         }
 
         return $inputVar;
@@ -263,8 +254,6 @@ class XmlDocument
 
     /**
      * @param mixed $inputVar
-     *
-     * @throws \fkooman\SAML\SP\Exception\XmlDocumentException
      *
      * @return string
      */
@@ -280,8 +269,6 @@ class XmlDocument
     /**
      * @param mixed $inputVar
      *
-     * @throws \fkooman\SAML\SP\Exception\XmlDocumentException
-     *
      * @return string
      */
     private static function requireNonEmptyString($inputVar)
@@ -290,11 +277,13 @@ class XmlDocument
             throw new XmlDocumentException('expected "string"');
         }
 
-        if ('' === $inputVar) {
+        $trimmedString = \trim($inputVar);
+
+        if ('' === $trimmedString) {
             throw new XmlDocumentException('expected non-empty "string"');
         }
 
-        return $inputVar;
+        return $trimmedString;
     }
 
     /**
