@@ -51,35 +51,36 @@ class Crypto
      *
      * @return void
      */
-    public static function verifyXml(XmlDocument $xmlDocument, DOMElement $domElement, array $publicKeys)
+    public static function verifyXml(XmlDocument $xmlDocument, array $publicKeys)
     {
-        $rootElementId = XmlDocument::requireNonEmptyString($xmlDocument->domXPath->evaluate('string(self::node()/@ID)', $domElement));
-        $referenceUri = XmlDocument::requireNonEmptyString($xmlDocument->domXPath->evaluate('string(ds:Signature/ds:SignedInfo/ds:Reference/@URI)', $domElement));
+        $rootElementId = $xmlDocument->requireOneDomAttrValue('self::node()/@ID');
+        $referenceUri = $xmlDocument->requireOneDomAttrValue('self::node()/ds:Signature/ds:SignedInfo/ds:Reference/@URI');
         if (\sprintf('#%s', $rootElementId) !== $referenceUri) {
             throw new CryptoException('reference URI does not point to document ID');
         }
 
-        $digestMethod = XmlDocument::requireNonEmptyString($xmlDocument->domXPath->evaluate('string(ds:Signature/ds:SignedInfo/ds:Reference/ds:DigestMethod/@Algorithm)', $domElement));
+        $digestMethod = $xmlDocument->requireOneDomAttrValue('self::node()/ds:Signature/ds:SignedInfo/ds:Reference/ds:DigestMethod/@Algorithm');
         if (self::SIGN_DIGEST_ALGO !== $digestMethod) {
             throw new CryptoException(\sprintf('only digest method "%s" is supported', self::SIGN_DIGEST_ALGO));
         }
 
-        $signatureMethod = XmlDocument::requireNonEmptyString($xmlDocument->domXPath->evaluate('string(ds:Signature/ds:SignedInfo/ds:SignatureMethod/@Algorithm)', $domElement));
+        $signatureMethod = $xmlDocument->requireOneDomAttrValue('self::node()/ds:Signature/ds:SignedInfo/ds:SignatureMethod/@Algorithm');
         if (self::SIGN_ALGO !== $signatureMethod) {
             throw new CryptoException(\sprintf('only signature method "%s" is supported', self::SIGN_ALGO));
         }
 
-        $signatureValue = self::removeWhiteSpace(XmlDocument::requireNonEmptyString($xmlDocument->domXPath->evaluate('string(ds:Signature/ds:SignatureValue)', $domElement)));
-        $digestValue = self::removeWhiteSpace(XmlDocument::requireNonEmptyString($xmlDocument->domXPath->evaluate('string(ds:Signature/ds:SignedInfo/ds:Reference/ds:DigestValue)', $domElement)));
+        $signatureValue = self::removeWhiteSpace($xmlDocument->requireOneDomElementTextContent('self::node()/ds:Signature/ds:SignatureValue'));
+        $digestValue = self::removeWhiteSpace($xmlDocument->requireOneDomElementTextContent('self::node()/ds:Signature/ds:SignedInfo/ds:Reference/ds:DigestValue'));
 
-        $signedInfoElement = XmlDocument::requireDomElement($xmlDocument->domXPath->query('ds:Signature/ds:SignedInfo', $domElement)->item(0));
+        $signedInfoElement = $xmlDocument->requireOneDomElement('self::node()/ds:Signature/ds:SignedInfo');
         $canonicalSignedInfo = $signedInfoElement->C14N(true, false);
-        $signatureElement = XmlDocument::requireDomElement($xmlDocument->domXPath->query('ds:Signature', $domElement)->item(0));
-        $domElement->removeChild($signatureElement);
+        $signatureElement = $xmlDocument->requireOneDomElement('self::node()/ds:Signature');
+        $rootElement = $xmlDocument->requireOneDomElement('self::node()');
+        $rootElement->removeChild($signatureElement);
         $rootElementDigest = Base64::encode(
             \hash(
                 self::SIGN_HASH_ALGO,
-                self::canonicalizeElement($domElement),
+                self::canonicalizeElement($rootElement),
                 true
             )
         );
@@ -122,33 +123,33 @@ class Crypto
      *
      * @return string
      */
-    public static function decryptXml(XmlDocument $xmlDocument, DOMElement $domElement, PrivateKey $privateKey)
+    public static function decryptXml(XmlDocument $xmlDocument, PrivateKey $privateKey)
     {
-        // XXX remove the need for DOMElement parameter if possible!
+        // XXX remove DOMELement parameter!
         if (!self::hasDecryptionSupport()) {
-            throw new CryptoException('"<EncryptedAssertion>" is not supported on this system');
+            throw new CryptoException('XML decryption is not supported on this system');
         }
 
         // make sure we support the encryption algorithm
-        $encryptionMethod = XmlDocument::requireNonEmptyString($xmlDocument->domXPath->evaluate('string(xenc:EncryptedData/xenc:EncryptionMethod/@Algorithm)', $domElement));
+        $encryptionMethod = $xmlDocument->requireOneDomAttrValue('/samlp:Response/saml:EncryptedAssertion/xenc:EncryptedData/xenc:EncryptionMethod/@Algorithm');
         if (self::ENCRYPT_BLOCK_ENCRYPTION_ALGO !== $encryptionMethod) {
             throw new CryptoException(\sprintf('only block encryption algorithm "%s" is supported', self::ENCRYPT_BLOCK_ENCRYPTION_ALGO));
         }
 
         // make sure we support the key transport encryption algorithm
-        $keyEncryptionMethod = XmlDocument::requireNonEmptyString($xmlDocument->domXPath->evaluate('string(xenc:EncryptedData/ds:KeyInfo/xenc:EncryptedKey/xenc:EncryptionMethod/@Algorithm)', $domElement));
+        $keyEncryptionMethod = $xmlDocument->requireOneDomAttrValue('/samlp:Response/saml:EncryptedAssertion/xenc:EncryptedData/ds:KeyInfo/xenc:EncryptedKey/xenc:EncryptionMethod/@Algorithm');
         if (self::ENCRYPT_KEY_TRANSPORT_ALGO !== $keyEncryptionMethod) {
             throw new CryptoException(\sprintf('only key transport algorithm "%s" is supported', self::ENCRYPT_KEY_TRANSPORT_ALGO));
         }
 
         // make sure we support the key transport encryption digest algorithm
-        $keyEncryptionDigestMethod = XmlDocument::requireNonEmptyString($xmlDocument->domXPath->evaluate('string(xenc:EncryptedData/ds:KeyInfo/xenc:EncryptedKey/xenc:EncryptionMethod/ds:DigestMethod/@Algorithm)', $domElement));
+        $keyEncryptionDigestMethod = $xmlDocument->requireOneDomAttrValue('/samlp:Response/saml:EncryptedAssertion/xenc:EncryptedData/ds:KeyInfo/xenc:EncryptedKey/xenc:EncryptionMethod/ds:DigestMethod/@Algorithm');
         if (self::ENCRYPT_KEY_DIGEST_ALGO !== $keyEncryptionDigestMethod) {
             throw new CryptoException(\sprintf('only key encryption digest "%s" is supported', self::ENCRYPT_KEY_DIGEST_ALGO));
         }
 
         // extract the session key
-        $keyCipherValue = self::removeWhiteSpace(XmlDocument::requireNonEmptyString($xmlDocument->domXPath->evaluate('string(xenc:EncryptedData/ds:KeyInfo/xenc:EncryptedKey/xenc:CipherData/xenc:CipherValue)', $domElement)));
+        $keyCipherValue = self::removeWhiteSpace($xmlDocument->requireOneDomElementTextContent('/samlp:Response/saml:EncryptedAssertion/xenc:EncryptedData/ds:KeyInfo/xenc:EncryptedKey/xenc:CipherData/xenc:CipherValue'));
 
         // decrypt the session key
         if (false === \openssl_private_decrypt(Base64::decode($keyCipherValue), $symmetricEncryptionKey, $privateKey->raw(), OPENSSL_PKCS1_OAEP_PADDING)) {
@@ -161,7 +162,7 @@ class Crypto
         }
 
         // extract the encrypted Assertion
-        $assertionCipherValue = Base64::decode(self::removeWhiteSpace(XmlDocument::requireNonEmptyString($xmlDocument->domXPath->evaluate('string(xenc:EncryptedData/xenc:CipherData/xenc:CipherValue)', $domElement))));
+        $assertionCipherValue = Base64::decode(self::removeWhiteSpace($xmlDocument->requireOneDomElementTextContent('/samlp:Response/saml:EncryptedAssertion/xenc:EncryptedData/xenc:CipherData/xenc:CipherValue')));
 
         // @see https://www.w3.org/TR/xmlenc-core1/#sec-AES-GCM
         $messageIv = Binary::safeSubstr($assertionCipherValue, 0, self::ENCRYPT_IV_LENGTH); // IV (first 96 bits)

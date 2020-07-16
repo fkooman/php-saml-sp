@@ -38,17 +38,9 @@ try {
     $xmlDocument = XmlDocument::fromMetadata(\file_get_contents($argv[1]), true);
     echo ' OK!'.PHP_EOL;
     if ($argc > 2) {
-        // XXX move this functionality to MetadataSource
-        // XXX make sure "/*" can only match either EntityDescriptor or
-        // EntitiesDescriptor...
-        $rootDomElement = XmlDocument::requireDomElement(
-            XmlDocument::requireDomNodeList(
-                $xmlDocument->domXPath->query('/*')
-            )->item(0)
-        );
         $publicKey = PublicKey::fromFile($argv[2]);
         echo 'Verifying XML signature...';
-        Crypto::verifyXml($xmlDocument, $rootDomElement, [$publicKey]);
+        Crypto::verifyXml($xmlDocument, [$publicKey]);
         echo ' OK!'.PHP_EOL;
     }
 } catch (Exception $e) {

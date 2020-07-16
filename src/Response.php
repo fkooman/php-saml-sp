@@ -58,7 +58,7 @@ class Response
         $responseDocument = XmlDocument::fromProtocolMessage($samlResponse);
         if (null !== $responseDocument->optionalOneDomElement('/samlp:Response/ds:Signature')) {
             // samlp:Response is signed
-            Crypto::verifyXml($responseDocument, $responseDocument->domDocument->documentElement, $idpInfo->getPublicKeys());
+            Crypto::verifyXml($responseDocument, $idpInfo->getPublicKeys());
             $responseSigned = true;
         }
 
@@ -83,7 +83,7 @@ class Response
 
         if (null !== $assertionDocument->optionalOneDomElement('/saml:Assertion/ds:Signature')) {
             // saml:Assertion is signed
-            Crypto::verifyXml($assertionDocument, $assertionDocument->domDocument->documentElement, $idpInfo->getPublicKeys());
+            Crypto::verifyXml($assertionDocument, $idpInfo->getPublicKeys());
             $assertionSigned = true;
         }
 
@@ -171,8 +171,8 @@ class Response
      */
     private static function getAssertionDocument(XmlDocument $responseDocument, SpInfo $spInfo, &$assertionEncrypted)
     {
-        if (null !== $encryptedAssertionElement = $responseDocument->optionalOneDomElement('/samlp:Response/saml:EncryptedAssertion')) {
-            $decryptedAssertion = Crypto::decryptXml($responseDocument, $encryptedAssertionElement, $spInfo->getCryptoKeys()->getEncryptionPrivateKey());
+        if (null !== $responseDocument->optionalOneDomElement('/samlp:Response/saml:EncryptedAssertion')) {
+            $decryptedAssertion = Crypto::decryptXml($responseDocument, $spInfo->getCryptoKeys()->getEncryptionPrivateKey());
             $assertionEncrypted = true;
 
             // create and validate new document for Assertion

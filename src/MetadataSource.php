@@ -203,14 +203,7 @@ class MetadataSource implements IdpSourceInterface
     {
         // read metadata file and validate its XML schema
         $xmlDocument = XmlDocument::fromMetadata($metadataString, true);
-        // XXX make sure "/*" can only match either EntityDescriptor or
-        // EntitiesDescriptor...
-        $rootDomElement = XmlDocument::requireDomElement(
-            XmlDocument::requireDomNodeList(
-                $xmlDocument->domXPath->query('/*')
-            )->item(0)
-        );
-        Crypto::verifyXml($xmlDocument, $rootDomElement, $publicKeyList);
+        Crypto::verifyXml($xmlDocument, $publicKeyList);
     }
 
     /**
