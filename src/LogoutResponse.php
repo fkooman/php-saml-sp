@@ -47,25 +47,24 @@ class LogoutResponse
         }
 
         $logoutResponseDocument = XmlDocument::fromProtocolMessage($inflatedProtocolMessage);
-        $logoutResponseElement = XmlDocument::requireDomElement($logoutResponseDocument->domXPath->query('/samlp:LogoutResponse')->item(0));
 
-        // the LogoutResponse Issuer MUST be IdP entityId
-        $issuerElement = XmlDocument::requireDomElement($logoutResponseDocument->domXPath->query('saml:Issuer', $logoutResponseElement)->item(0));
-        if ($issuerElement->textContent !== $idpInfo->getEntityId()) {
+        $logoutIssuer = $logoutResponseDocument->requireOneDomElementTextContent('/samlp:LogoutResponse/saml:Issuer');
+        if ($logoutIssuer !== $idpInfo->getEntityId()) {
             throw new ResponseException('unexpected Issuer');
         }
 
-        if ($expectedInResponseTo !== $logoutResponseElement->getAttribute('InResponseTo')) {
+        $logoutResponseInResponseTo = $logoutResponseDocument->requireOneDomAttrValue('/samlp:LogoutResponse/@InResponseTo');
+        if ($expectedInResponseTo !== $logoutResponseInResponseTo) {
             throw new ResponseException('unexpected InResponseTo');
         }
 
-        if ($expectedSloUrl !== $logoutResponseElement->getAttribute('Destination')) {
+        $logoutResponseDestination = $logoutResponseDocument->requireOneDomAttrValue('/samlp:LogoutResponse/@Destination');
+        if ($expectedSloUrl !== $logoutResponseDestination) {
             throw new ResponseException('unexpected Destination');
         }
 
         // handle samlp:Status
-        $statusCodeElement = XmlDocument::requireDomElement($logoutResponseDocument->domXPath->query('samlp:Status/samlp:StatusCode', $logoutResponseElement)->item(0));
-        $statusCode = $statusCodeElement->getAttribute('Value');
+        $statusCode = $logoutResponseDocument->requireOneDomAttrValue('/samlp:LogoutResponse/samlp:Status/samlp:StatusCode/@Value');
         if ('urn:oasis:names:tc:SAML:2.0:status:Success' !== $statusCode) {
             throw new ResponseException($statusCode);
         }
