@@ -208,7 +208,12 @@ class MetadataSource implements IdpSourceInterface
      */
     private function forEachIdP(callable $c, $entityId)
     {
-        foreach ([$this->staticDir, $this->dynamicDir] as $metadataDir) {
+        $dirList = [
+            'static' => $this->staticDir,
+            'dynamic' => $this->dynamicDir,
+        ];
+
+        foreach ($dirList as $dirType => $metadataDir) {
             if (!@\file_exists($metadataDir) || !@\is_dir($metadataDir)) {
                 // does not exist, or is not a folder
                 continue;
@@ -222,6 +227,20 @@ class MetadataSource implements IdpSourceInterface
                 }
 
                 $metadataDocument = XmlDocument::fromMetadata($xmlData, false);
+
+                if ('dynamic' === $dirType) {
+                    // for dynamic metadata ONLY, i.e. the one automatically
+                    // periodically retrieved we check validUntil and make sure
+                    // it is not in the past if it exists
+                    if (null !== $validUntil = $metadataDocument->optionalOneDomAttrValue('self::node()/@validUntil')) {
+                        $validUntilDateTime = new DateTime($validUntil);
+                        if ($this->dateTime->getTimestamp() > $validUntilDateTime->getTimestamp()) {
+                            $this->logger->warning(\sprintf('metadata file "%s" has "validUntil" in the past', $metadataFile));
+
+                            continue;
+                        }
+                    }
+                }
 
                 // we use "//" because "EntityDescriptor" could be in
                 // the root of the XML document, or inside a (nested)
