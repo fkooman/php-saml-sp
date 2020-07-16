@@ -151,10 +151,7 @@ class IdpInfo
      */
     private static function extractEntityId(XmlDocument $xmlDocument)
     {
-        $entityDescriptorDomNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query('/md:EntityDescriptor'));
-        $entityDescriptorDomElement = XmlDocument::requireDomElement($entityDescriptorDomNodeList->item(0));
-
-        return $entityDescriptorDomElement->getAttribute('entityID');
+        return $xmlDocument->requireOneDomAttrValue('/md:EntityDescriptor/@entityID');
     }
 
     /**
@@ -162,13 +159,13 @@ class IdpInfo
      */
     private static function extractSingleSignOnService(XmlDocument $xmlDocument)
     {
-        $pathQuery = '/md:EntityDescriptor/md:IDPSSODescriptor/md:SingleSignOnService[@Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"]/@Location';
-        $domNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query($pathQuery));
-        if (null === $firstNode = $domNodeList->item(0)) {
-            throw new IdpInfoException(\sprintf('path not found: "%s"', $pathQuery));
+        $ssoLocationList = $xmlDocument->allDomAttrValue('/md:EntityDescriptor/md:IDPSSODescriptor/md:SingleSignOnService[@Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"]/@Location');
+        if (0 === \count($ssoLocationList)) {
+            throw new IdpInfoException('unable to find SingleSignOnService with HTTP-Redirect binding');
         }
 
-        return \trim($firstNode->textContent);
+        // for now we only care about the first one...
+        return $ssoLocationList[0];
     }
 
     /**
@@ -176,32 +173,29 @@ class IdpInfo
      */
     private static function extractSingleLogoutService(XmlDocument $xmlDocument)
     {
-        $pathQuery = '/md:EntityDescriptor/md:IDPSSODescriptor/md:SingleLogoutService[@Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"]/@Location';
-        $domNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query($pathQuery));
-        if (null === $firstNode = $domNodeList->item(0)) {
+        $sloLocationList = $xmlDocument->allDomAttrValue('/md:EntityDescriptor/md:IDPSSODescriptor/md:SingleLogoutService[@Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"]/@Location');
+        if (0 === \count($sloLocationList)) {
+            // it is okay if SLO is not supported...
             return null;
         }
 
-        return \trim($firstNode->textContent);
+        // for now we only care about the first one...
+        return $sloLocationList[0];
     }
 
     /**
-     * @throws Exception\IdpInfoException
-     *
      * @return array<PublicKey>
      */
     private static function extractPublicKeys(XmlDocument $xmlDocument)
     {
-        $pathQuery = '/md:EntityDescriptor/md:IDPSSODescriptor/md:KeyDescriptor[not(@use) or @use="signing"]/ds:KeyInfo/ds:X509Data/ds:X509Certificate';
-        $domNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query($pathQuery));
-        if (0 === $domNodeList->length) {
-            throw new IdpInfoException(\sprintf('path not found: "%s"', $pathQuery));
-        }
-        $publicKeys = [];
-        foreach ($domNodeList as $domNode) {
-            $certificateElement = XmlDocument::requireDomElement($domNode);
+        $publicKeyStringList = $xmlDocument->allDomElementTextContent(
+            '/md:EntityDescriptor/md:IDPSSODescriptor/md:KeyDescriptor[not(@use) or @use="signing"]/ds:KeyInfo/ds:X509Data/ds:X509Certificate',
+        );
+
+        $publicKeyList = [];
+        foreach ($publicKeyStringList as $publicKeyString) {
             try {
-                $publicKeys[] = PublicKey::fromEncodedString(\trim($certificateElement->textContent));
+                $publicKeyList[] = PublicKey::fromEncodedString($publicKeyString);
             } catch (KeyException $e) {
                 // we do not (yet) support other keys than RSA at the moment,
                 // trying to parse e.g. an EC cert will fail. We ignore those
@@ -209,7 +203,7 @@ class IdpInfo
             }
         }
 
-        return $publicKeys;
+        return $publicKeyList;
     }
 
     /**
@@ -217,15 +211,9 @@ class IdpInfo
      */
     private static function extractScope(XmlDocument $xmlDocument)
     {
-        $pathQuery = '/md:EntityDescriptor/md:IDPSSODescriptor/md:Extensions/shibmd:Scope[not(@regexp) or @regexp="false" or @regexp="0"]';
-        $domNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query($pathQuery));
-        $scopeList = [];
-        foreach ($domNodeList as $domNode) {
-            $scopeElement = XmlDocument::requireDomElement($domNode);
-            $scopeList[] = \trim($scopeElement->textContent);
-        }
-
-        return $scopeList;
+        return $xmlDocument->allDomElementTextContent(
+            '/md:EntityDescriptor/md:IDPSSODescriptor/md:Extensions/shibmd:Scope[not(@regexp) or @regexp="false" or @regexp="0"]'
+        );
     }
 
     /**
@@ -233,20 +221,16 @@ class IdpInfo
      */
     private static function extractDisplayName(XmlDocument $xmlDocument)
     {
-        $pathQueryList = [
+        $xPathQueryList = [
             '/md:EntityDescriptor/md:IDPSSODescriptor/md:Extensions/mdui:UIInfo/mdui:DisplayName[@xml:lang="en"]',
             '/md:EntityDescriptor/md:Organization/md:OrganizationDisplayName[@xml:lang="en"]',
             '/md:EntityDescriptor/md:Organization/md:OrganizationName[@xml:lang="en"]',
         ];
 
-        foreach ($pathQueryList as $pathQuery) {
-            $domNodeList = XmlDocument::requireDomNodeList($xmlDocument->domXPath->query($pathQuery));
-            if (0 === $domNodeList->length) {
-                continue;
+        foreach ($xPathQueryList as $xPathQuery) {
+            if (null !== $textContent = $xmlDocument->optionalOneDomElementTextContent($xPathQuery)) {
+                return $textContent;
             }
-            $nameNode = XmlDocument::requireDomElement($domNodeList->item(0));
-
-            return \trim($nameNode->textContent);
         }
 
         return null;

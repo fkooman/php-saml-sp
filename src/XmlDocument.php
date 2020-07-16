@@ -202,6 +202,7 @@ class XmlDocument
             throw new XmlDocumentException(\sprintf('Q: "%s": expected exactly 1 DOMElement, got %d', $xPathQuery, $domNodeList->length));
         }
 
+        // XXX do we need to trim the value?
         return self::requireNonEmptyString(self::requireDomAttr($domNodeList->item(0))->value);
     }
 
@@ -214,8 +215,26 @@ class XmlDocument
     {
         $domNodeList = self::requireDomNodeList($this->domXPath->query($xPathQuery));
         foreach ($domNodeList as $domNode) {
+            // XXX do we need to trim the value?
             $c(self::requireNonEmptyString(self::requireDomAttr($domNode)->value));
         }
+    }
+
+    /**
+     * @param string $xPathQuery
+     *
+     * @return array<string>
+     */
+    public function allDomAttrValue($xPathQuery)
+    {
+        $domNodeList = self::requireDomNodeList($this->domXPath->query($xPathQuery));
+        $attributeValueList = [];
+        foreach ($domNodeList as $domNode) {
+            // XXX do we need to trim the value?
+            $attributeValueList[] = self::requireNonEmptyString(self::requireDomAttr($domNode)->value);
+        }
+
+        return $attributeValueList;
     }
 
     /**
@@ -227,8 +246,26 @@ class XmlDocument
     {
         $domNodeList = self::requireDomNodeList($this->domXPath->query($xPathQuery));
         foreach ($domNodeList as $domNode) {
+            // XXX do we need to trim the value?
             $c(self::requireNonEmptyString($domNode->textContent));
         }
+    }
+
+    /**
+     * @param string $xPathQuery
+     *
+     * @return array<string>
+     */
+    public function allDomElementTextContent($xPathQuery)
+    {
+        $domNodeList = self::requireDomNodeList($this->domXPath->query($xPathQuery));
+        $textValueList = [];
+        foreach ($domNodeList as $domNode) {
+            // XXX do we need to trim the value?
+            $textValueList[] = self::requireNonEmptyString($domNode->textContent);
+        }
+
+        return $textValueList;
     }
 
     /**

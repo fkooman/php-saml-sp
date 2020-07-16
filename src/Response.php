@@ -182,6 +182,7 @@ class Response
         $assertionElement = $responseDocument->requireOneDomElement('/samlp:Response/saml:Assertion');
 
         // we need to create a new document first to keep the namespacing intact
+        // XXX move this to XmlDocument?
         $assertionDocument = new DOMDocument('1.0', 'UTF-8');
         $assertionDocument->appendChild($assertionDocument->importNode($assertionElement, true));
 
