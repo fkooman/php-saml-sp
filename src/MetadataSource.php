@@ -26,7 +26,6 @@ namespace fkooman\SAML\SP;
 
 use DateInterval;
 use DateTime;
-use DOMElement;
 use fkooman\SAML\SP\Exception\CryptoException;
 use fkooman\SAML\SP\Exception\HttpClientException;
 use fkooman\SAML\SP\Exception\XmlDocumentException;
@@ -76,19 +75,13 @@ class MetadataSource implements IdpSourceInterface
      */
     public function get($entityId)
     {
-        $idpInfoList = [];
-        // XXX we can remove this function now! as they do the same for both get and getAll cases!
-        $this->foreachIdp(function (DOMElement $entityDescriptorDomElement) use (&$idpInfoList) {
-            $idpInfoList[] = IdpInfo::fromXml(XmlDocument::domElementToString($entityDescriptorDomElement));
-        }, $entityId);
-
-        // we expect there to be only 1 result, but even if there are more we
-        // simply return the first one...
-        if (0 === \count($idpInfoList)) {
+        $idpInfoList = $this->getAllIdpInfo($entityId);
+        // make sure we got our IdP
+        if (!\array_key_exists($entityId, $idpInfoList)) {
             return null;
         }
 
-        return $idpInfoList[0];
+        return $idpInfoList[$entityId];
     }
 
     /**
@@ -96,14 +89,7 @@ class MetadataSource implements IdpSourceInterface
      */
     public function getAll()
     {
-        $idpInfoList = [];
-        // XXX we can remove this function now! as they do the same for both get and getAll cases!
-        $this->foreachIdp(function (DOMElement $entityDescriptorDomElement) use (&$idpInfoList) {
-            $idpInfo = IdpInfo::fromXml(XmlDocument::domElementToString($entityDescriptorDomElement));
-            $idpInfoList[$idpInfo->getEntityId()] = $idpInfo;
-        }, null);
-
-        return $idpInfoList;
+        return $this->getAllIdpInfo(null);
     }
 
     /**
@@ -201,15 +187,16 @@ class MetadataSource implements IdpSourceInterface
     /**
      * @param string|null $entityId
      *
-     * @return void
+     * @return array<string,IdpInfo>
      */
-    private function forEachIdP(callable $c, $entityId)
+    private function getAllIdpInfo($entityId)
     {
         $dirList = [
             'static' => $this->staticDir,
             'dynamic' => $this->dynamicDir,
         ];
 
+        $idpInfoList = [];
         foreach ($dirList as $dirType => $metadataDir) {
             if (!@\file_exists($metadataDir) || !@\is_dir($metadataDir)) {
                 // does not exist, or is not a folder
@@ -245,9 +232,12 @@ class MetadataSource implements IdpSourceInterface
                 $xPathQuery = null === $entityId ? '//md:EntityDescriptor/md:IDPSSODescriptor/parent::node()' : \sprintf('//md:EntityDescriptor[@entityID="%s"]/md:IDPSSODescriptor/parent::node()', $entityId);
                 $domElementList = $metadataDocument->allDomElement($xPathQuery);
                 foreach ($domElementList as $domElement) {
-                    $c($domElement);
+                    $idpInfo = IdpInfo::fromXml(XmlDocument::domElementToString($domElement));
+                    $idpInfoList[$idpInfo->getEntityId()] = $idpInfo;
                 }
             }
         }
+
+        return $idpInfoList;
     }
 }
