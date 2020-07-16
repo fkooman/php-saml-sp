@@ -211,6 +211,10 @@ class XmlDocument
      */
     public static function domElementToString(DOMElement $domElement)
     {
+        // we create a new document here in order to make sure we retain all
+        // namespaces. Simply calling DOMElement::saveXML() will not retain
+        // the namespaces declared on parent documents and thus result in 
+        // a broken document...
         $domDocument = new DOMDocument('1.0', 'UTF-8');
         $domDocument->appendChild($domDocument->importNode($domElement, true));
         if (false === $xmlString = $domDocument->saveXML()) {
