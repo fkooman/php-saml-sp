@@ -34,7 +34,7 @@ interface IdpSourceInterface
     public function get($entityId);
 
     /**
-     * @return array<IdpInfo>
+     * @return array<string,IdpInfo>
      */
     public function getAll();
 }
