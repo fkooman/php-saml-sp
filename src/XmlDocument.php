@@ -129,6 +129,7 @@ class XmlDocument
      */
     public function forEachDomAttrValue($xPathQuery, callable $c)
     {
+        // XXX remove this!
         $domNodeList = self::requireDomNodeList($this->domXPath->query($xPathQuery));
         foreach ($domNodeList as $domNode) {
             // XXX do we need to trim the value?
@@ -143,6 +144,7 @@ class XmlDocument
      */
     public function forEachDomElementTextContent($xPathQuery, callable $c)
     {
+        // XXX remove this!
         $domNodeList = self::requireDomNodeList($this->domXPath->query($xPathQuery));
         foreach ($domNodeList as $domNode) {
             // XXX do we need to trim the value?
