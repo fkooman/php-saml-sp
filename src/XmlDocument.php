@@ -125,36 +125,6 @@ class XmlDocument
     /**
      * @param string $xPathQuery
      *
-     * @return void
-     */
-    public function forEachDomAttrValue($xPathQuery, callable $c)
-    {
-        // XXX remove this!
-        $domNodeList = self::requireDomNodeList($this->domXPath->query($xPathQuery));
-        foreach ($domNodeList as $domNode) {
-            // XXX do we need to trim the value?
-            $c(self::requireNonEmptyString(self::requireDomAttr($domNode)->value));
-        }
-    }
-
-    /**
-     * @param string $xPathQuery
-     *
-     * @return void
-     */
-    public function forEachDomElementTextContent($xPathQuery, callable $c)
-    {
-        // XXX remove this!
-        $domNodeList = self::requireDomNodeList($this->domXPath->query($xPathQuery));
-        foreach ($domNodeList as $domNode) {
-            // XXX do we need to trim the value?
-            $c(self::requireNonEmptyString($domNode->textContent));
-        }
-    }
-
-    /**
-     * @param string $xPathQuery
-     *
      * @return array<\DOMElement>
      */
     public function allDomElement($xPathQuery)

@@ -194,60 +194,31 @@ class Response
      */
     private static function extractAttributes(XmlDocument $assertionDocument, IdpInfo $idpInfo, SpInfo $spInfo)
     {
-        $attributeList = [];
         /** @var array<string,string> */
         $attributeMapping = include __DIR__.'/attribute_mapping.php';
-        $assertionDocument->forEachDomAttrValue(
-            '/saml:Assertion/saml:AttributeStatement/saml:Attribute/@Name',
-            /**
-             * @param string $attributeName
-             *
-             * @return void
-             */
-            function ($attributeName) use ($attributeMapping, &$attributeList, $idpInfo, $spInfo, $assertionDocument) {
-                if (!\array_key_exists($attributeName, $attributeMapping)) {
-                    // we only process attributes in urn:oid syntax we know about,
-                    // the rest we ignore...
-                    return;
-                }
-                if (!\array_key_exists($attributeName, $attributeList)) {
-                    $attributeList[$attributeName] = [];
-                    $attributeList[$attributeMapping[$attributeName]] = [];
-                }
 
-                // epTID
-                if ('urn:oid:1.3.6.1.4.1.5923.1.1.1.10' === $attributeName) {
-                    // ePTID (eduPersonTargetedID) is a special case as it wraps a
-                    // saml:NameID construct and not a simple string value...
-                    $nameIdElement = $assertionDocument->requireOneDomElement('/saml:Assertion/saml:AttributeStatement/saml:Attribute[@Name="urn:oid:1.3.6.1.4.1.5923.1.1.1.10"]/saml:AttributeValue/saml:NameID');
-                    $nameId = new NameId($idpInfo->getEntityId(), $spInfo->getEntityId(), $nameIdElement);
-                    $attributeList[$attributeName][] = $nameId->toUserId();
-                    $attributeList[$attributeMapping[$attributeName]][] = $nameId->toUserId();
-
-                    return;
-                }
-
-                $assertionDocument->forEachDomElementTextContent(
-                    \sprintf('/saml:Assertion/saml:AttributeStatement/saml:Attribute[@Name="%s"]/saml:AttributeValue', $attributeName),
-                    /**
-                     * @param string $attributeValue
-                     *
-                     * @return void
-                     */
-                    function ($attributeValue) use ($attributeName, &$attributeList, $idpInfo, $attributeMapping) {
-                        if (null !== $processedAttributeValue = self::processAttributeValue($attributeName, $attributeValue, $idpInfo)) {
-                            $attributeList[$attributeName][] = $processedAttributeValue;
-                            $attributeList[$attributeMapping[$attributeName]][] = $processedAttributeValue;
-                        }
-                    }
-                );
+        /** @var array<string,array<string>> */
+        $attributeList = [];
+        foreach ($assertionDocument->allDomAttrValue('/saml:Assertion/saml:AttributeStatement/saml:Attribute/@Name') as $attributeName) {
+            if (!\array_key_exists($attributeName, $attributeMapping)) {
+                // we only process attributes in urn:oid syntax we know about,
+                // the rest we ignore...
+                continue;
             }
-        );
 
-        // XXX remove the empty ones, can we do this better somehow?!
-        foreach ($attributeList as $k => $v) {
-            if (0 === \count($v)) {
-                unset($attributeList[$k]);
+            $attributeValueList = $assertionDocument->allDomElementTextContent(
+                \sprintf('/saml:Assertion/saml:AttributeStatement/saml:Attribute[@Name="%s"]/saml:AttributeValue', $attributeName),
+            );
+
+            foreach ($attributeValueList as $attributeValue) {
+                if (null !== $processedAttributeValue = self::processAttributeValue($assertionDocument, $attributeName, $attributeValue, $idpInfo, $spInfo)) {
+                    if (!\array_key_exists($attributeName, $attributeList)) {
+                        $attributeList[$attributeName] = [];
+                        $attributeList[$attributeMapping[$attributeName]] = [];
+                    }
+                    $attributeList[$attributeName][] = $processedAttributeValue;
+                    $attributeList[$attributeMapping[$attributeName]][] = $processedAttributeValue;
+                }
             }
         }
 
@@ -260,11 +231,16 @@ class Response
      *
      * @return string|null
      */
-    private static function processAttributeValue($attributeName, $attributeValue, IdpInfo $idpInfo)
+    private static function processAttributeValue(XmlDocument $assertionDocument, $attributeName, $attributeValue, IdpInfo $idpInfo, SpInfo $spInfo)
     {
+        // eduPersonTargetedID (ePTID)
         if ('urn:oid:1.3.6.1.4.1.5923.1.1.1.10' === $attributeName) {
-            // NameID is handled elsewhere
-            return null;
+            // ePTID is a special case as it wraps a saml:NameID construct and
+            // not a simple string value...
+            $nameIdDomElement = $assertionDocument->requireOneDomElement('/saml:Assertion/saml:AttributeStatement/saml:Attribute[@Name="urn:oid:1.3.6.1.4.1.5923.1.1.1.10"]/saml:AttributeValue/saml:NameID');
+            $nameId = new NameId($idpInfo->getEntityId(), $spInfo->getEntityId(), $nameIdDomElement);
+
+            return $nameId->toUserId();
         }
 
         // filter "scoped" attributes
