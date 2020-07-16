@@ -196,7 +196,10 @@ class Service
                 return new RedirectResponse($this->sp->logout($returnTo));
             // exposes the SP metadata for IdP consumption
             case '/metadata':
-                return new Response(200, ['Content-Type' => 'application/samlmetadata+xml'], $this->sp->metadata());
+                // add new line to end of output
+                $metadataStr = $this->sp->metadata().PHP_EOL;
+
+                return new Response(200, ['Content-Type' => 'application/samlmetadata+xml'], $metadataStr);
             // callback from IdP containing the "LogoutResponse"
             case '/slo':
                 // we need the "raw" query string to be able to verify the
