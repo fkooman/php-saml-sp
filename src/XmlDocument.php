@@ -83,12 +83,12 @@ class XmlDocument
      */
     public function requireOneDomElement($xPathQuery)
     {
-        $domNodeList = self::requireDomNodeList($this->domXPath->query($xPathQuery));
+        $domNodeList = self::requireDomNodeList($xPathQuery, $this->domXPath->query($xPathQuery));
         if (1 !== $domNodeList->length) {
             throw new XmlDocumentException(\sprintf('Q: "%s": expected exactly 1 DOMElement, got %d', $xPathQuery, $domNodeList->length));
         }
 
-        return self::requireDomElement($domNodeList->item(0));
+        return self::requireDomElement($xPathQuery, $domNodeList->item(0));
     }
 
     /**
@@ -98,7 +98,7 @@ class XmlDocument
      */
     public function optionalOneDomElement($xPathQuery)
     {
-        $domNodeList = self::requireDomNodeList($this->domXPath->query($xPathQuery));
+        $domNodeList = self::requireDomNodeList($xPathQuery, $this->domXPath->query($xPathQuery));
         if (1 !== $domNodeList->length) {
             return null;
         }
@@ -113,12 +113,12 @@ class XmlDocument
      */
     public function requireOneDomAttrValue($xPathQuery)
     {
-        $domNodeList = self::requireDomNodeList($this->domXPath->query($xPathQuery));
+        $domNodeList = self::requireDomNodeList($xPathQuery, $this->domXPath->query($xPathQuery));
         if (1 !== $domNodeList->length) {
             throw new XmlDocumentException(\sprintf('Q: "%s": expected exactly 1 DOMElement, got %d', $xPathQuery, $domNodeList->length));
         }
 
-        return self::requireNonEmptyString(self::requireDomAttr($domNodeList->item(0))->value);
+        return self::requireNonEmptyString($xPathQuery, self::requireDomAttr($xPathQuery, $domNodeList->item(0))->value);
     }
 
     /**
@@ -128,10 +128,10 @@ class XmlDocument
      */
     public function allDomElement($xPathQuery)
     {
-        $domNodeList = self::requireDomNodeList($this->domXPath->query($xPathQuery));
+        $domNodeList = self::requireDomNodeList($xPathQuery, $this->domXPath->query($xPathQuery));
         $domElementList = [];
         foreach ($domNodeList as $domNode) {
-            $domElementList[] = self::requireDomElement($domNode);
+            $domElementList[] = self::requireDomElement($xPathQuery, $domNode);
         }
 
         return $domElementList;
@@ -144,10 +144,10 @@ class XmlDocument
      */
     public function allDomAttrValue($xPathQuery)
     {
-        $domNodeList = self::requireDomNodeList($this->domXPath->query($xPathQuery));
+        $domNodeList = self::requireDomNodeList($xPathQuery, $this->domXPath->query($xPathQuery));
         $attributeValueList = [];
         foreach ($domNodeList as $domNode) {
-            $attributeValueList[] = self::requireNonEmptyString(self::requireDomAttr($domNode)->value);
+            $attributeValueList[] = self::requireNonEmptyString($xPathQuery, self::requireDomAttr($xPathQuery, $domNode)->value);
         }
 
         return $attributeValueList;
@@ -160,10 +160,10 @@ class XmlDocument
      */
     public function allDomElementTextContent($xPathQuery)
     {
-        $domNodeList = self::requireDomNodeList($this->domXPath->query($xPathQuery));
+        $domNodeList = self::requireDomNodeList($xPathQuery, $this->domXPath->query($xPathQuery));
         $textValueList = [];
         foreach ($domNodeList as $domNode) {
-            $textValueList[] = self::requireNonEmptyString($domNode->textContent);
+            $textValueList[] = self::requireNonEmptyString($xPathQuery, $domNode->textContent);
         }
 
         return $textValueList;
@@ -176,7 +176,7 @@ class XmlDocument
      */
     public function optionalOneDomAttrValue($xPathQuery)
     {
-        $domNodeList = self::requireDomNodeList($this->domXPath->query($xPathQuery));
+        $domNodeList = self::requireDomNodeList($xPathQuery, $this->domXPath->query($xPathQuery));
         if (1 !== $domNodeList->length) {
             return null;
         }
@@ -193,7 +193,7 @@ class XmlDocument
     {
         $domElement = $this->requireOneDomElement($xPathQuery);
 
-        return self::requireNonEmptyString($domElement->textContent);
+        return self::requireNonEmptyString($xPathQuery, $domElement->textContent);
     }
 
     /**
@@ -211,11 +211,12 @@ class XmlDocument
     }
 
     /**
-     * @param mixed $inputVar
+     * @param string $xPathQuery
+     * @param mixed  $inputVar
      *
      * @return \DOMElement
      */
-    private static function requireDomElement($inputVar)
+    private static function requireDomElement($xPathQuery, $inputVar)
     {
         if (!($inputVar instanceof DOMElement)) {
             throw new XmlDocumentException('expected "DOMElement"');
@@ -225,11 +226,12 @@ class XmlDocument
     }
 
     /**
-     * @param mixed $inputVar
+     * @param string $xPathQuery
+     * @param mixed  $inputVar
      *
      * @return \DOMAttr
      */
-    private static function requireDomAttr($inputVar)
+    private static function requireDomAttr($xPathQuery, $inputVar)
     {
         if (!($inputVar instanceof DOMAttr)) {
             throw new XmlDocumentException('expected "DOMAttr"');
@@ -239,11 +241,12 @@ class XmlDocument
     }
 
     /**
-     * @param mixed $inputVar
+     * @param string $xPathQuery
+     * @param mixed  $inputVar
      *
      * @return \DOMNodeList
      */
-    private static function requireDomNodeList($inputVar)
+    private static function requireDomNodeList($xPathQuery, $inputVar)
     {
         if (!($inputVar instanceof DOMNodeList)) {
             throw new XmlDocumentException('expected "DOMNodeList"');
@@ -253,11 +256,12 @@ class XmlDocument
     }
 
     /**
-     * @param mixed $inputVar
+     * @param string $xPathQuery
+     * @param mixed  $inputVar
      *
      * @return string
      */
-    private static function requireString($inputVar)
+    private static function requireString($xPathQuery, $inputVar)
     {
         if (!\is_string($inputVar)) {
             throw new XmlDocumentException('expected "string"');
@@ -267,11 +271,12 @@ class XmlDocument
     }
 
     /**
-     * @param mixed $inputVar
+     * @param string $xPathQuery
+     * @param mixed  $inputVar
      *
      * @return string
      */
-    private static function requireNonEmptyString($inputVar)
+    private static function requireNonEmptyString($xPathQuery, $inputVar)
     {
         if (!\is_string($inputVar)) {
             throw new XmlDocumentException('expected "string"');

@@ -2,11 +2,6 @@
 
 ## 1.0
 
-### Features
-
-- include XPath in DomNode/Element error message so we know where the problem is in
-  the XML
-
 ### Fixes / Security Audit
 
 - input validation on ALL (public) methods
