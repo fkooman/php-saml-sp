@@ -101,7 +101,7 @@ class Request
         // remove script_name (if it is part of request_uri
         if (0 === \strpos($requestUri, $scriptName)) {
             if (false === $pathInfo = \substr($requestUri, \strlen($scriptName))) {
-                throw new HttpException(500, 'unable to remove SCRIPT_NAME');
+                throw new HttpException(500, 'unable to remove script_name');
             }
 
             return $pathInfo;

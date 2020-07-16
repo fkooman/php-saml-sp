@@ -31,7 +31,6 @@ use fkooman\SAML\SP\AuthnRequestState;
 use fkooman\SAML\SP\Crypto;
 use fkooman\SAML\SP\CryptoKeys;
 use fkooman\SAML\SP\Exception\ResponseException;
-use fkooman\SAML\SP\Log\NullLogger;
 use fkooman\SAML\SP\LogoutRequestState;
 use fkooman\SAML\SP\MetadataSource;
 use fkooman\SAML\SP\NameId;

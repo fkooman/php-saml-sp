@@ -22,7 +22,9 @@
  * SOFTWARE.
  */
 
-namespace fkooman\SAML\SP\Log;
+namespace fkooman\SAML\SP\Tests;
+
+use fkooman\SAML\SP\Log\LoggerInterface;
 
 class NullLogger implements LoggerInterface
 {

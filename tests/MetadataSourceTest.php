@@ -26,7 +26,6 @@ namespace fkooman\SAML\SP\Tests;
 
 use DateTime;
 use Exception;
-use fkooman\SAML\SP\Log\NullLogger;
 use fkooman\SAML\SP\MetadataSource;
 use PHPUnit\Framework\TestCase;
 

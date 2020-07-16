@@ -25,7 +25,6 @@
 namespace fkooman\SAML\SP\Tests;
 
 use DateTime;
-use fkooman\SAML\SP\Log\NullLogger;
 use fkooman\SAML\SP\MetadataSource;
 
 class TestMetadataSource extends MetadataSource
