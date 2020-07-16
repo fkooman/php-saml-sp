@@ -1,5 +1,31 @@
 # ChangeLog
 
+## 0.5.0 (...)
+- implement auto metadata refresh with `metadataList` configuration option 
+  specifying the URL and certificate(s) to validate it (issue #8)
+- support validating XML metadata signature
+- only validate XML schema when importing it, not every time when using it
+- metadata files in config/metadata are always trusted (no schema check, no 
+  signature validation)
+- (**SECURITY**) make sure IdP is allowed to authenticate, previously it was 
+  possible to authenticate with an IdP in the metadata, but not explicitly 
+  listed under `idpList`
+- make it possible to accept _all_ IdPs from metadata without explicitly 
+  allowing them by not setting the `idpList` configuration option. An 
+  `idpList` with no items, i.e. empty array, does allow NO IdPs
+- implement rudimentary logging to _syslog_
+- add script to verify metadata XML schema and signature 
+  (`php-saml-sp-validate-metadata`)
+- ignore non-RSA keys in IdP metadata
+- much more helpful error messages in case something is missing/going wrong 
+  when parsing XML documents (issue #7)
+- major rewrite of XML document handling, no longer expose `DOMDocument` and 
+  `DOMXPath`, introduce more helper methods with strict type checks
+- remove all XML XPath "evaluate" queries
+- make XML signature validation / decryption more robust
+- add new line when fetching SP metadata (issue #2)
+- better check for empty strings by first calling `trim()` on the string value
+
 ## 0.4.2 (2020-07-06)
 - support validating ADFS metadata (ws-federation)
 
