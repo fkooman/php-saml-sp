@@ -25,6 +25,8 @@
 - make XML signature validation / decryption more robust
 - add new line when fetching SP metadata (issue #2)
 - better check for empty strings by first calling `trim()` on the string value
+- lots of fixes with the help of `vimeo/psalm`, `phpstan/phpstan` and 
+  `phan/phan`
 
 ## 0.4.2 (2020-07-06)
 - support validating ADFS metadata (ws-federation)
