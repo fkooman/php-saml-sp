@@ -189,7 +189,7 @@ class IdpInfo
     private static function extractPublicKeys(XmlDocument $xmlDocument)
     {
         $publicKeyStringList = $xmlDocument->allDomElementTextContent(
-            '/md:EntityDescriptor/md:IDPSSODescriptor/md:KeyDescriptor[not(@use) or @use="signing"]/ds:KeyInfo/ds:X509Data/ds:X509Certificate',
+            '/md:EntityDescriptor/md:IDPSSODescriptor/md:KeyDescriptor[not(@use) or @use="signing"]/ds:KeyInfo/ds:X509Data/ds:X509Certificate'
         );
 
         $publicKeyList = [];

@@ -207,7 +207,7 @@ class Response
             }
 
             $attributeValueList = $assertionDocument->allDomElementTextContent(
-                \sprintf('/saml:Assertion/saml:AttributeStatement/saml:Attribute[@Name="%s"]/saml:AttributeValue', $attributeName),
+                \sprintf('/saml:Assertion/saml:AttributeStatement/saml:Attribute[@Name="%s"]/saml:AttributeValue', $attributeName)
             );
 
             foreach ($attributeValueList as $attributeValue) {
