@@ -26,7 +26,6 @@ namespace fkooman\SAML\SP;
 
 use DateInterval;
 use DateTime;
-use DOMDocument;
 use fkooman\SAML\SP\Exception\ResponseException;
 
 class Response
@@ -182,12 +181,7 @@ class Response
 
         $assertionElement = $responseDocument->requireOneDomElement('/samlp:Response/saml:Assertion');
 
-        // we need to create a new document first to keep the namespacing intact
-        // XXX move this to XmlDocument?
-        $assertionDocument = new DOMDocument('1.0', 'UTF-8');
-        $assertionDocument->appendChild($assertionDocument->importNode($assertionElement, true));
-
-        return XmlDocument::fromProtocolMessage($assertionDocument->saveXML());
+        return XmlDocument::fromProtocolMessage(XmlDocument::domElementToString($assertionElement));
     }
 
     /**

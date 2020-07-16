@@ -26,7 +26,6 @@ namespace fkooman\SAML\SP;
 
 use DateInterval;
 use DateTime;
-use DOMDocument;
 use DOMElement;
 use fkooman\SAML\SP\Exception\CryptoException;
 use fkooman\SAML\SP\Exception\HttpClientException;
@@ -78,10 +77,9 @@ class MetadataSource implements IdpSourceInterface
     public function get($entityId)
     {
         $idpInfoList = [];
+        // XXX we can remove this function now! as they do the same for both get and getAll cases!
         $this->foreachIdp(function (DOMElement $entityDescriptorDomElement) use (&$idpInfoList) {
-            $entityDocument = new DOMDocument('1.0', 'UTF-8');
-            $entityDocument->appendChild($entityDocument->importNode($entityDescriptorDomElement, true));
-            $idpInfoList[] = IdpInfo::fromXml($entityDocument->saveXML());
+            $idpInfoList[] = IdpInfo::fromXml(XmlDocument::domElementToString($entityDescriptorDomElement));
         }, $entityId);
 
         // we expect there to be only 1 result, but even if there are more we
@@ -99,10 +97,9 @@ class MetadataSource implements IdpSourceInterface
     public function getAll()
     {
         $idpInfoList = [];
+        // XXX we can remove this function now! as they do the same for both get and getAll cases!
         $this->foreachIdp(function (DOMElement $entityDescriptorDomElement) use (&$idpInfoList) {
-            $entityDocument = new DOMDocument('1.0', 'UTF-8');
-            $entityDocument->appendChild($entityDocument->importNode($entityDescriptorDomElement, true));
-            $idpInfo = IdpInfo::fromXml($entityDocument->saveXML());
+            $idpInfo = IdpInfo::fromXml(XmlDocument::domElementToString($entityDescriptorDomElement));
             $idpInfoList[$idpInfo->getEntityId()] = $idpInfo;
         }, null);
 

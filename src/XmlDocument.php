@@ -207,6 +207,20 @@ class XmlDocument
     }
 
     /**
+     * @return string
+     */
+    public static function domElementToString(DOMElement $domElement)
+    {
+        $domDocument = new DOMDocument('1.0', 'UTF-8');
+        $domDocument->appendChild($domDocument->importNode($domElement, true));
+        if (false === $xmlString = $domDocument->saveXML()) {
+            throw new XmlDocumentException('unable to convert XML to string');
+        }
+
+        return $xmlString;
+    }
+
+    /**
      * @param string $xPathQuery
      * @param mixed  $inputVar
      *
