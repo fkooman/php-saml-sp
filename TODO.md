@@ -4,9 +4,8 @@
 
 ### Features
 
-- include DomNode/Element in error message so we know where the problem is in
+- include XPath in DomNode/Element error message so we know where the problem is in
   the XML
-- better XPath handling / do not use functions like `string()` in XPath query
 
 ### Fixes / Security Audit
 
