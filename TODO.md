@@ -1,10 +1,24 @@
 # TODO
 
-## 1.0
+## Before 1.0
 
-### Pre Audit
+- implement `cacheDuration` support in metadata files (`PTxH`) format, use 
+  `Last-Modified` if possible? maybe do that anyway using `If-Modified-Since` 
+  request header?
+- reject automatic metadata without `validUntil` (saml2int)
+- update CSS style
+- update-metadata should write to stdout/stderr so journalctl picks it up 
+  automatically and properly, get rid of logger for bin scripts
+- detect whether cookies are disabled in a proper way... so as to reject all
+  attempts without confusing the user... detect if we got a cookie on the ACS
+  endpoint before trying to check session values...
 
-- input validation on ALL (public) methods
+### Audit Specific
+
+- make sure external entities are really properly disabled...
+- do we need to only check the metadata schema for things we actually use? are
+  we safe when not verifying against all possible metadata schemas out there?
+- check input validation on ALL (public) methods is properly done
 - make absolutely sure we verify the assertion with the right public key as to
   avoid allowing one IdP to pretend to be another IdP
 - Do we also need to check `/samlp:Response/saml:Assertion/saml:Conditions/@NotOnOrAfter`?
@@ -16,10 +30,6 @@
         <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
     </ds:Transforms>
 ```
-
-### Post Audit 
-
-- update CSS style
 
 ## 2.0
 
