@@ -1,6 +1,6 @@
 # ChangeLog
 
-## 0.5.0 (...)
+## 0.5.0 (2020-07-17)
 - implement auto metadata refresh with `metadataList` configuration option 
   specifying the URL and certificate(s) to validate it (issue #8)
 - support validating XML metadata signature
