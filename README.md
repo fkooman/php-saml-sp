@@ -33,15 +33,17 @@ which is secure. So you won't find SHA1 support or insecure encryption.
   `samlp:Response/saml:Assertion`
 - Supports multiple IdP certificates for key rollover
 - Allow specifying `AuthnContextClassRef` as part of the `AuthnRequest`
-- No dependency on `robrichards/xmlseclibs`
-- Serializes `eduPersonTargetedID` as `idpEntityId!spEntityId!persistentId`, 
-  just like Shibboleth;
-- Only supports `urn:oid` SAML attributes from a white list, ignores the rest
+- Serializes `eduPersonTargetedID` as `idpEntityId!spEntityId!persistentId` 
+  (like Shibboleth);
+- Only supports `urn:oid` SAML attributes from a list of allowed attributes, 
+  ignores the rest
 - Verify "scope" of attributes based on `<shibmd:Scope>` metadata element when
   the IdP metadata contains this element
   - Silently removes the attribute (value) when scope does not match
 - Converts `urn:oid` attribute names to "friendly" names for use by 
   applications
+- Supports automated metadata retrieval/update with XML schema / signature 
+  verification
 - Validates XML schema(s) when processing XML protocol messages
 - Tested with IdPs:
   - [simpleSAMLphp](https://simplesamlphp.org/)
@@ -107,14 +109,8 @@ Disable to `Secure` session cookie parameter by setting the `secureCookie` key
 to `false` in `config/config.php`.
 
 A neat IdP to use for testing is 
-`https://x509idp.moonshot.utr.surfcloud.nl/metadata`. Add it to `idpList` in 
-`config/config.php` and put the metadata in `config/metadata`:
-
-    'idpList' => [
-        'https://x509idp.moonshot.utr.surfcloud.nl/metadata',
-    ],
-
-Now download the metadata of the IdP as well:
+`https://x509idp.moonshot.utr.surfcloud.nl/metadata`. Put the metadata in 
+`config/metadata`:
 
     $ mkdir config/metadata
     $ curl -L -o config/metadata/x509idp.moonshot.utr.surfcloud.nl.xml https://x509idp.moonshot.utr.surfcloud.nl/metadata
