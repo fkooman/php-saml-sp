@@ -1,5 +1,10 @@
 # ChangeLog
 
+## 0.5.1 (...)
+- add the `--force` flag to `php-saml-sp-update-metadata` to be able to force
+  metadata retrieval no matter `validUntil` in the existing metadata
+- make method `MetadataSource::importMetadata` private
+
 ## 0.5.0 (2020-07-17)
 - implement auto metadata refresh with `metadataList` configuration option 
   specifying the URL and certificate(s) to validate it (issue #8)
