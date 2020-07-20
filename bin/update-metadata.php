@@ -41,7 +41,8 @@ try {
     );
     $metadataSource->importAllMetadata(
         new CurlHttpClient(),
-        $config->getMetadataKeyList()
+        $config->getMetadataKeyList(),
+        $argc > 1 && '--force' === $argv[1]
     );
 } catch (Exception $e) {
     $logMessage = 'ERROR: ['.\get_class($e).'] '.$e->getMessage();

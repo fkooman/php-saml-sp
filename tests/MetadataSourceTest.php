@@ -75,20 +75,22 @@ class MetadataSourceTest extends TestCase
     /**
      * @return void
      */
-    public function testMetadataImport()
+    public function testImportAllMetadata()
     {
         // XXX make sure it actually triggers validation, now it is not old enough yet
         // extends class with different datetime
         try {
             $idpSource = new TestMetadataSource(__DIR__.'/data/metadata', \sys_get_temp_dir(), new DateTime('2020-09-09'));
-            $idpSource->importMetadata(
+            $idpSource->importAllMetadata(
                 new TestHttpClient(
                     [
                         'https://metadata.test.surfconext.nl/idp-metadata.xml' => \file_get_contents(__DIR__.'/data/metadata/idp-metadata.xml'),
                     ]
                 ),
-                'https://metadata.test.surfconext.nl/idp-metadata.xml',
-                ['SURFconext-metadata-signer.pem']
+                [
+                    'https://metadata.test.surfconext.nl/idp-metadata.xml' => ['SURFconext-metadata-signer.pem'],
+                ],
+                false
             );
             $this->assertTrue(true);
         } catch (Exception $e) {

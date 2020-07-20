@@ -97,10 +97,11 @@ class MetadataSource implements IdpSourceInterface
      * to the dynamic directory.
      *
      * @param array<string,array<string>> $metadataUrlKeyList
+     * @param bool                        $forceDownload
      *
      * @return void
      */
-    public function importAllMetadata(HttpClientInterface $httpClient, array $metadataUrlKeyList)
+    public function importAllMetadata(HttpClientInterface $httpClient, array $metadataUrlKeyList, $forceDownload)
     {
         // Algorithm, for each URL in metadataUrlKeyList
         // 1. do we have the metadata file already locally?
@@ -115,7 +116,7 @@ class MetadataSource implements IdpSourceInterface
         // 6. write to disk
         foreach ($metadataUrlKeyList as $metadataUrl => $publicKeyFileList) {
             try {
-                $this->importMetadata($httpClient, $metadataUrl, $publicKeyFileList);
+                $this->importMetadata($httpClient, $metadataUrl, $publicKeyFileList, $forceDownload);
             } catch (CryptoException $e) {
                 $this->logger->warning(\sprintf('unable to verify signature of metadata "%s": %s', $metadataUrl, $e->getMessage()));
             } catch (HttpClientException $e) {
@@ -129,28 +130,32 @@ class MetadataSource implements IdpSourceInterface
     /**
      * @param string        $metadataUrl
      * @param array<string> $publicKeyFileList
+     * @param bool          $forceDownload
      *
      * @return void
      */
-    public function importMetadata(HttpClientInterface $httpClient, $metadataUrl, array $publicKeyFileList)
+    private function importMetadata(HttpClientInterface $httpClient, $metadataUrl, array $publicKeyFileList, $forceDownload)
     {
         $metadataFile = \sprintf('%s/%s.xml', $this->dynamicDir, Base64UrlSafe::encode($metadataUrl));
-        if (false !== $metadataString = @\file_get_contents($metadataFile)) {
-            $metadataDocument = XmlDocument::fromMetadata($metadataString, false);
-            if (null !== $validUntil = $metadataDocument->optionalOneDomAttrValue('self::node()/@validUntil')) {
-                $validUntilDateTime = new DateTime($validUntil);
-                $refreshThreshhold = clone $this->dateTime;
-                $refreshThreshhold->add(new DateInterval('PT4H'));
-                if ($refreshThreshhold->getTimestamp() < $validUntilDateTime->getTimestamp()) {
-                    // still valid for a while, go to next URL
-                    $this->logger->notice(\sprintf('metadata "%s" is recent enough', $metadataUrl));
+        if (!$forceDownload) {
+            if (false !== $metadataString = @\file_get_contents($metadataFile)) {
+                // verify existing metadata whether it requires a "refresh"
+                $metadataDocument = XmlDocument::fromMetadata($metadataString, false);
+                if (null !== $validUntil = $metadataDocument->optionalOneDomAttrValue('self::node()/@validUntil')) {
+                    $validUntilDateTime = new DateTime($validUntil);
+                    $refreshThreshhold = clone $this->dateTime;
+                    $refreshThreshhold->add(new DateInterval('PT4H'));
+                    if ($refreshThreshhold->getTimestamp() < $validUntilDateTime->getTimestamp()) {
+                        // still valid for a while, go to next URL
+                        $this->logger->notice(\sprintf('metadata "%s" is recent enough', $metadataUrl));
 
-                    return;
+                        return;
+                    }
                 }
             }
         }
-        // either metadata does not yet exist, we didn't find validUntil,
-        // or the metadata needs refreshing...
+        // either metadata does not yet exist, we forced new downloads, we
+        // didn't find validUntil, or the metadata needs refreshing...
         $this->logger->notice(\sprintf('fetching metadata from "%s"', $metadataUrl));
         $freshMetadataString = $httpClient->get($metadataUrl);
         $publicKeyList = [];
