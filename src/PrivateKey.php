@@ -25,7 +25,6 @@
 namespace fkooman\SAML\SP;
 
 use fkooman\SAML\SP\Exception\KeyException;
-use ParagonIE\ConstantTime\Binary;
 use RuntimeException;
 
 class PrivateKey
@@ -53,7 +52,7 @@ class PrivateKey
         /** @var array<string,string> */
         $rsaInfo = $keyInfo['rsa'];
         // RSA key MUST be at least 2048 bits
-        if (256 > Binary::safeStrlen($rsaInfo['n'])) {
+        if (256 > Utils::binaryStrlen($rsaInfo['n'])) {
             throw new KeyException('invalid RSA key, must be >= 2048 bits');
         }
         $this->privateKey = $privateKey;

@@ -347,7 +347,6 @@ return [
         'bin',
         'example',
         'vendor/fkooman/secookie/src',
-        'vendor/paragonie/constant_time_encoding/src',
         'vendor/phpunit/phpunit/src',
         'vendor/symfony/polyfill-php56',
     ],

@@ -30,7 +30,6 @@ use fkooman\SAML\SP\Exception\CryptoException;
 use fkooman\SAML\SP\Exception\HttpClientException;
 use fkooman\SAML\SP\Exception\XmlDocumentException;
 use fkooman\SAML\SP\Log\LoggerInterface;
-use ParagonIE\ConstantTime\Base64UrlSafe;
 use RuntimeException;
 
 /**
@@ -136,7 +135,7 @@ class MetadataSource implements IdpSourceInterface
      */
     private function importMetadata(HttpClientInterface $httpClient, $metadataUrl, array $publicKeyFileList, $forceDownload)
     {
-        $metadataFile = \sprintf('%s/%s.xml', $this->dynamicDir, Base64UrlSafe::encode($metadataUrl));
+        $metadataFile = \sprintf('%s/%s.xml', $this->dynamicDir, Utils::encodeBase64UrlSafe($metadataUrl));
         if (!$forceDownload) {
             if (false !== $metadataString = @\file_get_contents($metadataFile)) {
                 // verify existing metadata whether it requires a "refresh"

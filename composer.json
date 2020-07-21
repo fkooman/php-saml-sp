@@ -27,6 +27,7 @@
     "require": {
         "ext-date": "*",
         "ext-dom": "*",
+        "ext-mbstring": "*",
         "ext-filter": "*",
         "ext-hash": "*",
         "ext-libxml": "*",
@@ -35,9 +36,8 @@
         "ext-spl": "*",
         "ext-zlib": "*",
         "fkooman/secookie": "^4",
-        "paragonie/constant_time_encoding": "^1|^2",
         "paragonie/random_compat": ">=1",
-        "php": ">=5.4",
+        "php": ">=5.4.8",
         "symfony/polyfill-php56": "^1"
     },
     "require-dev": {

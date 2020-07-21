@@ -26,8 +26,6 @@ namespace fkooman\SAML\SP;
 
 use DOMElement;
 use fkooman\SAML\SP\Exception\CryptoException;
-use ParagonIE\ConstantTime\Base64;
-use ParagonIE\ConstantTime\Binary;
 
 class Crypto
 {
@@ -77,7 +75,7 @@ class Crypto
         $signatureElement = $xmlDocument->requireOneDomElement('self::node()/ds:Signature');
         $rootElement = $xmlDocument->requireOneDomElement('self::node()');
         $rootElement->removeChild($signatureElement);
-        $rootElementDigest = Base64::encode(
+        $rootElementDigest = Utils::encodeBase64(
             \hash(
                 self::SIGN_HASH_ALGO,
                 self::canonicalizeElement($rootElement),
@@ -90,7 +88,7 @@ class Crypto
             throw new CryptoException('unexpected digest');
         }
 
-        self::verify($canonicalSignedInfo, Base64::decode($signatureValue), $publicKeys);
+        self::verify($canonicalSignedInfo, Utils::decodeBase64($signatureValue), $publicKeys);
     }
 
     /**
@@ -151,22 +149,22 @@ class Crypto
         $keyCipherValue = self::removeWhiteSpace($xmlDocument->requireOneDomElementTextContent('/samlp:Response/saml:EncryptedAssertion/xenc:EncryptedData/ds:KeyInfo/xenc:EncryptedKey/xenc:CipherData/xenc:CipherValue'));
 
         // decrypt the session key
-        if (false === \openssl_private_decrypt(Base64::decode($keyCipherValue), $symmetricEncryptionKey, $privateKey->raw(), OPENSSL_PKCS1_OAEP_PADDING)) {
+        if (false === \openssl_private_decrypt(Utils::decodeBase64($keyCipherValue), $symmetricEncryptionKey, $privateKey->raw(), OPENSSL_PKCS1_OAEP_PADDING)) {
             throw new CryptoException('unable to extract session key');
         }
 
         // make sure the obtained key is the exact length we expect
-        if (self::ENCRYPT_KEY_LENGTH !== Binary::safeStrlen($symmetricEncryptionKey)) {
+        if (self::ENCRYPT_KEY_LENGTH !== Utils::binaryStrlen($symmetricEncryptionKey)) {
             throw new CryptoException('session key has unexpected length');
         }
 
         // extract the encrypted Assertion
-        $assertionCipherValue = Base64::decode(self::removeWhiteSpace($xmlDocument->requireOneDomElementTextContent('/samlp:Response/saml:EncryptedAssertion/xenc:EncryptedData/xenc:CipherData/xenc:CipherValue')));
+        $assertionCipherValue = Utils::decodeBase64(self::removeWhiteSpace($xmlDocument->requireOneDomElementTextContent('/samlp:Response/saml:EncryptedAssertion/xenc:EncryptedData/xenc:CipherData/xenc:CipherValue')));
 
         // @see https://www.w3.org/TR/xmlenc-core1/#sec-AES-GCM
-        $messageIv = Binary::safeSubstr($assertionCipherValue, 0, self::ENCRYPT_IV_LENGTH); // IV (first 96 bits)
-        $messageTag = Binary::safeSubstr($assertionCipherValue, Binary::safeStrlen($assertionCipherValue) - self::ENCRYPT_TAG_LENGTH); // Tag (last 128 bits)
-        $cipherText = Binary::safeSubstr($assertionCipherValue, self::ENCRYPT_IV_LENGTH, -self::ENCRYPT_TAG_LENGTH); // CipherText (between IV and Tag)
+        $messageIv = Utils::binarySubstr($assertionCipherValue, 0, self::ENCRYPT_IV_LENGTH); // IV (first 96 bits)
+        $messageTag = Utils::binarySubstr($assertionCipherValue, Utils::binaryStrlen($assertionCipherValue) - self::ENCRYPT_TAG_LENGTH); // Tag (last 128 bits)
+        $cipherText = Utils::binarySubstr($assertionCipherValue, self::ENCRYPT_IV_LENGTH, -self::ENCRYPT_TAG_LENGTH); // CipherText (between IV and Tag)
         if (false === $decryptedAssertion = \openssl_decrypt($cipherText, self::ENCRYPT_OPENSSL_ALGO, $symmetricEncryptionKey, OPENSSL_RAW_DATA, $messageIv, $messageTag)) {
             throw new CryptoException('unable to decrypt data');
         }
