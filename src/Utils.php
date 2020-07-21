@@ -48,7 +48,7 @@ class Utils
      *
      * @return string
      */
-    public static function encodeBase64UrlSafe($inputStr)
+    public static function encodeBase64UrlSafeNoPadding($inputStr)
     {
         if (\function_exists('sodium_bin2base64')) {
             return \sodium_bin2base64($inputStr, SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING);

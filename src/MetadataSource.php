@@ -135,7 +135,7 @@ class MetadataSource implements IdpSourceInterface
      */
     private function importMetadata(HttpClientInterface $httpClient, $metadataUrl, array $publicKeyFileList, $forceDownload)
     {
-        $metadataFile = \sprintf('%s/%s.xml', $this->dynamicDir, Utils::encodeBase64UrlSafe($metadataUrl));
+        $metadataFile = \sprintf('%s/%s.xml', $this->dynamicDir, Utils::encodeBase64UrlSafeNoPadding($metadataUrl));
         if (!$forceDownload) {
             if (false !== $metadataString = @\file_get_contents($metadataFile)) {
                 // verify existing metadata whether it requires a "refresh"
