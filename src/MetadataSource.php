@@ -185,19 +185,21 @@ class MetadataSource implements IdpSourceInterface
         // metadata needs refreshing (cacheDuration)
         $this->logger->notice(\sprintf('[%s] fetching metadata', $metadataUrl));
         $httpClientResponse = $httpClient->get($metadataUrl, $requestHeaders);
-        if (304 === $httpClientResponse->getCode()) {
+        $responseCode = $httpClientResponse->getCode();
+        if (304 === $responseCode) {
             // Not Modified
             $this->logger->notice(\sprintf('[%s] metadata not changed on the server, keeping current copy', $metadataUrl));
-
-            // update locale file timestamp for future cacheDuration calculation
-            // XXX error checking?
+            // set filemTime to current time for future cacheDuration calculation
             \touch($metadataFile, $this->dateTime->getTimestamp());
 
             return;
         }
 
-        //  we MUST have a 200 response here?
-        // what to do on !== 200 response?
+        if (200 !== $responseCode) {
+            $this->logger->notice(\sprintf('[%s] unexpected HTTP response code "%d"', $metadataUrl, $responseCode));
+
+            return;
+        }
         $publicKeyList = [];
         foreach ($publicKeyFileList as $publicKeyFile) {
             $publicKeyList[] = PublicKey::fromFile($this->staticDir.'/keys/'.$publicKeyFile);
@@ -215,9 +217,10 @@ class MetadataSource implements IdpSourceInterface
         if (false === @\rename($tmpFile, $metadataFile)) {
             throw new RuntimeException(\sprintf('unable to move "%s" to "%s"', $tmpFile, $metadataFile));
         }
-        // XXX error checking?
+
+        // set filemTime to current time for future cacheDuration calculation
         \touch($metadataFile, $this->dateTime->getTimestamp());
-        $this->logger->notice(\sprintf('[%s] OK, (new) metadata written to "%s"', $metadataUrl, $metadataFile));
+        $this->logger->notice(\sprintf('[%s] OK, metadata written to "%s"', $metadataUrl, $metadataFile));
     }
 
     /**

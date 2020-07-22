@@ -10,6 +10,9 @@
   new metadata periodically (default is `PT6H`)
 - `validUntil` is now only used to reject dynamic metadata, not for 
   determining when to refresh metadata
+- follow metadata request redirects
+- make sure response code for metadata downloads is `200` before processing
+  metadata
 
 ## 0.5.0 (2020-07-17)
 - implement auto metadata refresh with `metadataList` configuration option 

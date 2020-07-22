@@ -46,7 +46,8 @@ class CurlHttpClient implements HttpClientInterface
             CURLOPT_HTTPHEADER => $requestHeaders,
             CURLOPT_HEADER => false,
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FOLLOWLOCATION => false,
+            CURLOPT_FOLLOWLOCATION => true, // follow redirects
+            CURLOPT_MAXREDIRS => 3,         // follow up to 3 redirects
             CURLOPT_CONNECTTIMEOUT => 15,
             CURLOPT_TIMEOUT => 90,
             CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
