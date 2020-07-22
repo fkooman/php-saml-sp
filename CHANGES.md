@@ -1,6 +1,6 @@
 # ChangeLog
 
-## 0.5.1 (...)
+## 0.5.1 (2020-07-22)
 - add the `--force` flag to `php-saml-sp-update-metadata` to be able to force
   metadata retrieval no matter `cacheDuration` in the existing metadata
 - make method `MetadataSource::importMetadata` private
