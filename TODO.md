@@ -2,13 +2,8 @@
 
 ## Before 1.0
 
-- implement `cacheDuration` support in metadata files (`PTxH`) format, use 
-  `Last-Modified` if possible? maybe do that anyway using `If-Modified-Since` 
-  request header?
 - reject automatic metadata without `validUntil` (saml2int)
 - update CSS style
-- update-metadata should write to stdout/stderr so journalctl picks it up 
-  automatically and properly, get rid of logger for bin scripts
 - detect whether cookies are disabled in a proper way... so as to reject all
   attempts without confusing the user... detect if we got a cookie on the ACS
   endpoint before trying to check session values...
