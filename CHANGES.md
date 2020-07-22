@@ -2,8 +2,14 @@
 
 ## 0.5.1 (...)
 - add the `--force` flag to `php-saml-sp-update-metadata` to be able to force
-  metadata retrieval no matter `validUntil` in the existing metadata
+  metadata retrieval no matter `cacheDuration` in the existing metadata
 - make method `MetadataSource::importMetadata` private
+- drop `paragonie/constant_time_encoding` dependency and instead use 
+  `ext-sodium` functions for constant time encoding
+- implement metadata `cacheDuration` support for dynamic metadata to check for 
+  new metadata periodically (default is `PT6H`)
+- `validUntil` is now only used to reject dynamic metadata, not for 
+  determining when to refresh metadata
 
 ## 0.5.0 (2020-07-17)
 - implement auto metadata refresh with `metadataList` configuration option 
