@@ -27,9 +27,10 @@ namespace fkooman\SAML\SP;
 interface HttpClientInterface
 {
     /**
-     * @param string $requestUrl
+     * @param string        $requestUrl
+     * @param array<string> $requestHeaders
      *
-     * @return string
+     * @return HttpClientResponse
      */
-    public function get($requestUrl);
+    public function get($requestUrl, array $requestHeaders);
 }

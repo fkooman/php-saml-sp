@@ -38,6 +38,12 @@ use RuntimeException;
  */
 class MetadataSource implements IdpSourceInterface
 {
+    /** @var string */
+    const CACHE_DURATION_MARGIN = 'PT1H15M'; // 1h15m
+
+    /** @var string */
+    const DEFAULT_CACHE_DURATION = 'PT6H';   // 6h
+
     /** @var \DateTime */
     protected $dateTime;
 
@@ -102,6 +108,7 @@ class MetadataSource implements IdpSourceInterface
      */
     public function importAllMetadata(HttpClientInterface $httpClient, array $metadataUrlKeyList, $forceDownload)
     {
+        // XXX this is no longer correct!
         // Algorithm, for each URL in metadataUrlKeyList
         // 1. do we have the metadata file already locally?
         //    1a: YES: go to 2
@@ -127,6 +134,32 @@ class MetadataSource implements IdpSourceInterface
     }
 
     /**
+     * @return bool
+     */
+    protected static function needsRefresh(DateTime $currentDateTime, DateTime $fileModifiedDateTime, DateInterval $cacheDuration)
+    {
+        /*
+         * refreshing SAML metadata is tricky. The SAML metadata specification
+         * mentions cacheDuration and validUntil as if they were related. They
+         * are NOT, as more clearly documented in the errata document.
+         *
+         * We have a systemd timer running every hour with a RandomizedDelaySec
+         * of 900, i.e. 15 minutes. We MUST make sure we refresh the metadata
+         * *at least* at the last run of the timer before the cacheDuration
+         * expires. This means, when we run the timer and the cache is about
+         * to expire in the next 1h15m we refresh it now...
+         *
+         * @see [4.3.1 Metadata Instance Caching] of
+         *     https://docs.oasis-open.org/security/saml/v2.0/saml-metadata-2.0-os.pdf
+         * @see [E94: Discussion of metadata caching mixes in validity] of
+         *     https://docs.oasis-open.org/security/saml/v2.0/sstc-saml-approved-errata-2.0.pdf
+         */
+        $refreshBefore = $fileModifiedDateTime->add($cacheDuration)->sub(new DateInterval(self::CACHE_DURATION_MARGIN));
+
+        return $currentDateTime->getTimestamp() >= $refreshBefore->getTimestamp();
+    }
+
+    /**
      * @param string        $metadataUrl
      * @param array<string> $publicKeyFileList
      * @param bool          $forceDownload
@@ -135,44 +168,68 @@ class MetadataSource implements IdpSourceInterface
      */
     private function importMetadata(HttpClientInterface $httpClient, $metadataUrl, array $publicKeyFileList, $forceDownload)
     {
+        $this->logger->notice(\sprintf('[%s] attempting to update metadata', $metadataUrl));
         $metadataFile = \sprintf('%s/%s.xml', $this->dynamicDir, Utils::encodeBase64UrlSafeNoPadding($metadataUrl));
+        $requestHeaders = [];
         if (!$forceDownload) {
             if (false !== $metadataString = @\file_get_contents($metadataFile)) {
-                // verify existing metadata whether it requires a "refresh"
+                // verify for existing metadata whether it requires a "refresh"
                 $metadataDocument = XmlDocument::fromMetadata($metadataString, false);
-                if (null !== $validUntil = $metadataDocument->optionalOneDomAttrValue('self::node()/@validUntil')) {
-                    $validUntilDateTime = new DateTime($validUntil);
-                    $refreshThreshhold = clone $this->dateTime;
-                    $refreshThreshhold->add(new DateInterval('PT4H'));
-                    if ($refreshThreshhold->getTimestamp() < $validUntilDateTime->getTimestamp()) {
-                        // still valid for a while, go to next URL
-                        $this->logger->notice(\sprintf('metadata "%s" is recent enough', $metadataUrl));
+                if (null === $cacheDuration = $metadataDocument->optionalOneDomAttrValue('self::node()/@cacheDuration')) {
+                    $cacheDuration = self::DEFAULT_CACHE_DURATION;
+                }
+                if (false !== $filemTime = \filemtime($metadataFile)) {
+                    $fileModifiedDateTime = new DateTime('@'.$filemTime);
+                    if (!self::needsRefresh(clone $this->dateTime, $fileModifiedDateTime, new DateInterval($cacheDuration))) {
+                        // no need to refresh (yet)
+                        $this->logger->notice(\sprintf('[%s] not time yet to refresh', $metadataUrl));
 
                         return;
                     }
+                    // indicate the last time we tried to fetch the metadata
+                    // through the If-Modified-Since header to avoid needless
+                    // downloading and verification...
+                    $requestHeaders[] = 'If-Modified-Since: '.$fileModifiedDateTime->format('D, d M Y H:i:s \G\M\T');
                 }
             }
         }
-        // either metadata does not yet exist, we forced new downloads, we
-        // didn't find validUntil, or the metadata needs refreshing...
-        $this->logger->notice(\sprintf('fetching metadata from "%s"', $metadataUrl));
-        $freshMetadataString = $httpClient->get($metadataUrl);
+        // either metadata does not yet exist, we forced new download, or the
+        // metadata needs refreshing (cacheDuration)
+        $this->logger->notice(\sprintf('[%s] fetching metadata', $metadataUrl));
+        $httpClientResponse = $httpClient->get($metadataUrl, $requestHeaders);
+        if (304 === $httpClientResponse->getCode()) {
+            // Not Modified
+            $this->logger->notice(\sprintf('[%s] metadata not changed on the server, keeping current copy', $metadataUrl));
+
+            // update locale file timestamp for future cacheDuration calculation
+            // XXX error checking?
+            \touch($metadataFile, $this->dateTime->getTimestamp());
+
+            return;
+        }
+
+        //  we MUST have a 200 response here?
+        // what to do on !== 200 response?
         $publicKeyList = [];
         foreach ($publicKeyFileList as $publicKeyFile) {
             $publicKeyList[] = PublicKey::fromFile($this->staticDir.'/keys/'.$publicKeyFile);
         }
 
-        self::validateMetadata($freshMetadataString, $publicKeyList);
+        $this->logger->notice(\sprintf('[%s] validating metadata', $metadataUrl));
+        self::validateMetadata($httpClientResponse->getBody(), $publicKeyList);
         if (false === $tmpFile = \tempnam(\sys_get_temp_dir(), 'php-saml-sp')) {
             throw new RuntimeException('unable to generate a temporary file');
         }
-        if (false === @\file_put_contents($tmpFile, $freshMetadataString)) {
+        if (false === @\file_put_contents($tmpFile, $httpClientResponse->getBody())) {
             throw new RuntimeException(\sprintf('unable to write "%s"', $tmpFile));
         }
         // write fresh metadata
         if (false === @\rename($tmpFile, $metadataFile)) {
             throw new RuntimeException(\sprintf('unable to move "%s" to "%s"', $tmpFile, $metadataFile));
         }
+        // XXX error checking?
+        \touch($metadataFile, $this->dateTime->getTimestamp());
+        $this->logger->notice(\sprintf('[%s] OK', $metadataUrl));
     }
 
     /**

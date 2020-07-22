@@ -24,6 +24,7 @@
 
 namespace fkooman\SAML\SP\Tests;
 
+use DateInterval;
 use DateTime;
 use fkooman\SAML\SP\MetadataSource;
 
@@ -37,5 +38,13 @@ class TestMetadataSource extends MetadataSource
     {
         parent::__construct(new NullLogger(), $staticDir, $dynamicDir);
         $this->dateTime = $dateTime;
+    }
+
+    /**
+     * @return bool
+     */
+    public static function needsRefresh(DateTime $dateTime, DateTime $filemDateTime, DateInterval $cacheDurationInterval)
+    {
+        return parent::needsRefresh($dateTime, $filemDateTime, $cacheDurationInterval);
     }
 }

@@ -22,37 +22,39 @@
  * SOFTWARE.
  */
 
-namespace fkooman\SAML\SP\Tests;
+namespace fkooman\SAML\SP;
 
-use fkooman\SAML\SP\Exception\HttpClientException;
-use fkooman\SAML\SP\HttpClientInterface;
-use fkooman\SAML\SP\HttpClientResponse;
-
-class TestHttpClient implements HttpClientInterface
+class HttpClientResponse
 {
-    /** @var array<string,string> */
-    private $urlFileMapping;
+    /** @var int */
+    private $responseCode;
 
-    public function __construct(array $urlFileMapping)
+    /** @var string */
+    private $responseBody;
+
+    /**
+     * @param int    $responseCode
+     * @param string $responseBody
+     */
+    public function __construct($responseCode, $responseBody)
     {
-        $this->urlFileMapping = $urlFileMapping;
+        $this->responseCode = $responseCode;
+        $this->responseBody = $responseBody;
     }
 
     /**
-     * @param string        $requestUrl
-     * @param array<string> $requestHeaders
-     *
-     * @return HttpClientResponse
+     * @return int
      */
-    public function get($requestUrl, array $requestHeaders)
+    public function getCode()
     {
-        if (\array_key_exists($requestUrl, $this->urlFileMapping)) {
-            return new HttpClientResponse(
-                200,
-                $this->urlFileMapping[$requestUrl]
-            );
-        }
+        return $this->responseCode;
+    }
 
-        throw new HttpClientException(\sprintf('URL "%s" not configured', $requestUrl));
+    /**
+     * @return string
+     */
+    public function getBody()
+    {
+        return $this->responseBody;
     }
 }

@@ -30,11 +30,12 @@ use RuntimeException;
 class CurlHttpClient implements HttpClientInterface
 {
     /**
-     * @param string $requestUrl
+     * @param string        $requestUrl
+     * @param array<string> $requestHeaders
      *
-     * @return string
+     * @return HttpClientResponse
      */
-    public function get($requestUrl)
+    public function get($requestUrl, array $requestHeaders)
     {
         if (false === $curlChannel = \curl_init()) {
             throw new RuntimeException('unable to create cURL channel');
@@ -42,11 +43,12 @@ class CurlHttpClient implements HttpClientInterface
 
         $curlOptions = [
             CURLOPT_URL => $requestUrl,
+            CURLOPT_HTTPHEADER => $requestHeaders,
             CURLOPT_HEADER => false,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_FOLLOWLOCATION => false,
-            CURLOPT_CONNECTTIMEOUT => 10,
-            CURLOPT_TIMEOUT => 120,
+            CURLOPT_CONNECTTIMEOUT => 15,
+            CURLOPT_TIMEOUT => 90,
             CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
         ];
 
@@ -59,8 +61,12 @@ class CurlHttpClient implements HttpClientInterface
             throw new HttpClientException(\sprintf('failure performing the HTTP request: "%s"', \curl_error($curlChannel)));
         }
 
+        $responseCode = (int) \curl_getinfo($curlChannel, CURLINFO_HTTP_CODE);
         \curl_close($curlChannel);
 
-        return $responseData;
+        return new HttpClientResponse(
+            $responseCode,
+            $responseData
+        );
     }
 }
