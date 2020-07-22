@@ -13,9 +13,9 @@ federations.
 ## Static
 
 All metadata files in `/etc/php-saml-sp/metadata` are considered valid, i.e. 
-their XML schema and XML signature will NOT be checked, not the `validUntil` 
+their XML schema and XML signature will NOT be checked, nor the `validUntil` 
 or `cacheDuration` attributes. Here the administrator is fully responsible for
-making sure the metadata files are kept up to date, if necessary.
+making sure the metadata files are kept up to date.
 
 You can use the validation tooling part of php-saml-sp to make sure the 
 metadata file you obtained is at least correct. This RECOMMENDED, for example:
@@ -92,3 +92,11 @@ To automate this process, a systemd timer is included that can easily be
 enabled:
 
     $ sudo systemctl enable --now php-saml-sp.timer
+
+### Force Update
+
+If you want to _force_ the update of metadata you can either remove the files
+from `/var/lib/php-saml-sp/metadata` or run the refresh command (manually). Use
+`www-data` instead of `apache` on Debian:
+
+    $ sudo -u apache php-saml-sp-update-metadata --force
