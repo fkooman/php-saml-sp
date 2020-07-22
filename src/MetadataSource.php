@@ -108,18 +108,6 @@ class MetadataSource implements IdpSourceInterface
      */
     public function importAllMetadata(HttpClientInterface $httpClient, array $metadataUrlKeyList, $forceDownload)
     {
-        // XXX this is no longer correct!
-        // Algorithm, for each URL in metadataUrlKeyList
-        // 1. do we have the metadata file already locally?
-        //    1a: YES: go to 2
-        //    1b: NO: go to 3
-        // 2. is validUntil approaching?
-        //    2a: YES: go to 3
-        //    2b: NO: next URL
-        // 3. fetch URL
-        // 4. verify the XML schema
-        // 5. verify the signature
-        // 6. write to disk
         foreach ($metadataUrlKeyList as $metadataUrl => $publicKeyFileList) {
             try {
                 $this->importMetadata($httpClient, $metadataUrl, $publicKeyFileList, $forceDownload);
@@ -229,7 +217,7 @@ class MetadataSource implements IdpSourceInterface
         }
         // XXX error checking?
         \touch($metadataFile, $this->dateTime->getTimestamp());
-        $this->logger->notice(\sprintf('[%s] OK', $metadataUrl));
+        $this->logger->notice(\sprintf('[%s] OK, (new) metadata written to "%s"', $metadataUrl, $metadataFile));
     }
 
     /**
