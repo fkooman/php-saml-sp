@@ -144,7 +144,7 @@ class MetadataSource implements IdpSourceInterface
          */
         $refreshBefore = $fileModifiedDateTime->add($cacheDuration)->sub(new DateInterval(self::CACHE_DURATION_MARGIN));
 
-        return $currentDateTime->getTimestamp() >= $refreshBefore->getTimestamp();
+        return self::dateTimeToTimestamp($currentDateTime) >= self::dateTimeToTimestamp($refreshBefore);
     }
 
     /**
@@ -168,7 +168,7 @@ class MetadataSource implements IdpSourceInterface
                 }
                 if (false !== $filemTime = \filemtime($metadataFile)) {
                     $fileModifiedDateTime = new DateTime('@'.$filemTime);
-                    if (!self::needsRefresh(clone $this->dateTime, $fileModifiedDateTime, new DateInterval($cacheDuration))) {
+                    if (!self::needsRefresh($this->dateTime, $fileModifiedDateTime, new DateInterval($cacheDuration))) {
                         // no need to refresh (yet)
                         $this->logger->notice(\sprintf('[%s] not time yet to refresh', $metadataUrl));
 
@@ -190,7 +190,7 @@ class MetadataSource implements IdpSourceInterface
             // Not Modified
             $this->logger->notice(\sprintf('[%s] metadata not changed on the server, keeping current copy', $metadataUrl));
             // set filemTime to current time for future cacheDuration calculation
-            \touch($metadataFile, $this->dateTime->getTimestamp());
+            \touch($metadataFile, self::dateTimeToTimestamp($this->dateTime));
 
             return;
         }
@@ -219,7 +219,7 @@ class MetadataSource implements IdpSourceInterface
         }
 
         // set filemTime to current time for future cacheDuration calculation
-        \touch($metadataFile, $this->dateTime->getTimestamp());
+        \touch($metadataFile, self::dateTimeToTimestamp($this->dateTime));
         $this->logger->notice(\sprintf('[%s] OK, metadata written to "%s"', $metadataUrl, $metadataFile));
     }
 
@@ -270,7 +270,7 @@ class MetadataSource implements IdpSourceInterface
                     // it is not in the past if it exists
                     if (null !== $validUntil = $metadataDocument->optionalOneDomAttrValue('self::node()/@validUntil')) {
                         $validUntilDateTime = new DateTime($validUntil);
-                        if ($this->dateTime->getTimestamp() > $validUntilDateTime->getTimestamp()) {
+                        if (self::dateTimeToTimestamp($this->dateTime) > self::dateTimeToTimestamp($validUntilDateTime)) {
                             $this->logger->warning(\sprintf('metadata file "%s" has "validUntil" in the past', $metadataFile));
 
                             continue;
@@ -291,5 +291,17 @@ class MetadataSource implements IdpSourceInterface
         }
 
         return $idpInfoList;
+    }
+
+    /**
+     * @return int
+     */
+    private static function dateTimeToTimestamp(DateTime $dateTime)
+    {
+        if (false === $timestamp = $dateTime->getTimestamp()) {
+            return 0;
+        }
+
+        return $timestamp;
     }
 }
