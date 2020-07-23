@@ -2,6 +2,8 @@
 
 ## 0.5.2 (...)
 - show warning on index page when `ext-sodium` is not available
+- fix typo in warning for missing encryption support
+- update translation
 
 ## 0.5.1 (2020-07-22)
 - add the `--force` flag to `php-saml-sp-update-metadata` to be able to force
