@@ -5,15 +5,21 @@
 <?=$this->t('This is the information page of this SAML SP. If you don\'t know what SAML is, you should not have arrived here! 🤔'); ?>
     </p>
 
+<?php if (!$secureCookie): ?>
+    <p class="warning">
+<?=$this->t('Secure Cookies are disabled. This is ONLY appropriate for development!'); ?>
+    </p>
+<?php endif; ?>
+
 <?php if (!$decryptionSupport): ?>
     <p class="warning">
 <?=$this->t('PHP >= 7.1 is required <code>&lt;EncryptedAssertion&gt;</code> support.'); ?>
     </p>
 <?php endif; ?>
 
-<?php if (!$secureCookie): ?>
+<?php if (!$sodiumSupport): ?>
     <p class="warning">
-<?=$this->t('Secure Cookies are disabled. This is ONLY appropriate for development!'); ?>
+<?=$this->t('PHP >= 7.2 with <code>sodium</code> extension is required for constant time encoding/decoding support.'); ?>
     </p>
 <?php endif; ?>
 

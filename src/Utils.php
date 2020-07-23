@@ -30,6 +30,14 @@ use RuntimeException;
 class Utils
 {
     /**
+     * @return bool
+     */
+    public static function hasSodium()
+    {
+        return \extension_loaded('sodium');
+    }
+
+    /**
      * @param string $inputStr
      *
      * @return string
