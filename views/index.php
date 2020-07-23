@@ -17,9 +17,14 @@
     </p>
 <?php endif; ?>
 
-<?php if (!$sodiumSupport): ?>
+<?php if ($sodiumSupport): ?>
     <p class="warning">
 <?=$this->t('PHP >= 7.2 with <code>sodium</code> extension is required for constant time encoding/decoding support.'); ?>
+        <small>
+            <a href="https://blog.ircmaxell.com/2014/11/its-all-about-time.html">
+<?=$this->t('Read More...'); ?>
+            </a>
+        </small>
     </p>
 <?php endif; ?>
 

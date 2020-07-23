@@ -37,6 +37,7 @@ return [
     'Other...' => '',
     'PHP >= 7.1 is required for <code>&lt;EncryptedAssertion&gt;</code> support.' => '',
     'PHP >= 7.2 with <code>sodium</code> extension is required for constant time encoding/decoding support.' => '',
+    'Read More...' => '',
     'Search for your organization...' => '',
     'Secure Cookies are disabled. This is ONLY appropriate for development!' => '',
     'Select your organization to continue the login process.' => '',

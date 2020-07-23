@@ -37,6 +37,7 @@ return [
     'Other...' => 'Andere...',
     'PHP >= 7.1 is required for <code>&lt;EncryptedAssertion&gt;</code> support.' => 'PHP >= 7.1 is benodigd voor <code>&lt;EncryptedAssertion&gt;</code> ondersteuning.',
     'PHP >= 7.2 with <code>sodium</code> extension is required for constant time encoding/decoding support.' => 'PHP >= 7.2 met <code>sodium</code> extensie is benodigd voor encoding/decoding in constante tijd.',
+    'Read More...' => 'Lees meer...',
     'Search for your organization...' => 'Zoek naar je organisatie...',
     'Secure Cookies are disabled. This is ONLY appropriate for development!' => 'Secure Cookies zijn uitgeschakeld. Dit is ALLEEN acceptabel voor ontwikkelomgevingen!',
     'Select your organization to continue the login process.' => 'Selecteer je organisatie om verder te gaan met het inlog-proces.',
