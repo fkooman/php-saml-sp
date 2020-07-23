@@ -13,7 +13,7 @@
 
 <?php if (!$decryptionSupport): ?>
     <p class="warning">
-<?=$this->t('PHP >= 7.1 is required <code>&lt;EncryptedAssertion&gt;</code> support.'); ?>
+<?=$this->t('PHP >= 7.1 is required for <code>&lt;EncryptedAssertion&gt;</code> support.'); ?>
     </p>
 <?php endif; ?>
 
