@@ -17,7 +17,7 @@
     </p>
 <?php endif; ?>
 
-<?php if ($sodiumSupport): ?>
+<?php if (!$sodiumSupport): ?>
     <p class="warning">
 <?=$this->t('PHP >= 7.2 with <code>sodium</code> extension is required for constant time encoding/decoding support.'); ?>
         <small>
