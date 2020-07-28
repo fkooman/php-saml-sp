@@ -1,6 +1,6 @@
 # ChangeLog
 
-## 0.5.2 (...)
+## 0.5.2 (2020-07-28)
 - show warning on index page when `ext-sodium` is not available
 - fix typo in warning for missing encryption support
 - update translation
