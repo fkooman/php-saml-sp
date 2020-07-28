@@ -107,24 +107,6 @@ class Utils
     /**
      * @param string $inputStr
      *
-     * @return string
-     */
-    public static function decodeHex($inputStr)
-    {
-        if (\function_exists('sodium_hex2bin')) {
-            return \sodium_hex2bin($inputStr);
-        }
-
-        if (false === $decodedStr = \hex2bin($inputStr)) {
-            throw new RangeException('unable to decode Hex string');
-        }
-
-        return $decodedStr;
-    }
-
-    /**
-     * @param string $inputStr
-     *
      * @return int
      */
     public static function binaryStrlen($inputStr)
