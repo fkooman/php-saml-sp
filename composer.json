@@ -36,7 +36,7 @@
         "ext-pcre": "*",
         "ext-spl": "*",
         "ext-zlib": "*",
-        "fkooman/secookie": "^4",
+        "fkooman/secookie": "^5",
         "paragonie/random_compat": ">=1",
         "php": ">=5.4.8",
         "symfony/polyfill-php56": "^1"
