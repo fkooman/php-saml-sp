@@ -28,7 +28,6 @@
         "ext-curl": "*",
         "ext-date": "*",
         "ext-dom": "*",
-        "ext-mbstring": "*",
         "ext-filter": "*",
         "ext-hash": "*",
         "ext-libxml": "*",

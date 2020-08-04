@@ -154,7 +154,7 @@ class Crypto
         }
 
         // make sure the obtained key is the exact length we expect
-        if (self::ENCRYPT_KEY_LENGTH !== Utils::binaryStrlen($symmetricEncryptionKey)) {
+        if (self::ENCRYPT_KEY_LENGTH !== \strlen($symmetricEncryptionKey)) {
             throw new CryptoException('session key has unexpected length');
         }
 
@@ -162,9 +162,9 @@ class Crypto
         $assertionCipherValue = Utils::decodeBase64(self::removeWhiteSpace($xmlDocument->requireOneDomElementTextContent('/samlp:Response/saml:EncryptedAssertion/xenc:EncryptedData/xenc:CipherData/xenc:CipherValue')));
 
         // @see https://www.w3.org/TR/xmlenc-core1/#sec-AES-GCM
-        $messageIv = Utils::binarySubstr($assertionCipherValue, 0, self::ENCRYPT_IV_LENGTH); // IV (first 96 bits)
-        $messageTag = Utils::binarySubstr($assertionCipherValue, Utils::binaryStrlen($assertionCipherValue) - self::ENCRYPT_TAG_LENGTH); // Tag (last 128 bits)
-        $cipherText = Utils::binarySubstr($assertionCipherValue, self::ENCRYPT_IV_LENGTH, -self::ENCRYPT_TAG_LENGTH); // CipherText (between IV and Tag)
+        $messageIv = \substr($assertionCipherValue, 0, self::ENCRYPT_IV_LENGTH); // IV (first 96 bits)
+        $messageTag = \substr($assertionCipherValue, \strlen($assertionCipherValue) - self::ENCRYPT_TAG_LENGTH); // Tag (last 128 bits)
+        $cipherText = \substr($assertionCipherValue, self::ENCRYPT_IV_LENGTH, -self::ENCRYPT_TAG_LENGTH); // CipherText (between IV and Tag)
         if (false === $decryptedAssertion = \openssl_decrypt($cipherText, self::ENCRYPT_OPENSSL_ALGO, $symmetricEncryptionKey, OPENSSL_RAW_DATA, $messageIv, $messageTag)) {
             throw new CryptoException('unable to decrypt data');
         }

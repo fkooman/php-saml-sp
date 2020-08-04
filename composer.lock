@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "92b23d52d07c975e1cd9ab672f6296aa",
+    "content-hash": "27dd993ddda312381723a4bb67fb9b79",
     "packages": [
         {
             "name": "fkooman/secookie",
@@ -101,7 +101,7 @@
         },
         {
             "name": "symfony/polyfill-php56",
-            "version": "v1.18.0",
+            "version": "v1.18.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-php56.git",
@@ -175,7 +175,7 @@
         },
         {
             "name": "symfony/polyfill-util",
-            "version": "v1.18.0",
+            "version": "v1.18.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-util.git",
@@ -1584,7 +1584,7 @@
         },
         {
             "name": "symfony/polyfill-ctype",
-            "version": "v1.18.0",
+            "version": "v1.18.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-ctype.git",
@@ -1763,7 +1763,6 @@
         "ext-curl": "*",
         "ext-date": "*",
         "ext-dom": "*",
-        "ext-mbstring": "*",
         "ext-filter": "*",
         "ext-hash": "*",
         "ext-libxml": "*",

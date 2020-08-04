@@ -25,7 +25,6 @@
 namespace fkooman\SAML\SP;
 
 use RangeException;
-use RuntimeException;
 
 class Utils
 {
@@ -102,37 +101,5 @@ class Utils
         }
 
         return \bin2hex($inputStr);
-    }
-
-    /**
-     * @param string $inputStr
-     *
-     * @return int
-     */
-    public static function binaryStrlen($inputStr)
-    {
-        if (false === $strLen = \mb_strlen($inputStr, '8bit')) {
-            throw new RuntimeException('unable to determine length of string');
-        }
-
-        return $strLen;
-    }
-
-    /**
-     * @param string   $str
-     * @param int      $start
-     * @param int|null $length
-     *
-     * @return string
-     */
-    public static function binarySubstr($str, $start = 0, $length = null)
-    {
-        // on PHP >= 5.4.8 we don't have weird '' result when $length is null
-        // @see https://github.com/php/php-src/pull/133
-        if (false === $subStr = \mb_substr($str, $start, $length, '8bit')) {
-            throw new RuntimeException('unable to extract part of string');
-        }
-
-        return $subStr;
     }
 }
