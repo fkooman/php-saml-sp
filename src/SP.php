@@ -85,7 +85,7 @@ class SP
     public function login($idpEntityId, $returnTo, array $authnContextClassRef = [], array $scopingIdpList = [])
     {
         self::validateReturnTo($returnTo);
-        $requestId = \sprintf('_%s', Utils::encodeHex($this->random->requestId()));
+        $requestId = \sprintf('_%s', Encoding::encodeHex($this->random->requestId()));
         if (null === $idpInfo = $this->idpSource->get($idpEntityId)) {
             throw new SpException(\sprintf('IdP "%s" not registered', $idpEntityId));
         }
@@ -103,7 +103,7 @@ class SP
             ]
         );
 
-        $relayState = Utils::encodeBase64($this->random->relayState());
+        $relayState = Encoding::encodeBase64($this->random->relayState());
         $authnRequestState = new AuthnRequestState($requestId, $idpEntityId, $authnContextClassRef, $scopingIdpList, $returnTo);
         $this->session->set(self::SESSION_KEY_PREFIX.$relayState, \serialize($authnRequestState));
 
@@ -138,7 +138,7 @@ class SP
         $samlAssertion = $response->verify(
             $this->spInfo,
             $idpInfo,
-            Utils::decodeBase64($samlResponse),
+            Encoding::decodeBase64($samlResponse),
             $authnRequestState->getRequestId(),
             $authnRequestState->getAuthnContextClassRef(),
             $authnRequestState->getScopingIdpList()
@@ -193,7 +193,7 @@ class SP
             return $returnTo;
         }
 
-        $requestId = \sprintf('_%s', Utils::encodeHex($this->random->requestId()));
+        $requestId = \sprintf('_%s', Encoding::encodeHex($this->random->requestId()));
         $logoutRequest = $this->tpl->render(
             'LogoutRequest',
             [
@@ -205,7 +205,7 @@ class SP
             ]
         );
 
-        $relayState = Utils::encodeBase64($this->random->relayState());
+        $relayState = Encoding::encodeBase64($this->random->relayState());
         $logoutRequestState = new LogoutRequestState($requestId, $idpEntityId, $returnTo);
         $this->session->set(self::SESSION_KEY_PREFIX.$relayState, \serialize($logoutRequestState));
 
@@ -335,13 +335,13 @@ class SP
         }
 
         $httpQueryParameters = [
-            'SAMLRequest' => Utils::encodeBase64($deflatedXml),
+            'SAMLRequest' => Encoding::encodeBase64($deflatedXml),
             'RelayState' => $relayState,
             'SigAlg' => 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256',
         ];
 
         // add the Signature key/value to the HTTP query
-        $httpQueryParameters['Signature'] = Utils::encodeBase64(
+        $httpQueryParameters['Signature'] = Encoding::encodeBase64(
             Crypto::sign(
                 \http_build_query($httpQueryParameters),
                 $privateKey

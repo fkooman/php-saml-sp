@@ -26,16 +26,8 @@ namespace fkooman\SAML\SP;
 
 use RangeException;
 
-class Utils
+class Encoding
 {
-    /**
-     * @return bool
-     */
-    public static function hasSodium()
-    {
-        return \extension_loaded('sodium');
-    }
-
     /**
      * @param string $inputStr
      *
@@ -98,6 +90,10 @@ class Utils
     {
         if (\function_exists('sodium_bin2hex')) {
             return \sodium_bin2hex($inputStr);
+        }
+
+        if (\function_exists('\Sodium\bin2hex')) {
+            return \Sodium\bin2hex($inputStr);
         }
 
         return \bin2hex($inputStr);

@@ -75,7 +75,7 @@ class Crypto
         $signatureElement = $xmlDocument->requireOneDomElement('self::node()/ds:Signature');
         $rootElement = $xmlDocument->requireOneDomElement('self::node()');
         $rootElement->removeChild($signatureElement);
-        $rootElementDigest = Utils::encodeBase64(
+        $rootElementDigest = Encoding::encodeBase64(
             \hash(
                 self::SIGN_HASH_ALGO,
                 self::canonicalizeElement($rootElement),
@@ -88,7 +88,7 @@ class Crypto
             throw new CryptoException('unexpected digest');
         }
 
-        self::verify($canonicalSignedInfo, Utils::decodeBase64($signatureValue), $publicKeys);
+        self::verify($canonicalSignedInfo, Encoding::decodeBase64($signatureValue), $publicKeys);
     }
 
     /**
@@ -149,7 +149,7 @@ class Crypto
         $keyCipherValue = self::removeWhiteSpace($xmlDocument->requireOneDomElementTextContent('/samlp:Response/saml:EncryptedAssertion/xenc:EncryptedData/ds:KeyInfo/xenc:EncryptedKey/xenc:CipherData/xenc:CipherValue'));
 
         // decrypt the session key
-        if (false === \openssl_private_decrypt(Utils::decodeBase64($keyCipherValue), $symmetricEncryptionKey, $privateKey->raw(), OPENSSL_PKCS1_OAEP_PADDING)) {
+        if (false === \openssl_private_decrypt(Encoding::decodeBase64($keyCipherValue), $symmetricEncryptionKey, $privateKey->raw(), OPENSSL_PKCS1_OAEP_PADDING)) {
             throw new CryptoException('unable to extract session key');
         }
 
@@ -159,7 +159,7 @@ class Crypto
         }
 
         // extract the encrypted Assertion
-        $assertionCipherValue = Utils::decodeBase64(self::removeWhiteSpace($xmlDocument->requireOneDomElementTextContent('/samlp:Response/saml:EncryptedAssertion/xenc:EncryptedData/xenc:CipherData/xenc:CipherValue')));
+        $assertionCipherValue = Encoding::decodeBase64(self::removeWhiteSpace($xmlDocument->requireOneDomElementTextContent('/samlp:Response/saml:EncryptedAssertion/xenc:EncryptedData/xenc:CipherData/xenc:CipherValue')));
 
         // @see https://www.w3.org/TR/xmlenc-core1/#sec-AES-GCM
         $messageIv = \substr($assertionCipherValue, 0, self::ENCRYPT_IV_LENGTH); // IV (first 96 bits)

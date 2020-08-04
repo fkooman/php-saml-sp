@@ -29,7 +29,6 @@ use fkooman\SAML\SP\Crypto;
 use fkooman\SAML\SP\Exception\SamlException;
 use fkooman\SAML\SP\IdpInfo;
 use fkooman\SAML\SP\SP;
-use fkooman\SAML\SP\Utils;
 use fkooman\SAML\SP\Web\Exception\HttpException;
 
 class Service
@@ -105,7 +104,7 @@ class Service
                             'metadataUrl' => $request->getRootUri().'metadata',
                             'samlMetadata' => $this->sp->metadata(),
                             'decryptionSupport' => Crypto::hasDecryptionSupport(),
-                            'sodiumSupport' => Utils::hasSodium(),
+                            'sodiumSupport' => \extension_loaded('sodium'),
                         ]
                     )
                 );
