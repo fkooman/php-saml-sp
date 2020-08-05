@@ -21,7 +21,7 @@
             "fkooman\\SAML\\SP\\Tests\\": "tests/"
         }
     },
-    "description": "SAML Service Provider",
+    "description": "Secure SAML Service Provider",
     "license": "MIT",
     "name": "fkooman/saml-sp",
     "require": {
@@ -44,7 +44,8 @@
         "phpunit/phpunit": "^4|^5|^6|^7"
     },
     "suggest": {
-        "ext-sodium": "constant time encoding/decoding"
+        "ext-sodium": "PHP >= 7 for constant-time encoding",
+        "ext-libsodium": "PHP < 7 for constant-time encoding"
     },
     "support": {
         "email": "fkooman@tuxed.net",

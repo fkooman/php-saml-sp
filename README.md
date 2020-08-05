@@ -1,3 +1,10 @@
+**Summary**: Secure SAML Service Provider
+
+**Description**: Secure SAML Service Provider with a focus on saml2int 
+compatibility and easy integration in PHP applications.
+
+**License**: MIT
+
 # Introduction
 
 A SAML Service Provider (SP) with an easy API to use SAML authentication from
