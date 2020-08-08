@@ -43,7 +43,7 @@ class SPTest extends TestCase
     /** @var \fkooman\SAML\SP\SP */
     private $sp;
 
-    public function setUp()
+    public function setUp(): void
     {
         $spInfo = new SpInfo(
             'http://localhost:8081/metadata',

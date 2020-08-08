@@ -348,8 +348,6 @@ return [
         'example',
         'vendor/fkooman/secookie/src',
         'vendor/phpunit/phpunit/src',
-        'vendor/paragonie/constant_time_encoding/src',
-        'vendor/symfony/polyfill-php56',
     ],
 
     // A list of individual files to include in analysis
