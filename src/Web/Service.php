@@ -104,7 +104,6 @@ class Service
                             'metadataUrl' => $request->getRootUri().'metadata',
                             'samlMetadata' => $this->sp->metadata(),
                             'decryptionSupport' => Crypto::hasDecryptionSupport(),
-                            'sodiumSupport' => \extension_loaded('sodium'),
                         ]
                     )
                 );
