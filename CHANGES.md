@@ -1,5 +1,8 @@
 # ChangeLog
 
+## 0.5.3 (...)
+- restore use of `paragonie/constant_time_encoding` for now
+
 ## 0.5.2 (2020-07-28)
 - show warning on index page when `ext-sodium` is not available
 - fix typo in warning for missing encryption support
