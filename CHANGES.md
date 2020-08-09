@@ -1,6 +1,6 @@
 # ChangeLog
 
-## 0.5.3 (...)
+## 0.5.3 (2020-08-09)
 - restore use of `paragonie/constant_time_encoding` for now
 
 ## 0.5.2 (2020-07-28)
