@@ -7,6 +7,9 @@
 - detect whether cookies are disabled in a proper way... so as to reject all
   attempts without confusing the user... detect if we got a cookie on the ACS
   endpoint before trying to check session values...
+- some IdPs also rollover the metadata signing keys (ADFS) it seems, so we have
+  to extract any new certificates found in the metadata and put them in the 
+  "trust store" as well?
 
 ### Audit Specific
 
@@ -28,9 +31,6 @@
 
 ## 2.0
 
-- some IdPs also rollover the metadata signing keys (ADFS) it seems, so we have
-  to extract any new certificates found in the metadata and put them in the 
-  "trust store" as well?
 - implementing (SQLite?) caching for eduGAIN purpose with 2k+ IdPs
 - validate schema of outgoing SAML messages (`AuthnRequest`, `LogoutRequest`, `Metadata`)?
 - `ForceAuthn` in `AuthnRequest` (is anyone actually using this?)
