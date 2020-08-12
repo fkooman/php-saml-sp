@@ -10,6 +10,8 @@
 - some IdPs also rollover the metadata signing keys (ADFS) it seems, so we have
   to extract any new certificates found in the metadata and put them in the 
   "trust store" as well?
+- do no longer consider metadata in `/var/lib/php-saml-sp/metadata` that is no 
+  longer listed in the config file to avoid confusion
 
 ### Audit Specific
 
