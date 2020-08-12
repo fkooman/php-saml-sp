@@ -44,6 +44,7 @@ $logger = new SyslogLogger('php-saml-sp');
 try {
     $config = Config::fromFile($baseDir.'/config/config.php');
     $secureCookie = $config->getSecureCookie();
+    $request = new Request($_SERVER, $_GET, $_POST);
 
     $seCookie = new SeCookie($secureCookie);
     $seSession = new SeSession($secureCookie);
@@ -59,13 +60,18 @@ try {
     if (null === $languageCode = $seCookie->get('L')) {
         $languageCode = $config->getDefaultLanguage();
     }
-    $tpl = new Tpl($templateDirs, $translationDirs);
+    $tpl = new Tpl($templateDirs, $translationDirs, \sprintf('%s/web/', $baseDir));
     $tpl->setLanguageCode($languageCode);
-    $tpl->addDefault(['secureCookie' => $secureCookie, 'enabledLanguages' => $config->getEnabledLanguages(), 'serviceName' => $config->getServiceName($languageCode)]);
+    $tpl->addDefault(
+        [
+            'requestRoot' => $request->getRoot(),
+            'secureCookie' => $secureCookie,
+            'enabledLanguages' => $config->getEnabledLanguages(),
+            'serviceName' => $config->getServiceName($languageCode),
+        ]
+    );
 
     $idpSource = new MetadataSource($logger, $baseDir.'/config/metadata', $dataDir.'/metadata');
-
-    $request = new Request($_SERVER, $_GET, $_POST);
 
     // have a default entityID, but allow overriding from config
     if (null === $spEntityId = $config->getEntityId()) {

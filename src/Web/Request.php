@@ -232,6 +232,19 @@ class Request
     /**
      * @return string
      */
+    public function getRoot()
+    {
+        $rootDir = \dirname($this->requireHeader('SCRIPT_NAME'));
+        if ('/' !== $rootDir) {
+            return \sprintf('%s/', $rootDir);
+        }
+
+        return $rootDir;
+    }
+
+    /**
+     * @return string
+     */
     private function getScheme()
     {
         if (null === $requestScheme = $this->optionalHeader('REQUEST_SCHEME')) {
@@ -273,18 +286,5 @@ class Request
         }
 
         return $serverName;
-    }
-
-    /**
-     * @return string
-     */
-    private function getRoot()
-    {
-        $rootDir = \dirname($this->requireHeader('SCRIPT_NAME'));
-        if ('/' !== $rootDir) {
-            return \sprintf('%s/', $rootDir);
-        }
-
-        return $rootDir;
     }
 }

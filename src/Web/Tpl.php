@@ -34,6 +34,9 @@ class Tpl
     /** @var array<string> */
     private $translationFolderList;
 
+    /** @var string */
+    private $assetDir;
+
     /** @var string|null */
     private $activeSectionName = null;
 
@@ -55,11 +58,13 @@ class Tpl
     /**
      * @param array<string> $templateFolderList
      * @param array<string> $translationFolderList
+     * @param string        $assetDir
      */
-    public function __construct(array $templateFolderList, array $translationFolderList = [])
+    public function __construct(array $templateFolderList, array $translationFolderList, $assetDir)
     {
         $this->templateFolderList = $templateFolderList;
         $this->translationFolderList = $translationFolderList;
+        $this->assetDir = $assetDir;
         $this->addCallback('language_code_to_human', [__CLASS__, 'languageCodeToHuman']);
     }
 
@@ -125,6 +130,25 @@ class Tpl
         }
 
         return $templateStr;
+    }
+
+    /**
+     * Get a URL with cache busting query parameter.
+     *
+     * @param string $requestRoot
+     * @param string $assetPath
+     *
+     * @return string
+     */
+    private function getAssetUrl($requestRoot, $assetPath)
+    {
+        if (false === $mTime = @\filemtime($this->assetDir.'/'.$assetPath)) {
+            // can't find file or determine last modified time, do not include
+            // cache busting query parameter
+            return $this->e($requestRoot.$assetPath);
+        }
+
+        return $this->e($requestRoot.$assetPath.'?mTime='.$mTime);
     }
 
     /**

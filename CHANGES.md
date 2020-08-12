@@ -1,5 +1,8 @@
 # ChangeLog
 
+## 0.5.4 (...)
+- implement CSS/JS cache busting
+
 ## 0.5.3 (2020-08-09)
 - restore use of `paragonie/constant_time_encoding` for now
 

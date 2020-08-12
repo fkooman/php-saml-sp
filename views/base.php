@@ -5,9 +5,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?=$this->e($serviceName); ?></title>
-    <link href="css/bootstrap-reboot.min.css" media="screen" rel="stylesheet">
-    <link href="css/screen.css" media="screen" rel="stylesheet">
-    <script src="js/search.js"></script>
+    <link href="<?=$this->getAssetUrl($requestRoot, 'css/bootstrap-reboot.min.css'); ?>" media="screen" rel="stylesheet">
+    <link href="<?=$this->getAssetUrl($requestRoot, 'css/screen.css'); ?>" media="screen" rel="stylesheet">
+    <script src="<?=$this->getAssetUrl($requestRoot, 'js/search.js'); ?>"></script>
 </head>
 <body>
     <header>
