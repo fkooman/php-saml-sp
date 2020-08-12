@@ -1,6 +1,6 @@
 # ChangeLog
 
-## 0.5.4 (...)
+## 0.5.4 (2020-08-12)
 - implement CSS/JS cache busting
 
 ## 0.5.3 (2020-08-09)
