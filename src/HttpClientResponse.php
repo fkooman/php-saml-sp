@@ -29,16 +29,21 @@ class HttpClientResponse
     /** @var int */
     private $responseCode;
 
+    /** @var array<string> */
+    private $headerList;
+
     /** @var string */
     private $responseBody;
 
     /**
-     * @param int    $responseCode
-     * @param string $responseBody
+     * @param int           $responseCode
+     * @param array<string> $headerList
+     * @param string        $responseBody
      */
-    public function __construct($responseCode, $responseBody)
+    public function __construct($responseCode, array $headerList, $responseBody)
     {
         $this->responseCode = $responseCode;
+        $this->headerList = $headerList;
         $this->responseBody = $responseBody;
     }
 
@@ -48,6 +53,30 @@ class HttpClientResponse
     public function getCode()
     {
         return $this->responseCode;
+    }
+
+    /**
+     * We loop over all available headers and return the value of the first
+     * matching header key. If multiple headers with the same name are present
+     * the next ones are ignored!
+     *
+     * @param string $headerKey
+     *
+     * @return string|null
+     */
+    public function getHeader($headerKey)
+    {
+        foreach ($this->headerList as $headerLine) {
+            if (false === \strpos($headerLine, ':')) {
+                continue;
+            }
+            list($k, $v) = \explode(':', $headerLine, 2);
+            if (\strtolower(\trim($headerKey)) === \strtolower(\trim($k))) {
+                return \trim($v);
+            }
+        }
+
+        return null;
     }
 
     /**
