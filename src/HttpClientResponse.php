@@ -80,6 +80,15 @@ class HttpClientResponse
     }
 
     /**
+     * @return array<string>
+     */
+    public function getHeaderList()
+    {
+        // strip the "HTTP/X" header and empty line between header and body
+        return \array_slice($this->headerList, 1, \count($this->headerList) - 2);
+    }
+
+    /**
      * @return string
      */
     public function getBody()
