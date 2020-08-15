@@ -54,6 +54,8 @@ class CurlHttpClient implements HttpClientInterface
             CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
             CURLOPT_HEADERFUNCTION =>
             /**
+             * @suppress PhanUnusedClosureParameter
+             *
              * @param resource $curlChannel
              * @param string   $headerLine
              *
