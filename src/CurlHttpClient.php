@@ -41,7 +41,7 @@ class CurlHttpClient implements HttpClientInterface
             throw new RuntimeException('unable to create cURL channel');
         }
 
-        $headerList = [];
+        $headerList = '';
         $curlOptions = [
             CURLOPT_URL => $requestUrl,
             CURLOPT_HTTPHEADER => $requestHeaders,
@@ -62,7 +62,7 @@ class CurlHttpClient implements HttpClientInterface
              * @return int
              */
             function ($curlChannel, $headerLine) use (&$headerList) {
-                $headerList[] = $headerLine;
+                $headerList .= $headerLine;
 
                 return \strlen($headerLine);
             },

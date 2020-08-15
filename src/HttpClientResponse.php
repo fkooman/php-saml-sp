@@ -29,18 +29,18 @@ class HttpClientResponse
     /** @var int */
     private $responseCode;
 
-    /** @var array<string> */
+    /** @var string */
     private $headerList;
 
     /** @var string */
     private $responseBody;
 
     /**
-     * @param int           $responseCode
-     * @param array<string> $headerList
-     * @param string        $responseBody
+     * @param int    $responseCode
+     * @param string $headerList
+     * @param string $responseBody
      */
-    public function __construct($responseCode, array $headerList, $responseBody)
+    public function __construct($responseCode, $headerList, $responseBody)
     {
         $this->responseCode = $responseCode;
         $this->headerList = $headerList;
@@ -66,7 +66,7 @@ class HttpClientResponse
      */
     public function getHeader($headerKey)
     {
-        foreach ($this->headerList as $headerLine) {
+        foreach (\explode("\r\n", $this->headerList) as $headerLine) {
             if (false === \strpos($headerLine, ':')) {
                 continue;
             }
@@ -80,12 +80,11 @@ class HttpClientResponse
     }
 
     /**
-     * @return array<string>
+     * @return string
      */
     public function getHeaderList()
     {
-        // strip the "HTTP/X" header and empty line between header and body
-        return \array_slice($this->headerList, 1, -1);
+        return $this->headerList;
     }
 
     /**
