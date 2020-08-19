@@ -1,5 +1,8 @@
 # ChangeLog
 
+## 0.5.5 (2020-08-19)
+- fix automatic metadata refresh considering `cacheDuration` / `Last-Modified`
+
 ## 0.5.4 (2020-08-12)
 - implement CSS/JS cache busting
 
