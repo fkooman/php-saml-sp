@@ -25,7 +25,6 @@
 namespace fkooman\SAML\SP\Tests;
 
 use DateTime;
-use Exception;
 use fkooman\SAML\SP\MetadataSource;
 use PHPUnit\Framework\TestCase;
 
@@ -77,25 +76,27 @@ class MetadataSourceTest extends TestCase
      */
     public function testImportAllMetadata()
     {
-        // XXX make sure it actually triggers validation, now it is not old enough yet
-        // extends class with different datetime
-        try {
-            $idpSource = new TestMetadataSource(__DIR__.'/data/metadata', \sys_get_temp_dir(), new DateTime('2020-09-09'));
-            $idpSource->importAllMetadata(
-                new TestHttpClient(
-                    [
-                        'https://metadata.test.surfconext.nl/idp-metadata.xml' => \file_get_contents(__DIR__.'/data/metadata/idp-metadata.xml'),
-                    ]
-                ),
+        $tmpDir = \sys_get_temp_dir();
+        $metadataFileContent = \file_get_contents(__DIR__.'/data/metadata/idp-metadata.xml');
+        $idpSource = new TestMetadataSource(__DIR__.'/data/metadata', $tmpDir, new DateTime('2020-09-09'));
+        $idpSource->importAllMetadata(
+            new TestHttpClient(
                 [
-                    'https://metadata.test.surfconext.nl/idp-metadata.xml' => ['SURFconext-metadata-signer.pem'],
-                ],
-                false
-            );
-            $this->assertTrue(true);
-        } catch (Exception $e) {
-            echo \get_class($e);
-            $this->fail();
-        }
+                    'https://metadata.test.surfconext.nl/idp-metadata.xml' => $metadataFileContent,
+                ]
+            ),
+            [
+                'https://metadata.test.surfconext.nl/idp-metadata.xml' => ['SURFconext-metadata-signer.pem'],
+            ],
+            true    // force refresh
+        );
+        // make sure:
+        // 1. metadata file has same time as Last-Modified response header
+        // 2. refresh_at file contains something expected
+        $dynamicMetadataFile = $tmpDir.'/aHR0cHM6Ly9tZXRhZGF0YS50ZXN0LnN1cmZjb25leHQubmwvaWRwLW1ldGFkYXRhLnhtbA.xml';
+        $this->assertSame(1595968015, \filemtime($dynamicMetadataFile));
+        $dynamicMetadataFileRefreshAt = $dynamicMetadataFile.'.refresh_at';
+        // 6 hours from now, correct!
+        $this->assertSame('2020-09-09T06:00:00+00:00', \file_get_contents($dynamicMetadataFileRefreshAt));
     }
 }

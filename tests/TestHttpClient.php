@@ -49,7 +49,7 @@ class TestHttpClient implements HttpClientInterface
         if (\array_key_exists($requestUrl, $this->urlFileMapping)) {
             return new HttpClientResponse(
                 200,
-                '',
+                "Last-Modified: Tue, 28 Jul 2020 20:26:55 GMT\r\n\r\n",
                 $this->urlFileMapping[$requestUrl]
             );
         }
