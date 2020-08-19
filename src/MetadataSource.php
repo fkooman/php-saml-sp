@@ -252,9 +252,14 @@ class MetadataSource implements IdpSourceInterface
                     // periodically retrieved we check validUntil and make sure
                     // it is not in the past. For dynamic metadata validUntil
                     // MUST be specified (saml2int)
-                    $validUntil = new DateTime($metadataDocument->requireOneDomAttrValue('self::node()/@validUntil'));
-                    if ($this->dateTime->getTimestamp() > $validUntil->getTimestamp()) {
-                        $this->logger->warning(\sprintf('metadata file "%s" has "validUntil" in the past', $metadataFile));
+                    if (null === $validUntil = $metadataDocument->optionalOneDomAttrValue('self::node()/@validUntil')) {
+                        $this->logger->warning(\sprintf('[%s] metadata has no "validUntil", rejecting it', $metadataFile));
+
+                        continue;
+                    }
+                    $validUntilDateTime = new DateTime($validUntil);
+                    if ($this->dateTime->getTimestamp() > $validUntilDateTime->getTimestamp()) {
+                        $this->logger->warning(\sprintf('[%s] metadata has "validUntil" in the past', $metadataFile));
 
                         continue;
                     }
