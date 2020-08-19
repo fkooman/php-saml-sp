@@ -49,7 +49,7 @@ class TestHttpClient implements HttpClientInterface
         if (\array_key_exists($requestUrl, $this->urlFileMapping)) {
             return new HttpClientResponse(
                 200,
-                [],
+                '',
                 $this->urlFileMapping[$requestUrl]
             );
         }

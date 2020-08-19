@@ -24,7 +24,6 @@
 
 namespace fkooman\SAML\SP\Tests;
 
-use DateInterval;
 use DateTime;
 use Exception;
 use fkooman\SAML\SP\MetadataSource;
@@ -95,64 +94,8 @@ class MetadataSourceTest extends TestCase
             );
             $this->assertTrue(true);
         } catch (Exception $e) {
+            echo \get_class($e);
             $this->fail();
         }
-    }
-
-    public function testNeedsRefresh()
-    {
-        // same time
-        $this->assertFalse(
-            TestMetadataSource::needsRefresh(
-                new DateTime('2020-01-01T09:00:00+00:00'),
-                new DateTime('2020-01-01T09:00:00+00:00'),
-                new DateInterval('PT6H')
-            )
-        );
-
-        // 5 hours before expiry
-        $this->assertFalse(
-            TestMetadataSource::needsRefresh(
-                new DateTime('2020-01-01T09:00:00+00:00'),
-                new DateTime('2020-01-01T08:00:00+00:00'),
-                new DateInterval('PT6H')
-            )
-        );
-
-        // 1 hour before expiry
-        $this->assertTrue(
-            TestMetadataSource::needsRefresh(
-                new DateTime('2020-01-01T13:00:00+00:00'),
-                new DateTime('2020-01-01T08:00:00+00:00'),
-                new DateInterval('PT6H')
-            )
-        );
-
-        // 1 hour and 15 minutes before expiry
-        $this->assertTrue(
-            TestMetadataSource::needsRefresh(
-                new DateTime('2020-01-01T12:45:00+00:00'),
-                new DateTime('2020-01-01T08:00:00+00:00'),
-                new DateInterval('PT6H')
-            )
-        );
-
-        // 1 hour and 16 minutes before expiry
-        $this->assertFalse(
-            TestMetadataSource::needsRefresh(
-                new DateTime('2020-01-01T12:44:00+00:00'),
-                new DateTime('2020-01-01T08:00:00+00:00'),
-                new DateInterval('PT6H')
-            )
-        );
-
-        // 1 hour after expiry
-        $this->assertTrue(
-            TestMetadataSource::needsRefresh(
-                new DateTime('2020-01-01T15:00:00+00:00'),
-                new DateTime('2020-01-01T08:00:00+00:00'),
-                new DateInterval('PT6H')
-            )
-        );
     }
 }
