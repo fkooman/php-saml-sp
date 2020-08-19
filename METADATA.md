@@ -18,7 +18,8 @@ or `cacheDuration` attributes. Here the administrator is fully responsible for
 making sure the metadata files are kept up to date.
 
 You can use the validation tooling part of php-saml-sp to make sure the 
-metadata file you obtained is at least correct. This RECOMMENDED, for example:
+metadata file you obtained is at least correct. This is RECOMMENDED, for 
+example:
 
     $ curl -o SURFconext.xml https://metadata.surfconext.nl/idp-metadata.xml
     $ php-saml-sp-validate-metadata SURFconext.xml
@@ -63,11 +64,11 @@ After configuring this, you can test the fetching:
 
     $ sudo systemctl start php-saml-sp
 
-This should place the metadata file(s) in `/var/lib/php-saml-sp/metadata. It 
-uses Base64 encoding to make the URL safe for storing on the file system. The 
-php-saml-sp service is not a service that remains active, but is `Type=oneshot` 
-which means it runs once and then stops. Using a timer we can periodically 
-launch it, see below.
+This should place the metadata file(s) in `/var/lib/php-saml-sp/metadata`. 
+Base64UrlSafe encoding is used to convert the URL to a string that is safe to 
+store on the file system. The `php-saml-sp` service is not a service that 
+remains active, but is `Type=oneshot` which means it runs once and then stops. 
+Using a timer we can periodically launch it, see below.
 
 You can follow along what happens:
 
