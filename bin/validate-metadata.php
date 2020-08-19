@@ -45,6 +45,10 @@ try {
         echo 'Verifying XML signature...';
         Crypto::verifyXml($xmlDocument, [$publicKey]);
         echo ' OK!'.PHP_EOL;
+        echo PHP_EOL.'Public Key:'.PHP_EOL;
+        foreach ($publicKey->getFingerprint() as $hashAlgo => $rawFingerprint) {
+            echo $hashAlgo."\t\t".\implode(':', \str_split(\bin2hex($rawFingerprint), 2)).PHP_EOL;
+        }
     }
 } catch (Exception $e) {
     $logMessage = 'ERROR: ['.\get_class($e).'] '.$e->getMessage();

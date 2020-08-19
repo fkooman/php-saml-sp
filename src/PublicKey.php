@@ -109,6 +109,17 @@ class PublicKey
     }
 
     /**
+     * @return array<string>
+     */
+    public function getFingerprint()
+    {
+        return [
+            'SHA-1' => \openssl_x509_fingerprint($this->pemStr, 'sha1', true),
+            'SHA-256' => \openssl_x509_fingerprint($this->pemStr, 'sha256', true),
+        ];
+    }
+
+    /**
      * @return resource
      */
     public function raw()
