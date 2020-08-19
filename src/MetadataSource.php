@@ -218,7 +218,7 @@ class MetadataSource implements IdpSourceInterface
             \touch($metadataFile, $lastModifiedDateTime->getTimestamp());
         }
         $this->writeRefreshAt($metadataFile, $metadataDocument);
-        $this->logger->notice(\sprintf('[%s] metadata updated', $metadataUrl, $metadataFile));
+        $this->logger->notice(\sprintf('[%s] metadata updated', $metadataUrl));
     }
 
     /**
