@@ -34,6 +34,17 @@ try {
         echo "\tSYNTAX: ".$argv[0].' metadata.xml [certificate.pem]'.PHP_EOL;
         exit(1);
     }
+
+    if ($argc > 2) {
+        // Show Public Key information
+        $publicKey = PublicKey::fromFile($argv[2]);
+        echo '################################# Public Key #################################'.PHP_EOL;
+        foreach ($publicKey->getFingerprint() as $hashAlgo => $rawFingerprint) {
+            echo $hashAlgo.PHP_EOL."\t".\implode(':', \str_split(\bin2hex($rawFingerprint), 2)).PHP_EOL;
+        }
+        echo '################################# Public Key #################################'.PHP_EOL;
+    }
+
     echo 'Verifying XML schema...';
     if (false === $fileContent = @\file_get_contents($argv[1])) {
         throw new RuntimeException(\sprintf('unable to read "%s"', $argv[1]));
@@ -41,14 +52,9 @@ try {
     $xmlDocument = XmlDocument::fromMetadata($fileContent, true);
     echo ' OK!'.PHP_EOL;
     if ($argc > 2) {
-        $publicKey = PublicKey::fromFile($argv[2]);
         echo 'Verifying XML signature...';
         Crypto::verifyXml($xmlDocument, [$publicKey]);
         echo ' OK!'.PHP_EOL;
-        echo PHP_EOL.'Public Key:'.PHP_EOL;
-        foreach ($publicKey->getFingerprint() as $hashAlgo => $rawFingerprint) {
-            echo $hashAlgo."\t\t".\implode(':', \str_split(\bin2hex($rawFingerprint), 2)).PHP_EOL;
-        }
     }
 } catch (Exception $e) {
     $logMessage = 'ERROR: ['.\get_class($e).'] '.$e->getMessage();
