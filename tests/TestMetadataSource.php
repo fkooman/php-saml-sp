@@ -35,7 +35,7 @@ class TestMetadataSource extends MetadataSource
      */
     public function __construct($staticDir, $dynamicDir, DateTime $dateTime)
     {
-        parent::__construct(new NullLogger(), $staticDir, $dynamicDir);
+        parent::__construct(new NullLogger(), $staticDir, $dynamicDir, []);
         $this->dateTime = $dateTime;
     }
 }

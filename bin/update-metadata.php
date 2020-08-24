@@ -37,7 +37,8 @@ try {
     $metadataSource = new MetadataSource(
         $logger,
         $baseDir.'/config/metadata',
-        $baseDir.'/data/metadata'
+        $baseDir.'/data/metadata',
+        []
     );
     $metadataSource->importAllMetadata(
         new CurlHttpClient(),

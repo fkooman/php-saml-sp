@@ -64,11 +64,15 @@ class MetadataSource implements IdpSourceInterface
     /** @var string */
     private $dynamicDir;
 
+    /** @var array<string,array<string>> */
+    private $metadataKeyList;
+
     /**
-     * @param string $staticDir
-     * @param string $dynamicDir
+     * @param string                      $staticDir
+     * @param string                      $dynamicDir
+     * @param array<string,array<string>> $metadataKeyList
      */
-    public function __construct(LoggerInterface $logger, $staticDir, $dynamicDir)
+    public function __construct(LoggerInterface $logger, $staticDir, $dynamicDir, array $metadataKeyList)
     {
         $this->dateTime = new DateTime();
         $this->logger = $logger;
@@ -79,6 +83,7 @@ class MetadataSource implements IdpSourceInterface
             }
         }
         $this->dynamicDir = $dynamicDir;
+        $this->metadataKeyList = $metadataKeyList;
     }
 
     /**
@@ -243,6 +248,14 @@ class MetadataSource implements IdpSourceInterface
                 throw new RuntimeException(\sprintf('unable to list files in directory "%s"', $metadataDir));
             }
             foreach ($metadataFileList as $metadataFile) {
+                if ('dynamic' === $dirType) {
+                    // we make sure the metadataUrl is still enabled...
+                    $metadataUrl = Base64UrlSafe::decode(\basename($metadataFile, '.xml'));
+                    if (!\array_key_exists($metadataUrl, $this->metadataKeyList)) {
+                        continue;
+                    }
+                }
+
                 if (false === $xmlData = @\file_get_contents($metadataFile)) {
                     throw new RuntimeException(\sprintf('unable to read "%s"', $metadataFile));
                 }

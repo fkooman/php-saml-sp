@@ -71,7 +71,12 @@ try {
         ]
     );
 
-    $idpSource = new MetadataSource($logger, $baseDir.'/config/metadata', $dataDir.'/metadata');
+    $idpSource = new MetadataSource(
+        $logger,
+        $baseDir.'/config/metadata',
+        $dataDir.'/metadata',
+        $config->getMetadataKeyList()
+    );
 
     // have a default entityID, but allow overriding from config
     if (null === $spEntityId = $config->getEntityId()) {
