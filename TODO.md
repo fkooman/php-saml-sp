@@ -6,14 +6,8 @@
 - detect whether cookies are disabled in a proper way... so as to reject all
   attempts without confusing the user... detect if we got a cookie on the ACS
   endpoint before trying to check session values...
-- some IdPs also rollover the metadata signing keys (ADFS) it seems, so we have
-  to extract any new certificates found in the metadata and put them in the 
-  "trust store" as well?
 - do no longer consider metadata in `/var/lib/php-saml-sp/metadata` that is no 
   longer listed in the config file to avoid confusion
-- only use the configured key in config.php for "bootstrapping", the key
-  there MUST also be in the metadata after the bootstrap
-- think about an "import" script?
 
 ### Audit Specific
 
