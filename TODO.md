@@ -2,7 +2,7 @@
 
 ## Before 1.0
 
-- update CSS style
+- update CSS style (remove bootstrap)
 - detect whether cookies are disabled in a proper way... so as to reject all
   attempts without confusing the user... detect if we got a cookie on the ACS
   endpoint before trying to check session values...
@@ -11,6 +11,9 @@
   "trust store" as well?
 - do no longer consider metadata in `/var/lib/php-saml-sp/metadata` that is no 
   longer listed in the config file to avoid confusion
+- only use the configured key in config.php for "bootstrapping", the key
+  there MUST also be in the metadata after the bootstrap
+- think about an "import" script?
 
 ### Audit Specific
 
