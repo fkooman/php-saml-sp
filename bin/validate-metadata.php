@@ -35,6 +35,7 @@ try {
         exit(1);
     }
 
+    $publicKey = null;
     if ($argc > 2) {
         // Show Public Key information
         $publicKey = PublicKey::fromFile($argv[2]);
@@ -51,7 +52,7 @@ try {
     }
     $xmlDocument = XmlDocument::fromMetadata($fileContent, true);
     echo ' OK!'.PHP_EOL;
-    if ($argc > 2) {
+    if (null !== $publicKey) {
         echo 'Verifying XML signature...';
         Crypto::verifyXml($xmlDocument, [$publicKey]);
         echo ' OK!'.PHP_EOL;
