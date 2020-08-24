@@ -8,6 +8,7 @@
   endpoint before trying to check session values...
 - do no longer consider metadata in `/var/lib/php-saml-sp/metadata` that is no 
   longer listed in the config file to avoid confusion
+- write test for dynamic metadata retrieving (active/inactive)
 
 ### Audit Specific
 
