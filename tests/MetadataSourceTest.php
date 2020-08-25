@@ -78,7 +78,7 @@ class MetadataSourceTest extends TestCase
     {
         $tmpDir = \sys_get_temp_dir();
         $metadataFileContent = \file_get_contents(__DIR__.'/data/metadata/idp-metadata.xml');
-        $idpSource = new TestMetadataSource(__DIR__.'/data/metadata', $tmpDir, new DateTime('2020-09-09'));
+        $idpSource = new TestMetadataSource(__DIR__.'/data/metadata', $tmpDir, [], new DateTime('2020-09-09'));
         $idpSource->importAllMetadata(
             new TestHttpClient(
                 [
@@ -98,5 +98,26 @@ class MetadataSourceTest extends TestCase
         $dynamicMetadataFileRefreshAt = $dynamicMetadataFile.'.refresh_at';
         // 6 hours from now, correct!
         $this->assertSame('2020-09-09T06:00:00+00:00', \file_get_contents($dynamicMetadataFileRefreshAt));
+    }
+
+    public function testDynamicFetch()
+    {
+        $idpSource = new TestMetadataSource('/tmp/i/hopefully/do/not/exist', __DIR__.'/data/metadata/dynamic', ['https://metadata.surfconext.nl/idp-metadata.xml' => []], new DateTime('2020-08-25'));
+        $idpInfo = $idpSource->get('https://engine.surfconext.nl/authentication/idp/metadata');
+        $this->assertSame('https://engine.surfconext.nl/authentication/idp/metadata', $idpInfo->getEntityId());
+    }
+
+    public function testDynamicNoLongerValid()
+    {
+        // validUntil expires on 2020-09-01
+        $idpSource = new TestMetadataSource('/tmp/i/hopefully/do/not/exist', __DIR__.'/data/metadata/dynamic', ['https://metadata.surfconext.nl/idp-metadata.xml' => []], new DateTime('2020-09-03'));
+        $this->assertNull($idpSource->get('https://engine.surfconext.nl/authentication/idp/metadata'));
+    }
+
+    public function testDynamicNotListedAnymore()
+    {
+        $idpSource = new TestMetadataSource('/tmp/i/hopefully/do/not/exist', __DIR__.'/data/metadata/dynamic', [], new DateTime('2020-08-25'));
+        $idpInfo = $idpSource->get('https://engine.surfconext.nl/authentication/idp/metadata');
+        $this->assertNull($idpSource->get('https://engine.surfconext.nl/authentication/idp/metadata'));
     }
 }

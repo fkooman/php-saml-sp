@@ -30,12 +30,13 @@ use fkooman\SAML\SP\MetadataSource;
 class TestMetadataSource extends MetadataSource
 {
     /**
-     * @param string $staticDir
-     * @param string $dynamicDir
+     * @param string                      $staticDir
+     * @param string                      $dynamicDir
+     * @param array<string,array<string>> $metadataKeyList
      */
-    public function __construct($staticDir, $dynamicDir, DateTime $dateTime)
+    public function __construct($staticDir, $dynamicDir, array $metadataKeyList, DateTime $dateTime)
     {
-        parent::__construct(new NullLogger(), $staticDir, $dynamicDir, []);
+        parent::__construct(new NullLogger(), $staticDir, $dynamicDir, $metadataKeyList);
         $this->dateTime = $dateTime;
     }
 }
