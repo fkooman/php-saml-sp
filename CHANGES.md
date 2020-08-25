@@ -1,5 +1,11 @@
 # ChangeLog
 
+## 0.5.6 (...)
+- `php-saml-sp-validate-metadata` shows fingerprints of used certificates. Some
+  federations publish those fingerprints, makes it easy to compare
+- dynamic metadata MUST still be configured in `config.php`, otherwise it is
+  ignored and IdPs from it are no longer available/listed
+
 ## 0.5.5 (2020-08-19)
 - fix automatic metadata refresh considering `cacheDuration` / `Last-Modified`
 

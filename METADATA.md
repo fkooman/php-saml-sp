@@ -30,6 +30,12 @@ signature as well:
 
     $ curl -O https://metadata.surfconext.nl/SURFconext-metadata-signer.pem
     $ php-saml-sp-validate-metadata SURFconext.xml SURFconext-metadata-signer.pem
+    ################################# Public Key #################################
+    SHA-1
+            73:64:05:95:ba:da:c5:d2:f9:b5:87:de:4a:1c:2b:e0:52:f5:d1:47
+    SHA-256
+            4b:05:ff:75:00:6a:36:47:79:ea:7e:45:26:b2:6a:64:b4:0e:57:f1:00:d9:6a:5a:21:d8:02:07:f3:43:4d:0e
+    ################################# Public Key #################################
     Verifying XML schema... OK!
     Verifying XML signature... OK!
 
@@ -48,7 +54,9 @@ example:
 
 ## Dynamic
 
-The dynamic type is more of a "configure once and forget" type of situation. 
+The dynamic type is more of a "configure once and forget" type of situation, 
+unless the metadata signing key itself needs to rollover of course.
+
 It can be configured through `/etc/php-saml-sp/config.php` under 
 `metadataList`. For example:
 
