@@ -6,9 +6,6 @@
 - detect whether cookies are disabled in a proper way... so as to reject all
   attempts without confusing the user... detect if we got a cookie on the ACS
   endpoint before trying to check session values...
-- do no longer consider metadata in `/var/lib/php-saml-sp/metadata` that is no 
-  longer listed in the config file to avoid confusion
-- write test for dynamic metadata retrieving (active/inactive)
 
 ### Audit Specific
 
