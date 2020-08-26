@@ -1,6 +1,6 @@
 # ChangeLog
 
-## 0.5.6 (...)
+## 0.5.6 (2020-08-26)
 - `php-saml-sp-validate-metadata` shows fingerprints of used certificates. Some
   federations publish those fingerprints, makes it easy to compare
 - dynamic metadata MUST still be configured in `config.php`, otherwise it is
