@@ -50,7 +50,7 @@ which is secure. So you won't find SHA1 support or insecure encryption.
 - Converts `urn:oid` attribute names to "friendly" names for use by 
   applications
 - Supports automated metadata retrieval/update with XML schema / signature 
-  verification
+  verification, see [METADATA](METADATA.md)
 - Validates XML schema(s) when processing XML protocol messages
 - Tested with IdPs:
   - [simpleSAMLphp](https://simplesamlphp.org/)
@@ -85,7 +85,17 @@ We _do_ aim to eventually support everything as mentioned in
 - PHP >= 5.4
   - For encryption (`<EncryptedAssertion>`) support, PHP >= 7.1
 - `php-openssl`
-- See `composer.json` for other dependencies
+- See `composer.json` for additional dependencies
+
+# Installation
+
+See [INSTALL](INSTALL.md) for manual installation.
+
+In the near future we'll provide supported CentOS/Fedora and Debian/Ubuntu 
+packages.
+
+Currently we have CentOS/Fedora packages in 
+[COPR](https://copr.fedorainfracloud.org/coprs/fkooman/php-saml-sp/).
 
 # Source Code Layout
 
@@ -112,12 +122,12 @@ Now copy the configuration template:
 
     $ cp config/config.php.example config/config.php
 
-Disable to `Secure` session cookie parameter by setting the `secureCookie` key 
+Disable the `Secure` session cookie parameter by setting the `secureCookie` key 
 to `false` in `config/config.php`.
 
 A neat IdP to use for testing is 
-`https://x509idp.moonshot.utr.surfcloud.nl/metadata`. Put the metadata in 
-`config/metadata`:
+`https://x509idp.moonshot.utr.surfcloud.nl/metadata`. There's no need to register
+your SP with that IdP. Put the metadata in `config/metadata`:
 
     $ mkdir config/metadata
     $ curl -L -o config/metadata/x509idp.moonshot.utr.surfcloud.nl.xml https://x509idp.moonshot.utr.surfcloud.nl/metadata
