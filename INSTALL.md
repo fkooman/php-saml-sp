@@ -81,7 +81,38 @@ You can add IdPs by putting their metadata XML files in
 
 # Dynamic Metadata
 
-TBD.
+See [METADATA](METADATA.md). This document is written for when using the 
+packages. Replace `/etc/php-saml-sp` with `/var/www/php-saml-sp/config` and
+`/var/lib/php-saml-sp` with `/var/www/php-saml-sp/data`.
+
+As for the `php-saml-sp.service` and `php-saml-sp.timer` files, you can use 
+these:
+
+`php-saml-sp.service`:
+
+    [Unit]
+    Description=Automatically retrieve SAML metadata from IdP(s) and/or federation(s)
+
+    [Service]
+    Type=oneshot
+    User=www-data
+    Group=www-data
+    ExecStart=/usr/bin/php /var/www/php-saml-sp/bin/update-metadata.php
+    
+`php-saml-sp.timer`:
+
+    [Unit]
+    Description=Schedule automatically retrieving SAML metadata
+
+    [Timer]
+    OnCalendar=*-*-* *:00:00
+    RandomizedDelaySec=900
+    Persistent=true
+
+    [Install]
+    WantedBy=timers.target
+    
+Put them in `/etc/systemd/system` on your system.
 
 # Software Update
 
