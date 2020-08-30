@@ -46,18 +46,18 @@ which is secure. So you won't find SHA1 support or insecure encryption.
   ignores the rest
 - Verify "scope" of attributes based on `<shibmd:Scope>` metadata element when
   the IdP metadata contains this element
-  - Silently removes the attribute (value) when scope does not match
+    - Silently removes the attribute (value) when scope does not match
 - Converts `urn:oid` attribute names to "friendly" names for use by 
   applications
 - Supports automated metadata retrieval/update with XML schema / signature 
   verification, see [METADATA](METADATA.md)
 - Validates XML schema(s) when processing XML protocol messages
 - Tested with IdPs:
-  - [simpleSAMLphp](https://simplesamlphp.org/)
-  - [OpenConext](https://openconext.org/)
-  - [FrkoIdP](https://github.com/fkooman/php-saml-idp/)
-  - [AD FS](https://en.wikipedia.org/wiki/Active_Directory_Federation_Services)
-  - [Shibboleth IdP](https://www.shibboleth.net/products/identity-provider/)
+    - [simpleSAMLphp](https://simplesamlphp.org/)
+    - [OpenConext](https://openconext.org/)
+    - [FrkoIdP](https://github.com/fkooman/php-saml-idp/)
+    - [AD FS](https://en.wikipedia.org/wiki/Active_Directory_Federation_Services)
+    - [Shibboleth IdP](https://www.shibboleth.net/products/identity-provider/)
 - Simple built-in WAYF when more than 1 IdP is configured for the SP
 - Support external discovery services implementing 
   [Identity Provider Discovery Service Protocol and Profile](https://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-idp-discovery.html)
@@ -83,7 +83,7 @@ We _do_ aim to eventually support everything as mentioned in
 # Requirements
 
 - PHP >= 5.4
-  - For encryption (`<EncryptedAssertion>`) support, PHP >= 7.1
+    - For encryption (`<EncryptedAssertion>`) support, PHP >= 7.1
 - `php-openssl`
 - See `composer.json` for additional dependencies
 
