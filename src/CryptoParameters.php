@@ -26,6 +26,9 @@ namespace fkooman\SAML\SP;
 
 use fkooman\SAML\SP\Exception\CryptoException;
 
+/**
+ * @see https://www.w3.org/TR/xmlenc-core1/#sec-AES-GCM
+ */
 class CryptoParameters
 {
     /**
