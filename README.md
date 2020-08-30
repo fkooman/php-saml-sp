@@ -75,7 +75,7 @@ We _do_ aim to eventually support everything as mentioned in
 | Digest               | `http://www.w3.org/2001/04/xmlenc#sha256`             | Yes       |
 | Signature            | `http://www.w3.org/2001/04/xmldsig-more#rsa-sha256`   | Yes       |
 |                      | `http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256` | No        |
-| Block Encryption     | `http://www.w3.org/2009/xmlenc11#aes128-gcm`          | No        |
+| Block Encryption     | `http://www.w3.org/2009/xmlenc11#aes128-gcm`          | Yes       |
 |                      | `http://www.w3.org/2009/xmlenc11#aes256-gcm`          | Yes       |
 | Key Transport        | `http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p`     | Yes       |
 | Key Transport Digest | `http://www.w3.org/2000/09/xmldsig#sha1`              | Yes       |

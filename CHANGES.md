@@ -1,5 +1,8 @@
 # ChangeLog
 
+## 0.5.7 (...)
+- implement `http://www.w3.org/2009/xmlenc11#aes128-gcm`, as per saml2int
+
 ## 0.5.6 (2020-08-26)
 - `php-saml-sp-validate-metadata` shows fingerprints of used certificates. Some
   federations publish those fingerprints, makes it easy to compare

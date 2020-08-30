@@ -37,11 +37,6 @@ class Crypto
 
     const ENCRYPT_KEY_DIGEST_ALGO = 'http://www.w3.org/2000/09/xmldsig#sha1';
     const ENCRYPT_KEY_TRANSPORT_ALGO = 'http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p';
-    const ENCRYPT_BLOCK_ENCRYPTION_ALGO = 'http://www.w3.org/2009/xmlenc11#aes256-gcm';
-    const ENCRYPT_OPENSSL_ALGO = 'aes-256-gcm';
-    const ENCRYPT_IV_LENGTH = 12;
-    const ENCRYPT_TAG_LENGTH = 16;
-    const ENCRYPT_KEY_LENGTH = 32;
 
     /**
      * @param array<PublicKey> $publicKeys
@@ -128,12 +123,6 @@ class Crypto
             throw new CryptoException('XML decryption is not supported on this system');
         }
 
-        // make sure we support the encryption algorithm
-        $encryptionMethod = $xmlDocument->requireOneDomAttrValue('/samlp:Response/saml:EncryptedAssertion/xenc:EncryptedData/xenc:EncryptionMethod/@Algorithm');
-        if (self::ENCRYPT_BLOCK_ENCRYPTION_ALGO !== $encryptionMethod) {
-            throw new CryptoException(\sprintf('only block encryption algorithm "%s" is supported', self::ENCRYPT_BLOCK_ENCRYPTION_ALGO));
-        }
-
         // make sure we support the key transport encryption algorithm
         $keyEncryptionMethod = $xmlDocument->requireOneDomAttrValue('/samlp:Response/saml:EncryptedAssertion/xenc:EncryptedData/ds:KeyInfo/xenc:EncryptedKey/xenc:EncryptionMethod/@Algorithm');
         if (self::ENCRYPT_KEY_TRANSPORT_ALGO !== $keyEncryptionMethod) {
@@ -154,8 +143,11 @@ class Crypto
             throw new CryptoException('unable to extract session key');
         }
 
+        // find out which encryption algorithm was used for the EncryptedAssertion
+        $encryptionMethod = $xmlDocument->requireOneDomAttrValue('/samlp:Response/saml:EncryptedAssertion/xenc:EncryptedData/xenc:EncryptionMethod/@Algorithm');
+
         // make sure the obtained key is the exact length we expect
-        if (self::ENCRYPT_KEY_LENGTH !== \strlen($symmetricEncryptionKey)) {
+        if (CryptoParameters::getKeyLength($encryptionMethod) !== \strlen($symmetricEncryptionKey)) {
             throw new CryptoException('session key has unexpected length');
         }
 
@@ -163,10 +155,10 @@ class Crypto
         $assertionCipherValue = Base64::decode(self::removeWhiteSpace($xmlDocument->requireOneDomElementTextContent('/samlp:Response/saml:EncryptedAssertion/xenc:EncryptedData/xenc:CipherData/xenc:CipherValue')));
 
         // @see https://www.w3.org/TR/xmlenc-core1/#sec-AES-GCM
-        $messageIv = \substr($assertionCipherValue, 0, self::ENCRYPT_IV_LENGTH); // IV (first 96 bits)
-        $messageTag = \substr($assertionCipherValue, \strlen($assertionCipherValue) - self::ENCRYPT_TAG_LENGTH); // Tag (last 128 bits)
-        $cipherText = \substr($assertionCipherValue, self::ENCRYPT_IV_LENGTH, -self::ENCRYPT_TAG_LENGTH); // CipherText (between IV and Tag)
-        if (false === $decryptedAssertion = \openssl_decrypt($cipherText, self::ENCRYPT_OPENSSL_ALGO, $symmetricEncryptionKey, OPENSSL_RAW_DATA, $messageIv, $messageTag)) {
+        $messageIv = \substr($assertionCipherValue, 0, CryptoParameters::getIvLength($encryptionMethod)); // IV (first 96 bits)
+        $messageTag = \substr($assertionCipherValue, \strlen($assertionCipherValue) - CryptoParameters::getTagLength($encryptionMethod)); // Tag (last 128 bits)
+        $cipherText = \substr($assertionCipherValue, CryptoParameters::getIvLength($encryptionMethod), -CryptoParameters::getTagLength($encryptionMethod)); // CipherText (between IV and Tag)
+        if (false === $decryptedAssertion = \openssl_decrypt($cipherText, CryptoParameters::getOpenSslAlgorithm($encryptionMethod), $symmetricEncryptionKey, OPENSSL_RAW_DATA, $messageIv, $messageTag)) {
             throw new CryptoException('unable to decrypt data');
         }
 
@@ -204,9 +196,11 @@ class Crypto
             return false;
         }
 
-        // we need support for AES-256-GCM
-        if (!\in_array('aes-256-gcm', \openssl_get_cipher_methods(), true)) {
-            return false;
+        // we need support for AES-GCM
+        foreach (['aes-128-gcm', 'aes-256-gcm'] as $encryptionAlgorithm) {
+            if (!\in_array($encryptionAlgorithm, \openssl_get_cipher_methods(), true)) {
+                return false;
+            }
         }
 
         return true;
