@@ -1,7 +1,8 @@
 # ChangeLog
 
-## 0.5.7 (...)
+## 0.5.7 (2020-08-31)
 - implement `http://www.w3.org/2009/xmlenc11#aes128-gcm`, as per saml2int
+- add manual install instructions
 
 ## 0.5.6 (2020-08-26)
 - `php-saml-sp-validate-metadata` shows fingerprints of used certificates. Some
