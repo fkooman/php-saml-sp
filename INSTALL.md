@@ -139,6 +139,12 @@ Copy the configuration, IdP metadata and keys:
     $ sudo cp -ra /var/www/php-saml-sp/config/metadata /var/www/php-saml-sp-0.5.7/config
     $ sudo cp -ra /var/www/php-saml-sp/keys /var/www/php-saml-sp-0.5.7/keys
 
+If you were using dynamic metadata:
+
+    $ sudo cp -ra /var/www/php-saml-sp/data /var/www/php-saml-sp-0.5.7/data
+    $ sudo chown root.apache /var/www/php-saml-sp-0.5.7/data     # (Fedora/CentOS)
+    $ sudo chown root.www-data /var/www/php-saml-sp-0.5.7/data   # (Debian/Ubuntu)
+    
 Update the symlink:
 
     $ sudo rm /var/www/php-saml-sp
