@@ -165,8 +165,7 @@ for this SP:
 
 # API 
 
-You can integrate your application using the `SamlAuth()` class. See the 
-`example/` directory for a working example.
+See [API](API.md) for how to use php-saml-sp from your PHP application.
 
 # Tests
 
