@@ -78,6 +78,8 @@ class NameId
     }
 
     /**
+     * Get NameID XML string. This SHOULD only be needed for logout (SLO).
+     *
      * @return string
      */
     public function toXml()
@@ -101,6 +103,9 @@ class NameId
     }
 
     /**
+     * Convert the NameID XML to string similar to Shibboleth SP. This SHOULD
+     * only be used with "eduPersonTargetedID" attributes.
+     *
      * @throws \fkooman\SAML\SP\Exception\NameIdException
      *
      * @return string

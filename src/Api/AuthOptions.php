@@ -24,6 +24,9 @@
 
 namespace fkooman\SAML\SP\Api;
 
+/**
+ * Configure the SAML authentication.
+ */
 class AuthOptions
 {
     /** @var string|null */
@@ -47,6 +50,10 @@ class AuthOptions
     }
 
     /**
+     * Specify the URL the browser will return to after authentication is
+     * complete. By default the browser will return to the URL the
+     * authentication was started from.
+     *
      * @param string $returnTo
      *
      * @return self
@@ -67,6 +74,11 @@ class AuthOptions
     }
 
     /**
+     * Specify the "AuthnContext" for the authentication request. This can for
+     * example be used to request two factor authentication.
+     *
+     * @see https://docs.oasis-open.org/security/saml/v2.0/saml-authn-context-2.0-os.pdf
+     *
      * @param array<string> $authnContextClassRef
      *
      * @return self
@@ -87,6 +99,10 @@ class AuthOptions
     }
 
     /**
+     * Specify the entityID of the IdP you want to use for authentication when
+     * >= 1 IdP is configured in the metadata. This effectively skips the
+     * IdP selector dialog, also know as "WAYF".
+     *
      * @param string $idpEntityId
      *
      * @return self
@@ -107,6 +123,9 @@ class AuthOptions
     }
 
     /**
+     * Restrict the list of IdP(s), by entityID, the user is allowed to choose
+     * from when your IdP(s) are behind a proxy.
+     *
      * @param array<string> $scopingIdpList
      *
      * @return self

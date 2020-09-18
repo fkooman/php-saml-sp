@@ -32,6 +32,9 @@ use fkooman\SAML\SP\SP;
 use fkooman\SAML\SP\Web\Config;
 use fkooman\SAML\SP\Web\Request;
 
+/**
+ * SAML Authentication for your PHP application.
+ */
 class SamlAuth
 {
     /** @var \fkooman\SAML\SP\Web\Config */
@@ -55,6 +58,8 @@ class SamlAuth
     }
 
     /**
+     * Get the URL to redirect to in order to trigger user authentication.
+     *
      * @return string
      */
     public function getLoginURL(AuthOptions $authOptions = null)
@@ -63,6 +68,10 @@ class SamlAuth
     }
 
     /**
+     * Get the SAML assertion when the user is already authenticated.
+     *
+     * @throws \fkooman\SAML\SP\Api\Exception\AuthException
+     *
      * @return \fkooman\SAML\SP\Assertion
      */
     public function getAssertion(AuthOptions $authOptions = null)
@@ -75,6 +84,8 @@ class SamlAuth
     }
 
     /**
+     * Figure out whether the user was (successfully) authenticated already.
+     *
      * @return bool
      */
     public function isAuthenticated(AuthOptions $authOptions = null)
@@ -83,6 +94,8 @@ class SamlAuth
     }
 
     /**
+     * Get the SAML assertion iff the user was successfully authenticated.
+     *
      * @return \fkooman\SAML\SP\Assertion|null
      */
     public function getAndVerifyAssertion(AuthOptions $authOptions = null)

@@ -66,6 +66,9 @@ class Assertion
     }
 
     /**
+     * Get the issuer, i.e. entityID of the IdP that provided the SAML
+     * assertion.
+     *
      * @return string
      */
     public function getIssuer()
@@ -82,6 +85,8 @@ class Assertion
     }
 
     /**
+     * Get the NameID object.
+     *
      * @return NameId|null
      */
     public function getNameId()
@@ -90,6 +95,8 @@ class Assertion
     }
 
     /**
+     * Get the moment the authentication took place.
+     *
      * @return \DateTime
      */
     public function getAuthnInstant()
@@ -98,6 +105,8 @@ class Assertion
     }
 
     /**
+     * Get the time until which the assertion is valid.
+     *
      * @return \DateTime
      */
     public function getSessionNotOnOrAfter()
@@ -106,6 +115,8 @@ class Assertion
     }
 
     /**
+     * Get the AuthnContext that was granted by the IdP.
+     *
      * @return string
      */
     public function getAuthnContext()
@@ -114,6 +125,9 @@ class Assertion
     }
 
     /**
+     * Get the entityID of the IdP that authenticated the user in case the
+     * IdP is behind a SAML proxy.
+     *
      * @return string|null
      */
     public function getAuthenticatingAuthority()
@@ -122,6 +136,8 @@ class Assertion
     }
 
     /**
+     * Get a list of attributes received from the IdP.
+     *
      * @return array<string,array<string>>
      */
     public function getAttributes()
