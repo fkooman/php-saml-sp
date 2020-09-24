@@ -96,6 +96,7 @@ p.success::before {
 
 summary {
   margin-bottom: 1em;
+  cursor: pointer;
 }
 
 pre {
