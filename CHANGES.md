@@ -1,6 +1,6 @@
 # ChangeLog
 
-## 0.5.8 (...)
+## 0.5.8 (2020-10-01)
 - fix `PublicKey::getFingerprint()` on PHP 5.4
 - change mouse cursor to pointer when hovering `<details>`
 - add API documentation
