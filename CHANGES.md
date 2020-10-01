@@ -1,8 +1,8 @@
 # ChangeLog
 
 ## 0.5.8 (...)
-- fix PublicKey::getFingerprint() on PHP 5.4
-- change mouse cursor to pointer when hovering <details>
+- fix `PublicKey::getFingerprint()` on PHP 5.4
+- change mouse cursor to pointer when hovering `<details>`
 - add API documentation
 - add API method docblocks
 
