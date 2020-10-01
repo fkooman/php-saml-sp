@@ -1,5 +1,11 @@
 # ChangeLog
 
+## 0.5.8 (...)
+- fix PublicKey::getFingerprint() on PHP 5.4
+- change mouse cursor to pointer when hovering <details>
+- add API documentation
+- add API method docblocks
+
 ## 0.5.7 (2020-08-31)
 - implement `http://www.w3.org/2009/xmlenc11#aes128-gcm`, as per saml2int
 - add manual install instructions
