@@ -25,6 +25,7 @@
 namespace fkooman\SAML\SP;
 
 use fkooman\SAML\SP\Exception\KeyException;
+use ParagonIE\ConstantTime\Base64;
 use RuntimeException;
 
 class PublicKey
@@ -114,8 +115,8 @@ class PublicKey
     public function getFingerprint()
     {
         return [
-            'SHA-1' => \openssl_x509_fingerprint($this->pemStr, 'sha1', true),
-            'SHA-256' => \openssl_x509_fingerprint($this->pemStr, 'sha256', true),
+            'SHA-1' => \hash('sha1', Base64::decode($this->toEncodedString()), true),
+            'SHA-256' => \hash('sha256', Base64::decode($this->toEncodedString()), true),
         ];
     }
 
