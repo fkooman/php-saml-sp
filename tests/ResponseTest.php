@@ -46,6 +46,7 @@ class ResponseTest extends TestCase
                 'http://localhost:8081/metadata',
                 CryptoKeys::load(__DIR__.'/data/certs'),
                 'http://localhost:8081/acs',
+                'http://localhost:8081/slo',
                 false,
                 ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
             ),
@@ -94,6 +95,7 @@ class ResponseTest extends TestCase
                 'https://labrat.eduvpn.nl/saml',
                 CryptoKeys::load(__DIR__.'/data/certs'),
                 'https://labrat.eduvpn.nl/saml/postResponse',
+                'https://labrat.eduvpn.nl/saml/postResponse',
                 false,
                 ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
             ),
@@ -136,6 +138,7 @@ class ResponseTest extends TestCase
                 new SpInfo(
                     'https://labrat.eduvpn.nl/saml',
                     CryptoKeys::load(__DIR__.'/data/certs'),
+                    'https://labrat.eduvpn.nl/saml/postResponse',
                     'https://labrat.eduvpn.nl/saml/postResponse',
                     false,
                     ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
@@ -193,6 +196,7 @@ class ResponseTest extends TestCase
                     'http://localhost:8081/metadata',
                     CryptoKeys::load(__DIR__.'/data/certs'),
                     'http://localhost:8081/acs',
+                    'http://localhost:8081/slo',
                     false,
                     ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
                 ),
@@ -218,6 +222,7 @@ class ResponseTest extends TestCase
                     'http://localhost:8081/metadata',
                     CryptoKeys::load(__DIR__.'/data/certs'),
                     'http://localhost:8081/acs',
+                    'http://localhost:8081/slo',
                     false,
                     ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
                 ),
@@ -243,6 +248,7 @@ class ResponseTest extends TestCase
                     'http://localhost:8081/metadata',
                     CryptoKeys::load(__DIR__.'/data/certs'),
                     'http://localhost:8081/acs',
+                    'http://localhost:8081/slo',
                     false,
                     ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
                 ),
@@ -268,6 +274,7 @@ class ResponseTest extends TestCase
                     'http://localhost:8081/metadata',
                     CryptoKeys::load(__DIR__.'/data/certs'),
                     'http://localhost:8081/acs',
+                    'http://localhost:8081/slo',
                     false,
                     ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
                 ),
@@ -293,6 +300,7 @@ class ResponseTest extends TestCase
                     'http://localhost:8081/metadata',
                     CryptoKeys::load(__DIR__.'/data/certs'),
                     'http://localhost:8081/acs',
+                    'http://localhost:8081/slo',
                     false,
                     ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
                 ),
@@ -346,6 +354,7 @@ class ResponseTest extends TestCase
                     'https://kluitje.eduvpn.nl/saml',
                     CryptoKeys::load(__DIR__.'/data/certs'),
                     'https://kluitje.eduvpn.nl/portal/_saml/acs',
+                    'https://kluitje.eduvpn.nl/portal/_saml/slo',
                     false,
                     ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
                 ),
@@ -370,6 +379,7 @@ class ResponseTest extends TestCase
                 'https://demo.eduvpn.nl/saml',
                 CryptoKeys::load(__DIR__.'/data/certs'),
                 'https://demo.eduvpn.nl/portal/_saml/acs',
+                'https://demo.eduvpn.nl/portal/_saml/slo',
                 false,
                 ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
             ),
@@ -395,6 +405,7 @@ class ResponseTest extends TestCase
                 'http://localhost:8081/metadata',
                 CryptoKeys::load(__DIR__.'/data/certs'),
                 'http://localhost:8081/acs',
+                'http://localhost:8081/slo',
                 false,
                 ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
             ),
@@ -447,6 +458,7 @@ class ResponseTest extends TestCase
                 'http://localhost:8081/metadata',
                 CryptoKeys::load(__DIR__.'/data/certs'),
                 'http://localhost:8081/acs',
+                'http://localhost:8081/slo',
                 false,
                 ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
             ),
@@ -503,6 +515,7 @@ class ResponseTest extends TestCase
                 'https://vpn.tuxed.net/vpn-user-portal/_saml/metadata',
                 CryptoKeys::load(__DIR__.'/data/certs2'),
                 'https://vpn.tuxed.net/vpn-user-portal/_saml/acs',
+                'https://vpn.tuxed.net/vpn-user-portal/_saml/slo',
                 true,
                 ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
             ),

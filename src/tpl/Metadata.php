@@ -28,9 +28,7 @@
       <md:EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"/>
     </md:KeyDescriptor>
 <?php endif; ?>
-<?php if (null !== $spInfo->getSloUrl()): ?>
     <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="<?=$spInfo->getSloUrl(); ?>"/>
-<?php endif; ?>
     <md:AssertionConsumerService index="0" Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="<?=$spInfo->getAcsUrl(); ?>"/>
   </md:SPSSODescriptor>
 </md:EntityDescriptor>

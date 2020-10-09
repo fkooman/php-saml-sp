@@ -49,10 +49,10 @@ class SPTest extends TestCase
             'http://localhost:8081/metadata',
             CryptoKeys::load(__DIR__.'/data'),
             'http://localhost:8081/acs',
+            'http://localhost:8081/slo',
             false,
             ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
         );
-        $spInfo->setSloUrl('http://localhost:8081/slo');
         $this->sp = new TestSP(
             $spInfo,
             new MetadataSource(new NullLogger(), __DIR__.'/data/metadata', \sys_get_temp_dir(), []),

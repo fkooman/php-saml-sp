@@ -89,10 +89,10 @@ try {
         // AuthnRequest / LogoutRequest / Decryption <EncryptedAssertion>
         CryptoKeys::load($baseDir.'/keys'),
         $request->getRootUri().'acs',
+        $request->getRootUri().'slo',
         $config->getRequireEncryption(),
         $config->getServiceNames()
     );
-    $spInfo->setSloUrl($request->getRootUri().'slo');
     $sp = new SP($spInfo, $idpSource, $seSession);
     $service = new Service($config, $tpl, $sp, $seCookie);
     $request = new Request($_SERVER, $_GET, $_POST);

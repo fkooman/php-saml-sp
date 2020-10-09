@@ -190,10 +190,6 @@ class SP
             // IdP does not support logout, nothing we can do about it
             return $returnTo;
         }
-        if (null === $this->spInfo->getSloUrl()) {
-            // SP does not support logout, do not redirect to IdP
-            return $returnTo;
-        }
 
         $requestId = \sprintf('_%s', Hex::encode($this->random->requestId()));
         $logoutRequest = $this->tpl->render(
@@ -223,10 +219,6 @@ class SP
      */
     public function handleLogoutResponse($queryString)
     {
-        if (null === $spSloUrl = $this->spInfo->getSloUrl()) {
-            throw new SpException('SP does not support SLO');
-        }
-
         $queryParameters = new QueryParameters($queryString);
         $relayState = $queryParameters->requireQueryParameter('RelayState');
 
@@ -248,7 +240,7 @@ class SP
         $logoutResponse->verify(
             $queryParameters,
             $logoutRequestState->getRequestId(),
-            $spSloUrl,
+            $this->spInfo->getSloUrl(),
             $idpInfo
         );
 

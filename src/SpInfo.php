@@ -38,8 +38,8 @@ class SpInfo
     /** @var string */
     private $acsUrl;
 
-    /** @var string|null */
-    private $sloUrl = null;
+    /** @var string */
+    private $sloUrl;
 
     /** @var bool */
     private $requireEncryption;
@@ -50,14 +50,16 @@ class SpInfo
     /**
      * @param string               $entityId          SP entityID
      * @param string               $acsUrl            AssertionConsumerService URL
+     * @param string               $sloUrl            SingleLogoutService URL
      * @param bool                 $requireEncryption
      * @param array<string,string> $displayNameList
      */
-    public function __construct($entityId, CryptoKeys $cryptoKeys, $acsUrl, $requireEncryption, array $displayNameList)
+    public function __construct($entityId, CryptoKeys $cryptoKeys, $acsUrl, $sloUrl, $requireEncryption, array $displayNameList)
     {
         $this->entityId = $entityId;
         $this->cryptoKeys = $cryptoKeys;
         $this->acsUrl = $acsUrl;
+        $this->sloUrl = $sloUrl;
         $this->requireEncryption = $requireEncryption;
         $this->displayNameList = $displayNameList;
     }
@@ -89,21 +91,9 @@ class SpInfo
     }
 
     /**
-     * Set SingleLogout URL.
-     *
-     * @param string $sloUrl
-     *
-     * @return void
-     */
-    public function setSloUrl($sloUrl)
-    {
-        $this->sloUrl = $sloUrl;
-    }
-
-    /**
      * Get SingleLogout URL.
      *
-     * @return string|null
+     * @return string
      */
     public function getSloUrl()
     {
