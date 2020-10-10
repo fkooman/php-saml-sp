@@ -220,7 +220,10 @@ class MetadataSource implements IdpSourceInterface
             // time, if available from server to be used on future requests as
             // the "If-Modified-Since" header value
             $lastModifiedDateTime = new DateTime($lastModified);
-            \touch($metadataFile, $lastModifiedDateTime->getTimestamp());
+            if (false === $lastModifiedTimestamp = $lastModifiedDateTime->getTimestamp()) {
+                $lastModifiedTimestamp = 0; // 1970-01-01
+            }
+            \touch($metadataFile, $lastModifiedTimestamp);
         }
         $this->writeRefreshAt($metadataFile, $metadataDocument);
         $this->logger->notice(\sprintf('[%s] metadata updated', $metadataUrl));
@@ -303,7 +306,8 @@ class MetadataSource implements IdpSourceInterface
         if (null === $cacheDuration = $metadataDocument->optionalOneDomAttrValue('self::node()/@cacheDuration')) {
             $cacheDuration = self::DEFAULT_CACHE_DURATION;
         }
-        $refreshAt = \date_add(clone $this->dateTime, new DateInterval($cacheDuration));
+        $refreshAt = clone $this->dateTime;
+        $refreshAt->add(new DateInterval($cacheDuration));
         if (false === \file_put_contents($metadataFile.self::REFRESH_AT_SUFFIX, $refreshAt->format(DateTime::ATOM))) {
             throw new RuntimeException(\sprintf('unable to write "%s"', $metadataFile.self::REFRESH_AT_SUFFIX));
         }
