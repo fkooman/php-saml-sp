@@ -155,9 +155,22 @@ class Crypto
         $assertionCipherValue = Base64::decode(self::removeWhiteSpace($xmlDocument->requireOneDomElementTextContent('/samlp:Response/saml:EncryptedAssertion/xenc:EncryptedData/xenc:CipherData/xenc:CipherValue')));
 
         // @see https://www.w3.org/TR/xmlenc-core1/#sec-AES-GCM
-        $messageIv = \substr($assertionCipherValue, 0, CryptoParameters::getIvLength($encryptionMethod)); // IV (first 96 bits)
-        $messageTag = \substr($assertionCipherValue, \strlen($assertionCipherValue) - CryptoParameters::getTagLength($encryptionMethod)); // Tag (last 128 bits)
-        $cipherText = \substr($assertionCipherValue, CryptoParameters::getIvLength($encryptionMethod), -CryptoParameters::getTagLength($encryptionMethod)); // CipherText (between IV and Tag)
+
+        // IV (first 96 bits)
+        $messageIv = self::expectStringWithLen(
+            \substr($assertionCipherValue, 0, CryptoParameters::getIvLength($encryptionMethod)),
+            CryptoParameters::getIvLength($encryptionMethod)
+        );
+        // Tag (last 128 bits)
+        $messageTag = self::expectStringWithLen(
+            \substr($assertionCipherValue, \strlen($assertionCipherValue) - CryptoParameters::getTagLength($encryptionMethod)),
+            CryptoParameters::getTagLength($encryptionMethod)
+        );
+        // CipherText (between IV and Tag)
+        $cipherText = self::expectStringWithLen(
+            \substr($assertionCipherValue, CryptoParameters::getIvLength($encryptionMethod), -CryptoParameters::getTagLength($encryptionMethod)),
+            \strlen($assertionCipherValue) - CryptoParameters::getIvLength($encryptionMethod) - CryptoParameters::getTagLength($encryptionMethod)
+        );
         if (false === $decryptedAssertion = \openssl_decrypt($cipherText, CryptoParameters::getOpenSslAlgorithm($encryptionMethod), $symmetricEncryptionKey, OPENSSL_RAW_DATA, $messageIv, $messageTag)) {
             throw new CryptoException('unable to decrypt data');
         }
@@ -235,5 +248,23 @@ class Crypto
         // we do NOT follow the exact rules for white space removal, because
         // they are insane...
         return \str_replace(["\x09", "\x0a", "\x0d", "\x20"], '', $inputStr);
+    }
+
+    /**
+     * @param mixed $inputData
+     * @param int   $expectedLength
+     *
+     * @return string
+     */
+    private static function expectStringWithLen($inputData, $expectedLength)
+    {
+        if (!\is_string($inputData)) {
+            throw new CryptoException('"string" expected');
+        }
+        if ($expectedLength !== \strlen($inputData)) {
+            throw new CryptoException('unexpected "string" length');
+        }
+
+        return $inputData;
     }
 }
