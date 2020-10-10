@@ -216,7 +216,10 @@ class XmlDocument
         // the namespaces declared on parent documents and thus result in
         // a broken document...
         $domDocument = new DOMDocument('1.0', 'UTF-8');
-        $domDocument->appendChild($domDocument->importNode($domElement, true));
+        if (false === $importedNode = $domDocument->importNode($domElement, true)) {
+            throw new XmlDocumentException('unable to import node');
+        }
+        $domDocument->appendChild($importedNode);
         if (false === $xmlString = $domDocument->saveXML()) {
             throw new XmlDocumentException('unable to convert XML to string');
         }
