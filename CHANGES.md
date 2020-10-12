@@ -1,5 +1,11 @@
 # ChangeLog
 
+## 0.5.9 (2020-10-12)
+- `sloUrl` is no longer optional
+- make sure `substr` returns the expected number of bytes
+- check return value of `DOMDocument::importNode`
+- some small `DateTime` type fixes
+
 ## 0.5.8 (2020-10-01)
 - fix `PublicKey::getFingerprint()` on PHP 5.4
 - change mouse cursor to pointer when hovering `<details>`
