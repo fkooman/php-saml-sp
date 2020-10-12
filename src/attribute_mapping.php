@@ -100,7 +100,7 @@ return [
     'urn:oid:2.16.840.1.113730.3.1.39' => 'preferredLanguage',
     'urn:oid:2.16.840.1.113730.3.1.40' => 'userSMIMECertificate',
     'urn:oid:2.16.840.1.113730.3.1.241' => 'displayName',
-    'urn:oid::2.5.4.9' => 'street',
+    'urn:oid:2.5.4.9' => 'street',
     'urn:oasis:names:tc:SAML:attribute:pairwise-id' => 'pairwise-id',
     'urn:oasis:names:tc:SAML:attribute:subject-id' => 'subject-id',
 ];
