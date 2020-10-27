@@ -43,5 +43,5 @@ if (null !== $nameId = $samlAssertion->getNameId()) {
     echo \htmlentities($nameId->toXml()).'<br>';
 }
 foreach ($samlAssertion->getAttributes() as $k => $v) {
-    echo $k.': '.\implode(',', $v).'<br>';
+    echo \htmlentities($k.': '.\implode(',', $v)).'<br>';
 }
