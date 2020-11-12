@@ -349,7 +349,7 @@ EOF;
         $this->assertSame(\sprintf('http://localhost:8080/slo.php?%s&%s', $httpQuery, $signatureQuery), $sloUrl);
     }
 
-    public function testHandleLogoutResponse()
+    public function testHandleLogout()
     {
         $logoutResponse = \file_get_contents(__DIR__.'/data/assertion/LogoutResponse.xml');
         $session = new TestSession();
@@ -365,7 +365,7 @@ EOF;
                 'Signature' => 'MNvAlJmSRH0PpRNpVLt4/diLRhi7LjV986I0ZL+VXMSxsEnd197D7H/xG4EpdpiA4n+BWPyPIhlvq3xCjcr1SI3UJ53NKYyOfTUq62c+Cz6ZmSmq3ttpw5VvSf8slUd/jfNs7NfdT80V7mo992DZjzE8DBoTzUS+ByrJCfkhiPrpjc2TwiL4X6XZ80DD51k4tdQyDVbgBCnw/AlIljzhodIzg+PQp89LkAXx+4wbsxy1pqltxOhZ2toE91SPzuVYPKJQXlFVLqaGPegU+9yJCtf676KNoJ19lxtKXigBZzEouJ72p/Tsxsa+gQI47YadTOP9a3KQSE1IHYeFYzg/EsbU5RqhLPYyFksSEY+a4VNenoIWbC7X3UMj8BTMrmtE+dqQgaJ/RhhCr+lwbtNCOqJ2l9h8bc5Nrq8ycgM6l0iR+h4AFpIYl3XdPcebNu90Sn8LNFQu+30vf9QT21VFQQmo2yKnYBUwyPbW8WgTVX+/JihlpnGjuRadY7efcHEK',
             ]
         );
-        $returnTo = $this->sp->handleLogoutResponse($queryString);
+        $returnTo = $this->sp->handleLogout($queryString);
         $this->assertSame('http://localhost:8081/', $returnTo);
         $this->assertNull($session->get(TestSP::SESSION_KEY_PREFIX.'+/M7/sd8CgDR7BXVpw2lqgsalw54taH0E2eYa2RrZcI='));
     }

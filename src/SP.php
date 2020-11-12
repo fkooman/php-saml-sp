@@ -217,9 +217,77 @@ class SP
      *
      * @return string
      */
-    public function handleLogoutResponse($queryString)
+    public function handleLogout($queryString)
     {
         $queryParameters = new QueryParameters($queryString);
+        if ($queryParameters->hasQueryParameter('SAMLResponse')) {
+            // LogoutResponse
+            return $this->handleLogoutResponse($queryParameters);
+        }
+        if ($queryParameters->hasQueryParameter('SAMLRequest')) {
+            // LogoutRequest
+            return $this->handleLogoutRequest($queryParameters);
+        }
+
+        throw new SpException('neither "SAMLRequest" nor "SAMLResponse" query parameter provided');
+    }
+
+    /**
+     * @throws \fkooman\SAML\SP\Exception\SpException
+     *
+     * @return string
+     */
+    public function handleLogoutRequest(QueryParameters $queryParameters)
+    {
+//    <samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
+//                     xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
+//                     Version="2.0"
+//                     IssueInstant="2020-10-12T18:13:04Z"
+//                     ID="_kvpZIWx3fYCBe6pzA1kYwcKwG3D9"
+//                     Destination="https://vpn.deic.dk/php-saml-sp/slo"
+//                     >
+//    <saml:Issuer>http://sts.ait.dtu.dk/adfs/services/trust</saml:Issuer>
+//    <saml:NameID Format="urn:oasis:names:tc:SAML:2.0:nameid-format:transient"
+//                 SPNameQualifier="https://vpn.deic.dk/php-saml-sp/metadata"
+//                 >_Nypo5_G06wuBBXHVueoqlRgQy9o3</saml:NameID>
+//    <samlp:SessionIndex>_r6UCnQCK6nbopBikk-a-0ks9VPp7</samlp:SessionIndex>
+        //</samlp:LogoutRequest>
+
+//        $relayState = $queryParameters->optionalQueryParameter('RelayState');
+
+        $relayState = $queryParameters->requireQueryParameter('RelayState');
+
+        // create a LogoutResponse
+        // verify the LogoutRequest, and log the user out somehow if all is
+        // correct based on NameID / Issuer so we have to get the NameID from the
+        // active session and match it, if it matches that's great.
+
+        // we need to return logoutresponse to idp full URL with encoded response etc.
+
+        //<samlp:LogoutResponse xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
+//                      xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
+//                      ID="_9f466b235abca18cfb7c419cac82ed7cb184418691d10c2994b256695c6c1615"
+//                      Version="2.0"
+//                      IssueInstant="2020-10-20T09:15:27Z"
+//                      Destination="https://vpn.tuxed.net/php-saml-sp/slo"
+//                      InResponseTo="_d58f0d727c7abf00d4c0666bc1742d0790f8a8394e2606b0ad0c3358a5015013"
+//                      >
+//    <saml:Issuer>https://idp.tuxed.net/metadata</saml:Issuer>
+//    <samlp:Status>
+//        <samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success" />
+//    </samlp:Status>
+        //</samlp:LogoutResponse>
+
+        return 'XXX';
+    }
+
+    /**
+     * @throws \fkooman\SAML\SP\Exception\SpException
+     *
+     * @return string
+     */
+    public function handleLogoutResponse(QueryParameters $queryParameters)
+    {
         $relayState = $queryParameters->requireQueryParameter('RelayState');
 
         if (null === $sessionValue = $this->session->take(self::SESSION_KEY_PREFIX.$relayState)) {

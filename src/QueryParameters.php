@@ -63,6 +63,16 @@ class QueryParameters
 
     /**
      * @param string $parameterName
+     *
+     * @return bool
+     */
+    public function hasQueryParameter($parameterName)
+    {
+        return \array_key_exists($parameterName, $this->queryData);
+    }
+
+    /**
+     * @param string $parameterName
      * @param bool   $rawValue
      *
      * @throws \fkooman\SAML\SP\Exception\QueryParametersException
@@ -86,7 +96,7 @@ class QueryParameters
      */
     public function optionalQueryParameter($parameterName, $rawValue = false)
     {
-        if (!\array_key_exists($parameterName, $this->queryData)) {
+        if (!$this->hasQueryParameter($parameterName)) {
             return null;
         }
 

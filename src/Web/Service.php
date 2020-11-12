@@ -204,7 +204,7 @@ class Service
             case '/slo':
                 // we need the "raw" query string to be able to verify the
                 // signatures...
-                $returnTo = $this->sp->handleLogoutResponse($request->getQueryString());
+                $returnTo = $this->sp->handleLogout($request->getQueryString());
 
                 return new RedirectResponse($returnTo);
             default:
