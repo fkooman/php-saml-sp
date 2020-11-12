@@ -110,6 +110,13 @@ class Service
         if (!\array_key_exists('scheme', $parsedUrl) || !\array_key_exists('host', $parsedUrl)) {
             throw new HttpException(400, 'invalid "ReturnTo" provided');
         }
+
+        // we do NOT accept any user/pass to be part of the URL to avoid
+        // normalization issues (DEC-01-001 WP1)
+        if (\array_key_exists('user', $parsedUrl) || \array_key_exists('pass', $parsedUrl)) {
+            throw new HttpException(400, 'invalid "ReturnTo" provided');
+        }
+
         $urlConstruction = $parsedUrl['scheme'].'://'.$parsedUrl['host'];
         if (\array_key_exists('port', $parsedUrl)) {
             $urlConstruction .= ':'.(string) $parsedUrl['port'];

@@ -44,4 +44,11 @@ class ServiceTest extends TestCase
         $this->expectExceptionMessage('invalid "ReturnTo" provided');
         Service::verifyReturnToOrigin('https://www.example.org', 'https://www.example.com/foo?a=b');
     }
+
+    public function testInvalidReturnToOriginUser()
+    {
+        $this->expectException(HttpException::class);
+        $this->expectExceptionMessage('invalid "ReturnTo" provided');
+        Service::verifyReturnToOrigin('https://www.example.org', 'https://a\@www.example.org/foo?a=b');
+    }
 }
