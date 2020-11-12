@@ -90,6 +90,39 @@ class Service
     }
 
     /**
+     * @param string $expectedOrigin
+     * @param string $returnTo
+     *
+     * @return string
+     */
+    public static function verifyReturnToOrigin($expectedOrigin, $returnTo)
+    {
+        // Origin is scheme://host[:port]
+        if (false === \filter_var($returnTo, FILTER_VALIDATE_URL)) {
+            throw new HttpException(400, 'invalid "ReturnTo" provided');
+        }
+        if (false === $parsedUrl = \parse_url($returnTo)) {
+            throw new HttpException(400, 'invalid "ReturnTo" provided');
+        }
+
+        // the filter_var FILTER_VALIDATE_URL make sure scheme and host are
+        // there, but just to make absolutely sure...
+        if (!\array_key_exists('scheme', $parsedUrl) || !\array_key_exists('host', $parsedUrl)) {
+            throw new HttpException(400, 'invalid "ReturnTo" provided');
+        }
+        $urlConstruction = $parsedUrl['scheme'].'://'.$parsedUrl['host'];
+        if (\array_key_exists('port', $parsedUrl)) {
+            $urlConstruction .= ':'.(string) $parsedUrl['port'];
+        }
+
+        if ($expectedOrigin !== $urlConstruction) {
+            throw new HttpException(400, 'invalid "ReturnTo" provided');
+        }
+
+        return $returnTo;
+    }
+
+    /**
      * @return Response
      */
     private function runGet(Request $request)
@@ -266,39 +299,6 @@ class Service
         }
 
         return $availableIdpInfoList;
-    }
-
-    /**
-     * @param string $expectedOrigin
-     * @param string $returnTo
-     *
-     * @return string
-     */
-    private static function verifyReturnToOrigin($expectedOrigin, $returnTo)
-    {
-        // Origin is scheme://host[:port]
-        if (false === \filter_var($returnTo, FILTER_VALIDATE_URL)) {
-            throw new HttpException(400, 'invalid "ReturnTo" provided');
-        }
-        if (false === $parsedUrl = \parse_url($returnTo)) {
-            throw new HttpException(400, 'invalid "ReturnTo" provided');
-        }
-
-        // the filter_var FILTER_VALIDATE_URL make sure scheme and host are
-        // there, but just to make absolutely sure...
-        if (!\array_key_exists('scheme', $parsedUrl) || !\array_key_exists('host', $parsedUrl)) {
-            throw new HttpException(400, 'invalid "ReturnTo" provided');
-        }
-        $urlConstruction = $parsedUrl['scheme'].'://'.$parsedUrl['host'];
-        if (\array_key_exists('port', $parsedUrl)) {
-            $urlConstruction .= ':'.(string) $parsedUrl['port'];
-        }
-
-        if ($expectedOrigin !== $urlConstruction) {
-            throw new HttpException(400, 'invalid "ReturnTo" provided');
-        }
-
-        return $returnTo;
     }
 
     /**
