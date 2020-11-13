@@ -67,7 +67,9 @@ class Crypto
         $digestValue = self::removeWhiteSpace($xmlDocument->requireOneDomElementTextContent('self::node()/ds:Signature/ds:SignedInfo/ds:Reference/ds:DigestValue'));
 
         $signedInfoElement = $xmlDocument->requireOneDomElement('self::node()/ds:Signature/ds:SignedInfo');
-        $canonicalSignedInfo = $signedInfoElement->C14N(true, false);
+        if (false === $canonicalSignedInfo = $signedInfoElement->C14N(true, false)) {
+            throw new CryptoException('unable to canonicalize node');
+        }
         $signatureElement = $xmlDocument->requireOneDomElement('self::node()/ds:Signature');
         $rootElement = $xmlDocument->requireOneDomElement('self::node()');
         $rootElement->removeChild($signatureElement);
@@ -229,11 +231,19 @@ class Crypto
         // @see https://groups.google.com/forum/#!msg/simplesamlphp/b6fTf53iq4w/uNhw_NBNzxkJ
         if (null !== $ownerDocument = $domElement->ownerDocument) {
             if ($domElement === $ownerDocument->documentElement) {
-                return $ownerDocument->C14N(true, false);
+                if (false === $canonicalElement = $ownerDocument->C14N(true, false)) {
+                    throw new CryptoException('unable to canonicalize node');
+                }
+
+                return $canonicalElement;
             }
         }
 
-        return $domElement->C14N(true, false);
+        if (false === $canonicalElement = $domElement->C14N(true, false)) {
+            throw new CryptoException('unable to canonicalize node');
+        }
+
+        return $canonicalElement;
     }
 
     /**
