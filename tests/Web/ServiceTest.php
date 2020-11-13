@@ -34,21 +34,21 @@ class ServiceTest extends TestCase
     {
         $this->assertSame(
             'https://www.example.org/foo?a=b',
-            Service::verifyReturnToOrigin('https://www.example.org', 'https://www.example.org/foo?a=b')
+            Service::verifyMatchesOrigin('https://www.example.org', 'https://www.example.org/foo?a=b')
         );
     }
 
     public function testInvalidReturnToOrigin()
     {
         $this->expectException(HttpException::class);
-        $this->expectExceptionMessage('invalid "ReturnTo" provided');
-        Service::verifyReturnToOrigin('https://www.example.org', 'https://www.example.com/foo?a=b');
+        $this->expectExceptionMessage('URL does not match Origin');
+        Service::verifyMatchesOrigin('https://www.example.org', 'https://www.example.com/foo?a=b');
     }
 
     public function testInvalidReturnToOriginUser()
     {
         $this->expectException(HttpException::class);
-        $this->expectExceptionMessage('invalid "ReturnTo" provided');
-        Service::verifyReturnToOrigin('https://www.example.org', 'https://a\@www.example.org/foo?a=b');
+        $this->expectExceptionMessage('URL must not contain authentication information');
+        Service::verifyMatchesOrigin('https://www.example.org', 'https://a\@www.example.org/foo?a=b');
     }
 }

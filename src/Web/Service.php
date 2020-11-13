@@ -90,43 +90,35 @@ class Service
     }
 
     /**
-     * @param string $expectedOrigin
-     * @param string $returnTo
+     * @param string $httpOrigin
+     * @param string $urlToMatch
      *
      * @return string
      */
-    public static function verifyReturnToOrigin($expectedOrigin, $returnTo)
+    public static function verifyMatchesOrigin($httpOrigin, $urlToMatch)
     {
-        // Origin is scheme://host[:port]
-        if (false === \filter_var($returnTo, FILTER_VALIDATE_URL)) {
-            throw new HttpException(400, 'invalid "ReturnTo" provided');
+        $urlScheme = \parse_url($urlToMatch, PHP_URL_SCHEME);
+        if ('https' !== $urlScheme && 'http' !== $urlScheme) {
+            throw new HttpException(400, 'URL scheme not supported');
         }
-        if (false === $parsedUrl = \parse_url($returnTo)) {
-            throw new HttpException(400, 'invalid "ReturnTo" provided');
+        if (null !== \parse_url($urlToMatch, PHP_URL_USER)) {
+            // URL MUST NOT contain authentication information (DEC-01-001 WP1)
+            throw new HttpException(400, 'URL must not contain authentication information');
         }
-
-        // the filter_var FILTER_VALIDATE_URL make sure scheme and host are
-        // there, but just to make absolutely sure...
-        if (!\array_key_exists('scheme', $parsedUrl) || !\array_key_exists('host', $parsedUrl)) {
-            throw new HttpException(400, 'invalid "ReturnTo" provided');
+        $urlHost = \parse_url($urlToMatch, PHP_URL_HOST);
+        if (!\is_string($urlHost)) {
+            throw new HttpException(400, 'malformed URL host');
         }
-
-        // we do NOT accept any user/pass to be part of the URL to avoid
-        // normalization issues (DEC-01-001 WP1)
-        if (\array_key_exists('user', $parsedUrl) || \array_key_exists('pass', $parsedUrl)) {
-            throw new HttpException(400, 'invalid "ReturnTo" provided');
+        $constructedUrl = $urlScheme.'://'.$urlHost;
+        if (null !== $urlPort = \parse_url($urlToMatch, PHP_URL_PORT)) {
+            $constructedUrl .= ':'.(string) $urlPort;
         }
 
-        $urlConstruction = $parsedUrl['scheme'].'://'.$parsedUrl['host'];
-        if (\array_key_exists('port', $parsedUrl)) {
-            $urlConstruction .= ':'.(string) $parsedUrl['port'];
+        if ($httpOrigin !== $constructedUrl) {
+            throw new HttpException(400, 'URL does not match Origin');
         }
 
-        if ($expectedOrigin !== $urlConstruction) {
-            throw new HttpException(400, 'invalid "ReturnTo" provided');
-        }
-
-        return $returnTo;
+        return $urlToMatch;
     }
 
     /**
@@ -164,7 +156,7 @@ class Service
                 );
             case '/login':
                 $availableIdpInfoList = $this->getAvailableIdpInfoList();
-                $returnTo = self::verifyReturnToOrigin($request->getOrigin(), $request->requireQueryParameter('ReturnTo'));
+                $returnTo = self::verifyMatchesOrigin($request->getOrigin(), $request->requireQueryParameter('ReturnTo'));
                 $authnContextClassRef = self::verifyAuthnContextClassRef($request->optionalQueryParameter('AuthnContextClassRef'));
                 $scopingIdpList = self::verifyScopingIdpList($request->optionalQueryParameter('ScopingIdpList'));
                 if (1 === \count($availableIdpInfoList)) {
@@ -231,7 +223,7 @@ class Service
                 );
             // user triggered logout
             case '/logout':
-                $returnTo = self::verifyReturnToOrigin($request->getOrigin(), $request->requireQueryParameter('ReturnTo'));
+                $returnTo = self::verifyMatchesOrigin($request->getOrigin(), $request->requireQueryParameter('ReturnTo'));
 
                 return new RedirectResponse($this->sp->logout($returnTo));
             // exposes the SP metadata for IdP consumption
@@ -269,7 +261,7 @@ class Service
                 // in the metadata (or allowed) as the GET to /login where this
                 // POST will redirect to will take care of this...
                 $this->cookie->set(self::LAST_CHOSEN_COOKIE_NAME, $idpEntityId);
-                $returnTo = self::verifyReturnToOrigin($request->getOrigin(), $request->getUri());
+                $returnTo = self::verifyMatchesOrigin($request->getOrigin(), $request->getUri());
 
                 return new RedirectResponse($returnTo.'&'.\http_build_query(['IdP' => $idpEntityId]));
             case '/setLanguage':
@@ -277,7 +269,7 @@ class Service
                 // will be verified by Tpl::setLanguage. User can provide any
                 // cookie value anyway!
                 $this->cookie->set('L', $request->requirePostParameter('uiLanguage'));
-                $returnTo = self::verifyReturnToOrigin($request->getOrigin(), $request->requireHeader('HTTP_REFERER'));
+                $returnTo = self::verifyMatchesOrigin($request->getOrigin(), $request->requireHeader('HTTP_REFERER'));
 
                 return new RedirectResponse($returnTo);
             default:
