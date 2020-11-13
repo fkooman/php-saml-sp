@@ -58,4 +58,16 @@ class Template
 
         return \trim($bufferData);
     }
+
+    /**
+     * Escaper for output in XML.
+     *
+     * @param string $v
+     *
+     * @return string
+     */
+    private function xe($v)
+    {
+        return \htmlspecialchars($v, ENT_XML1 | ENT_QUOTES, 'UTF-8');
+    }
 }

@@ -3,7 +3,7 @@
 <?php if (0 !== \count($AuthnContextClassRef)): ?>
   <samlp:RequestedAuthnContext Comparison="exact">
 <?php foreach ($AuthnContextClassRef as $v): ?>
-    <saml:AuthnContextClassRef><?=$v; ?></saml:AuthnContextClassRef>
+    <saml:AuthnContextClassRef><?=$this->xe($v); ?></saml:AuthnContextClassRef>
 <?php endforeach; ?>
   </samlp:RequestedAuthnContext>
 <?php endif; ?>
@@ -11,7 +11,7 @@
   <samlp:Scoping>
     <samlp:IDPList>
 <?php foreach ($ScopingIdpList as $ScopingIdp): ?>
-      <samlp:IDPEntry ProviderID="<?=$ScopingIdp; ?>"/>
+      <samlp:IDPEntry ProviderID="<?=$this->xe($ScopingIdp); ?>"/>
 <?php endforeach; ?>
     </samlp:IDPList>
   </samlp:Scoping>
