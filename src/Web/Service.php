@@ -221,11 +221,6 @@ class Service
                         ]
                     )
                 );
-            // user triggered logout
-            case '/logout':
-                $returnTo = self::verifyMatchesOrigin($request->getOrigin(), $request->requireQueryParameter('ReturnTo'));
-
-                return new RedirectResponse($this->sp->logout($returnTo));
             // exposes the SP metadata for IdP consumption
             case '/metadata':
                 // add new line to end of output
@@ -252,24 +247,32 @@ class Service
         switch ($request->getPathInfo()) {
             // callback from IdP containing the "SAMLResponse"
             case '/acs':
+                // we do NOT require CSRF protection here
                 $returnTo = $this->sp->handleResponse($request->requirePostParameter('SAMLResponse'), $request->requirePostParameter('RelayState'));
 
                 return new RedirectResponse($returnTo);
             case '/login':
+                self::verifyMatchesOrigin($request->getOrigin(), $request->requireHeader('HTTP_REFERER'));
+                $returnTo = self::verifyMatchesOrigin($request->getOrigin(), $request->getUri());
                 $idpEntityId = self::verifyEntityId($request->requirePostParameter('IdP'));
                 // we do not have to make sure the IdP is actually available
                 // in the metadata (or allowed) as the GET to /login where this
                 // POST will redirect to will take care of this...
                 $this->cookie->set(self::LAST_CHOSEN_COOKIE_NAME, $idpEntityId);
-                $returnTo = self::verifyMatchesOrigin($request->getOrigin(), $request->getUri());
 
                 return new RedirectResponse($returnTo.'&'.\http_build_query(['IdP' => $idpEntityId]));
+            // user triggered logout
+            case '/logout':
+                self::verifyMatchesOrigin($request->getOrigin(), $request->requireHeader('HTTP_REFERER'));
+                $returnTo = self::verifyMatchesOrigin($request->getOrigin(), $request->requirePostParameter('ReturnTo'));
+
+                return new RedirectResponse($this->sp->logout($returnTo));
             case '/setLanguage':
+                $returnTo = self::verifyMatchesOrigin($request->getOrigin(), $request->requireHeader('HTTP_REFERER'));
                 // we don't care what uiLanguage is, it can be anything, it
                 // will be verified by Tpl::setLanguage. User can provide any
                 // cookie value anyway!
                 $this->cookie->set('L', $request->requirePostParameter('uiLanguage'));
-                $returnTo = self::verifyMatchesOrigin($request->getOrigin(), $request->requireHeader('HTTP_REFERER'));
 
                 return new RedirectResponse($returnTo);
             default:

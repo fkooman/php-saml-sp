@@ -40,7 +40,8 @@
 <?php endforeach; ?>
     </dl>
 <?php endif; ?>
-    <p>
-        <a href="logout?ReturnTo=<?=$logoutReturnTo; ?>"><button><?=$this->t('Logout'); ?></button></a>
-    </p>
+    <form method="post" action="logout">
+        <input type="hidden" name="ReturnTo" value="<?=$logoutReturnTo; ?>">
+        <button><?=$this->t('Logout'); ?></button>
+    </form>
 <?php $this->stop('content'); ?>
