@@ -24,7 +24,6 @@
 
 namespace fkooman\SAML\SP;
 
-use DOMElement;
 use fkooman\SAML\SP\Exception\CryptoException;
 use ParagonIE\ConstantTime\Base64;
 
@@ -67,16 +66,15 @@ class Crypto
         $digestValue = self::removeWhiteSpace($xmlDocument->requireOneDomElementTextContent('self::node()/ds:Signature/ds:SignedInfo/ds:Reference/ds:DigestValue'));
 
         $signedInfoElement = $xmlDocument->requireOneDomElement('self::node()/ds:Signature/ds:SignedInfo');
-        if (false === $canonicalSignedInfo = $signedInfoElement->C14N(true, false)) {
-            throw new CryptoException('unable to canonicalize node');
-        }
+
+        $canonicalSignedInfo = XmlDocument::canonicalizeElement($signedInfoElement);
         $signatureElement = $xmlDocument->requireOneDomElement('self::node()/ds:Signature');
         $rootElement = $xmlDocument->requireOneDomElement('self::node()');
         $rootElement->removeChild($signatureElement);
         $rootElementDigest = Base64::encode(
             \hash(
                 self::SIGN_HASH_ALGO,
-                self::canonicalizeElement($rootElement),
+                XmlDocument::canonicalizeElement($rootElement),
                 true
             )
         );
@@ -219,31 +217,6 @@ class Crypto
         }
 
         return true;
-    }
-
-    /**
-     * @return string
-     */
-    private static function canonicalizeElement(DOMElement $domElement)
-    {
-        // canonicalizing a DOMElement can be *very* slow, however,
-        // canonicalizing a *DOMDocument* is fast in PHP
-        // @see https://groups.google.com/forum/#!msg/simplesamlphp/b6fTf53iq4w/uNhw_NBNzxkJ
-        if (null !== $ownerDocument = $domElement->ownerDocument) {
-            if ($domElement === $ownerDocument->documentElement) {
-                if (false === $canonicalElement = $ownerDocument->C14N(true, false)) {
-                    throw new CryptoException('unable to canonicalize node');
-                }
-
-                return $canonicalElement;
-            }
-        }
-
-        if (false === $canonicalElement = $domElement->C14N(true, false)) {
-            throw new CryptoException('unable to canonicalize node');
-        }
-
-        return $canonicalElement;
     }
 
     /**

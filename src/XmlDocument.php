@@ -228,6 +228,43 @@ class XmlDocument
     }
 
     /**
+     * @return string
+     */
+    public function canonicalizeDocument()
+    {
+        if (false === $canonicalDocument = $this->domXPath->document->C14N(true, false)) {
+            throw new XmlDocumentException('unable to canonicalize document');
+        }
+
+        return $canonicalDocument;
+    }
+
+    /**
+     * @return string
+     */
+    public static function canonicalizeElement(DOMElement $domElement)
+    {
+        // canonicalizing a DOMElement can be *very* slow, however,
+        // canonicalizing a *DOMDocument* is fast in PHP
+        // @see https://groups.google.com/forum/#!msg/simplesamlphp/b6fTf53iq4w/uNhw_NBNzxkJ
+        if (null !== $ownerDocument = $domElement->ownerDocument) {
+            if ($domElement === $ownerDocument->documentElement) {
+                if (false === $canonicalElement = $ownerDocument->C14N(true, false)) {
+                    throw new XmlDocumentException('unable to canonicalize node');
+                }
+
+                return $canonicalElement;
+            }
+        }
+
+        if (false === $canonicalElement = $domElement->C14N(true, false)) {
+            throw new XmlDocumentException('unable to canonicalize node');
+        }
+
+        return $canonicalElement;
+    }
+
+    /**
      * @param string $xPathQuery
      * @param mixed  $inputVar
      *

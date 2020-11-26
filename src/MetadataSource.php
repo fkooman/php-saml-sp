@@ -208,7 +208,16 @@ class MetadataSource implements IdpSourceInterface
         if (false === $tmpFile = \tempnam(\sys_get_temp_dir(), 'php-saml-sp')) {
             throw new RuntimeException('unable to generate a temporary file');
         }
-        if (false === @\file_put_contents($tmpFile, $responseBody)) {
+
+        // as Crypto::verifyXml uses the canonicalized version of the XML
+        // document to verify the signature, we also want to write this
+        // canonicalized version to disk to make sure that what we verify is
+        // what is stored on disk (DEC-01-006 SP)
+        // NOTE: we do canonicalize twice here, once in Crypto::verifyXml and
+        // once here, but as the same algorithm is used this is only a bit
+        // inefficient... as writing metadata is done outside the SAML
+        // authentication flows, it is not *that* important...
+        if (false === @\file_put_contents($tmpFile, $metadataDocument->canonicalizeDocument())) {
             throw new RuntimeException(\sprintf('unable to write "%s"', $tmpFile));
         }
         if (false === @\rename($tmpFile, $metadataFile)) {
