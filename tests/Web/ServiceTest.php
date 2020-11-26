@@ -24,6 +24,7 @@
 
 namespace fkooman\SAML\SP\Tests\Web;
 
+use fkooman\SAML\SP\Web\Exception\HttpException;
 use fkooman\SAML\SP\Web\Service;
 use PHPUnit\Framework\TestCase;
 
@@ -39,15 +40,21 @@ class ServiceTest extends TestCase
 
     public function testInvalidReturnToOrigin()
     {
-        $this->expectException('fkooman\SAML\SP\Web\Exception\HttpException');
-        $this->expectExceptionMessage('URL does not match Origin');
-        Service::verifyMatchesOrigin('https://www.example.org', 'https://www.example.com/foo?a=b');
+        try {
+            Service::verifyMatchesOrigin('https://www.example.org', 'https://www.example.com/foo?a=b');
+            $this->fail();
+        } catch (HttpException $e) {
+            $this->assertSame('URL does not match Origin', $e->getMessage());
+        }
     }
 
     public function testInvalidReturnToOriginUser()
     {
-        $this->expectException('fkooman\SAML\SP\Web\Exception\HttpException');
-        $this->expectExceptionMessage('URL must not contain authentication information');
-        Service::verifyMatchesOrigin('https://www.example.org', 'https://a\@www.example.org/foo?a=b');
+        try {
+            Service::verifyMatchesOrigin('https://www.example.org', 'https://a\@www.example.org/foo?a=b');
+            $this->fail();
+        } catch (HttpException $e) {
+            $this->assertSame('URL must not contain authentication information', $e->getMessage());
+        }
     }
 }
