@@ -253,8 +253,15 @@ class Service
         switch ($request->getPathInfo()) {
             // callback from IdP containing the "SAMLResponse"
             case '/acs':
+                // make sure we can find the "RelayState" in the user's
+                // session, before validating the SAML Assertion, otherwise
+                // cookies are most likely disabled...
+                $relayState = $request->requirePostParameter('RelayState');
+                if (null === $this->sp->getSession()->get(SP::SESSION_KEY_PREFIX.$relayState)) {
+                    throw new HttpException(400, 'no active session (cookies disabled/blocked?)');
+                }
                 // we do NOT require CSRF protection here
-                $returnTo = $this->sp->handleResponse($request->requirePostParameter('SAMLResponse'), $request->requirePostParameter('RelayState'));
+                $returnTo = $this->sp->handleResponse($request->requirePostParameter('SAMLResponse'), $relayState);
 
                 return new RedirectResponse($returnTo);
             case '/login':

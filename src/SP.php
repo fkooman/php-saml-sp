@@ -73,6 +73,14 @@ class SP
     }
 
     /**
+     * @return SessionInterface
+     */
+    public function getSession()
+    {
+        return $this->session;
+    }
+
+    /**
      * Prepare and retrieve the login URL.
      *
      * @param string        $idpEntityId
