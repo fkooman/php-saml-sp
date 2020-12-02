@@ -221,6 +221,12 @@ class Service
                         ]
                     )
                 );
+            // user triggered logout
+            case '/logout':
+                self::verifyMatchesOrigin($request->getOrigin(), $request->requireHeader('HTTP_REFERER'));
+                $returnTo = self::verifyMatchesOrigin($request->getOrigin(), $request->requireQueryParameter('ReturnTo'));
+
+                return new RedirectResponse($this->sp->logout($returnTo));
             // exposes the SP metadata for IdP consumption
             case '/metadata':
                 // add new line to end of output
@@ -261,12 +267,6 @@ class Service
                 $this->cookie->set(self::LAST_CHOSEN_COOKIE_NAME, $idpEntityId);
 
                 return new RedirectResponse($returnTo.'&'.\http_build_query(['IdP' => $idpEntityId]));
-            // user triggered logout
-            case '/logout':
-                self::verifyMatchesOrigin($request->getOrigin(), $request->requireHeader('HTTP_REFERER'));
-                $returnTo = self::verifyMatchesOrigin($request->getOrigin(), $request->requirePostParameter('ReturnTo'));
-
-                return new RedirectResponse($this->sp->logout($returnTo));
             case '/setLanguage':
                 $returnTo = self::verifyMatchesOrigin($request->getOrigin(), $request->requireHeader('HTTP_REFERER'));
                 // we don't care what uiLanguage is, it can be anything, it

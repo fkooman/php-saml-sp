@@ -40,7 +40,7 @@
 <?php endforeach; ?>
     </dl>
 <?php endif; ?>
-    <form method="post" action="logout">
+    <form method="get" action="logout">
         <input type="hidden" name="ReturnTo" value="<?=$logoutReturnTo; ?>">
         <button><?=$this->t('Logout'); ?></button>
     </form>
