@@ -11,13 +11,14 @@ use Phan\Issue;
  *   (E.g. this only includes direct composer dependencies - You may have to manually add indirect composer dependencies to 'directory_list')
  * - Look at 'plugins' and add or remove plugins if appropriate (see https://github.com/phan/phan/tree/master/.phan/plugins#plugins)
  * - Add global suppressions for pre-existing issues to suppress_issue_types (https://github.com/phan/phan/wiki/Tutorial-for-Analyzing-a-Large-Sloppy-Code-Base)
+ *   - Consider setting up a baseline if there are a large number of pre-existing issues (see `phan --extended-help`)
  *
  * This configuration will be read and overlaid on top of the
  * default configuration. Command line arguments will be applied
  * after this file is read.
  *
- * @see src/Phan/Config.php
- * See Config for all configurable options.
+ * @see https://github.com/phan/phan/wiki/Phan-Config-Settings for all configurable options
+ * @see https://github.com/phan/phan/tree/master/src/Phan/Config.php
  *
  * A Note About Paths
  * ==================
@@ -35,6 +36,11 @@ use Phan\Issue;
  */
 return [
 
+    // The PHP version that the codebase will be checked for compatibility against.
+    // For best results, the PHP binary used to run Phan should have the same PHP version.
+    // (Phan relies on Reflection for some types, param counts,
+    // and checks for undefined classes/methods/functions)
+    //
     // Supported values: `'5.6'`, `'7.0'`, `'7.1'`, `'7.2'`, `'7.3'`, `'7.4'`, `null`.
     // If this is set to `null`,
     // then Phan assumes the PHP version which is closest to the minor version
@@ -42,7 +48,7 @@ return [
     //
     // Note that the **only** effect of choosing `'5.6'` is to infer that functions removed in php 7.0 exist.
     // (See `backward_compatibility_checks` for additional options)
-    // Automatically inferred from composer.json requirement for "php" of ">=5.4"
+    // Automatically inferred from composer.json requirement for "php" of ">=5.4.8"
     'target_php_version' => '7.0',
 
     // If enabled, missing properties will be created when
@@ -252,7 +258,7 @@ return [
     'minimum_severity' => Issue::SEVERITY_LOW,
 
     // Add any issue types (such as `'PhanUndeclaredMethod'`)
-    // to this black-list to inhibit them from being reported.
+    // to this list to inhibit them from being reported.
     'suppress_issue_types' => [],
 
     // A regular expression to match files to be excluded
@@ -283,8 +289,8 @@ return [
     //       should be added to the `directory_list` as well as
     //       to `exclude_analysis_directory_list`.
     'exclude_analysis_directory_list' => [
-        'vendor/',
-        'src/tpl/',
+	    'vendor/',
+	    'src/tpl/',
     ],
 
     // Enable this to enable checks of require/include statements referring to valid paths.
@@ -343,13 +349,9 @@ return [
     // your application should be included in this list.
     'directory_list' => [
         'src',
-        'web',
-        'bin',
-        'example',
         'vendor/fkooman/secookie/src',
-        'vendor/phpunit/phpunit/src',
         'vendor/paragonie/constant_time_encoding/src',
-        'vendor/symfony/polyfill-php56',
+        'vendor/phpunit/phpunit/src',
     ],
 
     // A list of individual files to include in analysis
