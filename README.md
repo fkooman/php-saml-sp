@@ -10,9 +10,10 @@ compatibility and easy integration in PHP applications.
 A SAML Service Provider (SP) with an easy API to use SAML authentication from
 your existing PHP applications.
 
-**NOTE**: this project did NOT receive a comprehensive security audit yet!
-
-**NOTE**: do NOT use it in production until there is a 1.0 release!
+This project received a comprehensive security audit by 
+[Cure53](https://cure53.de/) in November 2020. The identified issues were 
+fixed. You can read the audit [report](report/DEC-01-report.final.pdf) 
+yourself.
 
 # Why
 

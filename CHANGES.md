@@ -1,5 +1,16 @@
 # ChangeLog
 
+## 1.0.0 (2020-12-07)
+- fix security issues found by Cure53 audit:
+  - DEC-01-001 WP1: ReturnTo validation bypass via URL parser problem (Medium)
+  - DEC-01-002 WP1: XSS in example code via unencoded SAML attributes (Medium)
+  - DEC-01-007 WP1: CSRF in logout due to missing CSRF protection (Low)
+  - DEC-01-004 SP: User can inject XML which is subsequently signed (Low)
+  - DEC-01-005 SP: Potential signature bypass via empty string C14N() failure (Low)
+  - DEC-01-006 SP: Non-canonicalized XML data used after signature check (Low)
+- fix URN of `street` attribute mapping
+- improve error message when cookies are disabled in user's browser (issue #3)
+
 ## 0.5.9 (2020-10-12)
 - `sloUrl` is no longer optional
 - make sure `substr` returns the expected number of bytes
