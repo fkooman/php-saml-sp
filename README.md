@@ -12,7 +12,7 @@ your existing PHP applications.
 
 This project received a comprehensive security audit by 
 [Cure53](https://cure53.de/) in November 2020. The identified issues were 
-fixed. You can read the audit [report](report/DEC-01-report.final.pdf) 
+fixed. You can read the audit [report](audit/DEC-01-report.final.pdf) 
 yourself.
 
 # Why
