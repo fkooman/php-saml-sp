@@ -1,29 +1,5 @@
 # TODO
 
-## Before 1.0
-
-- detect whether cookies are disabled in a proper way... so as to reject all
-  attempts without confusing the user... detect if we got a cookie on the ACS
-  endpoint before trying to check session values...
-
-### Audit Specific
-
-- make sure external entities are really properly disabled...
-- do we need to only check the metadata schema for things we actually use? are
-  we safe when not verifying against all possible metadata schemas out there?
-- check input validation on ALL (public) methods is properly done
-- make absolutely sure we verify the assertion with the right public key as to
-  avoid allowing one IdP to pretend to be another IdP
-- Do we also need to check `/samlp:Response/saml:Assertion/saml:Conditions/@NotOnOrAfter`?
-- do we need to make sure the transforms are exactly as we expect them to be?
-
-```
-    <ds:Transforms>
-        <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
-        <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
-    </ds:Transforms>
-```
-
 ## 2.0
 
 - implementing (SQLite?) caching for eduGAIN purpose with 2k+ IdPs
