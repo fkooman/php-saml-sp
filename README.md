@@ -62,7 +62,6 @@ which is secure. So you won't find SHA1 support or insecure encryption.
 - Simple built-in WAYF when more than 1 IdP is configured for the SP
 - Support external discovery services implementing 
   [Identity Provider Discovery Service Protocol and Profile](https://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-idp-discovery.html)
-- Currently ~3500 SLOC
 
 ## SAML V2.0 Deployment Profile for Federation Interoperability 
 
