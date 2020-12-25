@@ -68,6 +68,11 @@ ul li button {
   margin: 0;
 }
 
+ul li button:focus {
+  /* restore default outline for last chosen IdP on Firefox */
+  outline: auto;
+}
+
 p.warning {
   border: 1px solid orange;
   padding: 1em;
