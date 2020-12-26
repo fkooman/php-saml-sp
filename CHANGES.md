@@ -1,5 +1,8 @@
 # ChangeLog
 
+## 1.0.1 (...)
+- fix CSS outline on last chosen IdP in Firefox (issue #12)
+
 ## 1.0.0 (2020-12-07)
 - fix security issues found by Cure53 audit:
   - DEC-01-001 WP1: ReturnTo validation bypass via URL parser problem (Medium)
