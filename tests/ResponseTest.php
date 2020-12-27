@@ -37,6 +37,28 @@ use PHPUnit\Framework\TestCase;
 
 class ResponseTest extends TestCase
 {
+    public function testAzureIdp()
+    {
+        $response = new Response(new DateTime('2020-12-15T12:42:30.681Z'));
+        $samlResponse = \file_get_contents(__DIR__.'/data/assertion/azure_idp_assertion.xml');
+        $samlAssertion = $response->verify(
+            new SpInfo(
+                'https://portal.uia.eduvpn.no/php-saml-sp/metadata',
+                CryptoKeys::load(__DIR__.'/data/certs'),
+                'https://portal.uia.eduvpn.no/php-saml-sp/acs',
+                'https://portal.uia.eduvpn.no/php-saml-sp/slo',
+                false,
+                ['en-US' => 'My SP', 'nl-NL' => 'Mijn SP']
+            ),
+            new IdpInfo('https://sts.windows.net/8482881e-3699-4b3f-b135-cf4800bc1efb/', 'Test', 'http://localhost:8080/sso.php', null, [PublicKey::fromFile(__DIR__.'/data/certs/azure_idp_assertion.crt')], []),
+            $samlResponse,
+            '_a73bd11263b36ccf88b1fee8d0602eb8f80c5b0140b9c438cb96ca06447335d2',
+            [],
+            []
+        );
+        $this->assertSame('https://sts.windows.net/8482881e-3699-4b3f-b135-cf4800bc1efb/', $samlAssertion->getIssuer());
+    }
+
     public function testFrkoIdP()
     {
         $response = new Response(new DateTime('2019-02-23T17:01:21Z'));

@@ -102,6 +102,32 @@ class Crypto
             throw new CryptoException('no public key(s) provided');
         }
 
+        // Our XML handling requires the use of a DOMDocument (contained in
+        // XmlDocument) that just has the saml:Assertion. This used to work
+        // great until we tested with an Azure IdP. It uses the default
+        // namespace for the Signature element. Other implementations always
+        // use the ds: prefix. This triggers a bug in PHP/libxml where when
+        // importing this node into another document, the default namespace is
+        // made explicit with the default: prefix. This is very annoying, as
+        // this breaks XML signatures...
+        //
+        // A better solution is probably to NOT import the Assertion in another
+        // document and instead do the signature verification directly on the
+        // Response document. This works for Assertion, but not
+        // EncryptedAssertion. In the latter case the Response XML should be
+        // modified and the EncryptedAssertion be replaced by the Assertion.
+        // Unfortunately this requires a substantial refactor that I'd like to
+        // avoid just after the audit. So instead, we just do simple text
+        // replacement to remove the "default" namespace prefix after which the
+        // signature verification works again. This is rather safe as if the
+        // document is mangled somehow the verification will simply fail. As no
+        // other part of the Signature element can possibly contain these
+        // strings I'm rather sure this is fine...
+        //
+        // @see https://bugs.php.net/bug.php?id=55294
+        // @see https://bugs.php.net/bug.php?id=47530
+        $inStr = \str_replace(['<default:', '</default:', 'xmlns:default='], ['<', '</', 'xmlns='], $inStr);
+
         foreach ($publicKeys as $publicKey) {
             if (1 === \openssl_verify($inStr, $inSig, $publicKey->raw(), self::SIGN_OPENSSL_ALGO)) {
                 // signature verified
