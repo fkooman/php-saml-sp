@@ -52,7 +52,6 @@ class Response
     {
         $responseSigned = false;
         $assertionSigned = false;
-        $assertionEncrypted = false;
 
         $responseDocument = XmlDocument::fromProtocolMessage($samlResponse);
         if (null !== $responseDocument->optionalOneDomElement('/samlp:Response/ds:Signature')) {
