@@ -1,7 +1,8 @@
 # ChangeLog
 
-## 1.0.1 (...)
+## 1.0.1 (2020-12-28)
 - fix CSS outline on last chosen IdP in Firefox (issue #12)
+- add test for Azure IdP and fix default namespace prefix (issue #11)
 
 ## 1.0.0 (2020-12-07)
 - fix security issues found by Cure53 audit:
