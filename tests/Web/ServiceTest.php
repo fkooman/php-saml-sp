@@ -44,7 +44,7 @@ class ServiceTest extends TestCase
             Service::verifyMatchesOrigin('https://www.example.org', 'https://www.example.com/foo?a=b');
             $this->fail();
         } catch (HttpException $e) {
-            $this->assertSame('URL does not match Origin', $e->getMessage());
+            $this->assertSame('URL must match "Origin"', $e->getMessage());
         }
     }
 
@@ -54,7 +54,7 @@ class ServiceTest extends TestCase
             Service::verifyMatchesOrigin('https://www.example.org', 'https://a\@www.example.org/foo?a=b');
             $this->fail();
         } catch (HttpException $e) {
-            $this->assertSame('URL must not contain authentication information', $e->getMessage());
+            $this->assertSame('URL must match "Origin"', $e->getMessage());
         }
     }
 }

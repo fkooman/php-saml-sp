@@ -99,15 +99,20 @@ class Service
     {
         $urlScheme = \parse_url($urlToMatch, PHP_URL_SCHEME);
         if ('https' !== $urlScheme && 'http' !== $urlScheme) {
-            throw new HttpException(400, 'URL scheme not supported');
+            // only https/http is supported
+            throw new HttpException(400, 'URL must match "Origin"');
         }
         if (null !== \parse_url($urlToMatch, PHP_URL_USER)) {
             // URL MUST NOT contain authentication information (DEC-01-001 WP1)
-            throw new HttpException(400, 'URL must not contain authentication information');
+            // before PHP 7.4.14 & 7.3.26 there was a bug that invalid userinfo
+            // appeared as PHP_URL_USER instead of as part of the hostname,
+            // @see https://bugs.php.net/bug.php?id=77423
+            throw new HttpException(400, 'URL must match "Origin"');
         }
         $urlHost = \parse_url($urlToMatch, PHP_URL_HOST);
         if (!\is_string($urlHost)) {
-            throw new HttpException(400, 'malformed URL host');
+            // not a valid host
+            throw new HttpException(400, 'URL must match "Origin"');
         }
         $constructedUrl = $urlScheme.'://'.$urlHost;
         if (null !== $urlPort = \parse_url($urlToMatch, PHP_URL_PORT)) {
@@ -115,7 +120,7 @@ class Service
         }
 
         if ($httpOrigin !== $constructedUrl) {
-            throw new HttpException(400, 'URL does not match Origin');
+            throw new HttpException(400, 'URL must match "Origin"');
         }
 
         return $urlToMatch;

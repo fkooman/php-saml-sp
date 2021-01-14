@@ -1,5 +1,9 @@
 # ChangeLog
 
+## 1.0.2 (...)
+- handle new PHP 7.3 and 7.4 releases changing `parse_url` behavior 
+  (PHP #77423)
+
 ## 1.0.1 (2020-12-28)
 - fix CSS outline on last chosen IdP in Firefox (issue #12)
 - add test for Azure IdP and fix default namespace prefix (issue #11)
