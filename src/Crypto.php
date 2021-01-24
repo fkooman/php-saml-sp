@@ -81,6 +81,8 @@ class Crypto
 
         // compare the digest from the XML with the actual digest
         if (!\hash_equals($rootElementDigest, $digestValue)) {
+            var_dump($rootElementDigest);
+            var_dump($digestValue);
             throw new CryptoException('unexpected digest');
         }
 
