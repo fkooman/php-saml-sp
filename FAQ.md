@@ -1,6 +1,6 @@
 # FAQ 
 
-## Why do attributes my IdP send not show up in the SP?
+## Why do attributes my IdP sends not show up at the SP?
 
 The attribute is filtered because:
 
