@@ -25,7 +25,6 @@
 namespace fkooman\SAML\SP;
 
 use fkooman\SAML\SP\Exception\KeyException;
-use ParagonIE\ConstantTime\Base64;
 use RuntimeException;
 
 class PublicKey
@@ -115,8 +114,8 @@ class PublicKey
     public function getFingerprint()
     {
         return [
-            'SHA-1' => \hash('sha1', Base64::decode($this->toEncodedString()), true),
-            'SHA-256' => \hash('sha256', Base64::decode($this->toEncodedString()), true),
+            'SHA-1' => \hash('sha1', \sodium_base642bin($this->toEncodedString(), SODIUM_BASE64_VARIANT_ORIGINAL), true),
+            'SHA-256' => \hash('sha256', \sodium_base642bin($this->toEncodedString(), SODIUM_BASE64_VARIANT_ORIGINAL), true),
         ];
     }
 

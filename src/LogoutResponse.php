@@ -25,7 +25,6 @@
 namespace fkooman\SAML\SP;
 
 use fkooman\SAML\SP\Exception\ResponseException;
-use ParagonIE\ConstantTime\Base64;
 
 class LogoutResponse
 {
@@ -40,9 +39,16 @@ class LogoutResponse
     public function verify(QueryParameters $queryParameters, $expectedInResponseTo, $expectedSloUrl, IdpInfo $idpInfo)
     {
         $queryString = self::prepareQueryString($queryParameters);
-        Crypto::verify($queryString, Base64::decode($queryParameters->requireQueryParameter('Signature')), $idpInfo->getPublicKeys());
+        Crypto::verify(
+            $queryString,
+            \sodium_base642bin(
+                $queryParameters->requireQueryParameter('Signature'),
+                SODIUM_BASE64_VARIANT_ORIGINAL
+            ),
+            $idpInfo->getPublicKeys()
+        );
 
-        if (false === $inflatedProtocolMessage = \gzinflate(Base64::decode($queryParameters->requireQueryParameter('SAMLResponse')))) {
+        if (false === $inflatedProtocolMessage = \gzinflate(\sodium_base642bin($queryParameters->requireQueryParameter('SAMLResponse'), SODIUM_BASE64_VARIANT_ORIGINAL))) {
             throw new ResponseException('unable to "inflate" SAMLResponse');
         }
 

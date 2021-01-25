@@ -25,7 +25,6 @@
 namespace fkooman\SAML\SP;
 
 use fkooman\SAML\SP\Exception\CryptoException;
-use ParagonIE\ConstantTime\Base64;
 
 class Crypto
 {
@@ -71,12 +70,13 @@ class Crypto
         $signatureElement = $xmlDocument->requireOneDomElement('self::node()/ds:Signature');
         $rootElement = $xmlDocument->requireOneDomElement('self::node()');
         $rootElement->removeChild($signatureElement);
-        $rootElementDigest = Base64::encode(
+        $rootElementDigest = \sodium_bin2base64(
             \hash(
                 self::SIGN_HASH_ALGO,
                 XmlDocument::canonicalizeElement($rootElement),
                 true
-            )
+            ),
+            SODIUM_BASE64_VARIANT_ORIGINAL
         );
 
         // compare the digest from the XML with the actual digest
@@ -84,7 +84,7 @@ class Crypto
             throw new CryptoException('unexpected digest');
         }
 
-        self::verify($canonicalSignedInfo, Base64::decode($signatureValue), $publicKeys);
+        self::verify($canonicalSignedInfo, \sodium_base642bin($signatureValue, SODIUM_BASE64_VARIANT_ORIGINAL), $publicKeys);
     }
 
     /**
@@ -165,7 +165,7 @@ class Crypto
         $keyCipherValue = self::removeWhiteSpace($xmlDocument->requireOneDomElementTextContent('/samlp:Response/saml:EncryptedAssertion/xenc:EncryptedData/ds:KeyInfo/xenc:EncryptedKey/xenc:CipherData/xenc:CipherValue'));
 
         // decrypt the session key
-        if (false === \openssl_private_decrypt(Base64::decode($keyCipherValue), $symmetricEncryptionKey, $privateKey->raw(), OPENSSL_PKCS1_OAEP_PADDING)) {
+        if (false === \openssl_private_decrypt(\sodium_base642bin($keyCipherValue, SODIUM_BASE64_VARIANT_ORIGINAL), $symmetricEncryptionKey, $privateKey->raw(), OPENSSL_PKCS1_OAEP_PADDING)) {
             throw new CryptoException('unable to extract session key');
         }
 
@@ -178,7 +178,10 @@ class Crypto
         }
 
         // extract the encrypted Assertion
-        $assertionCipherValue = Base64::decode(self::removeWhiteSpace($xmlDocument->requireOneDomElementTextContent('/samlp:Response/saml:EncryptedAssertion/xenc:EncryptedData/xenc:CipherData/xenc:CipherValue')));
+        $assertionCipherValue = \sodium_base642bin(
+            self::removeWhiteSpace($xmlDocument->requireOneDomElementTextContent('/samlp:Response/saml:EncryptedAssertion/xenc:EncryptedData/xenc:CipherData/xenc:CipherValue')),
+            SODIUM_BASE64_VARIANT_ORIGINAL
+        );
 
         // @see https://www.w3.org/TR/xmlenc-core1/#sec-AES-GCM
 

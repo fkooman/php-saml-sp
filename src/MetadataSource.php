@@ -30,7 +30,6 @@ use fkooman\SAML\SP\Exception\CryptoException;
 use fkooman\SAML\SP\Exception\HttpClientException;
 use fkooman\SAML\SP\Exception\XmlDocumentException;
 use fkooman\SAML\SP\Log\LoggerInterface;
-use ParagonIE\ConstantTime\Base64UrlSafe;
 use RuntimeException;
 
 /**
@@ -150,7 +149,7 @@ class MetadataSource implements IdpSourceInterface
      */
     private function importMetadata(HttpClientInterface $httpClient, $metadataUrl, array $publicKeyFileList, $forceImport)
     {
-        $metadataFile = \sprintf('%s/%s.xml', $this->dynamicDir, Base64UrlSafe::encodeUnpadded($metadataUrl));
+        $metadataFile = \sprintf('%s/%s.xml', $this->dynamicDir, \sodium_bin2base64($metadataUrl, SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING));
         $requestHeaders = [];
         if (!$forceImport) {
             if (false !== $refreshAt = @\file_get_contents($metadataFile.self::REFRESH_AT_SUFFIX)) {
@@ -262,7 +261,7 @@ class MetadataSource implements IdpSourceInterface
             foreach ($metadataFileList as $metadataFile) {
                 if ('dynamic' === $dirType) {
                     // we make sure the metadataUrl is still enabled...
-                    $metadataUrl = Base64UrlSafe::decode(\basename($metadataFile, '.xml'));
+                    $metadataUrl = \sodium_base642bin(\basename($metadataFile, '.xml'), SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING);
                     if (!\array_key_exists($metadataUrl, $this->metadataKeyList)) {
                         continue;
                     }
