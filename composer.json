@@ -34,10 +34,10 @@
         "ext-openssl": "*",
         "ext-pcre": "*",
         "ext-spl": "*",
+        "ext-sodium": "*",
         "ext-zlib": "*",
         "fkooman/secookie": "^5",
         "paragonie/random_compat": ">=1",
-        "paragonie/constant_time_encoding": "^1|^2",
         "php": ">=5.4.8",
         "symfony/polyfill-php56": "^1"
     },
