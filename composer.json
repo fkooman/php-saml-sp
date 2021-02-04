@@ -8,7 +8,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://git.tuxed.net/fkooman/php-secookie"
+            "url": "https://git.sr.ht/~fkooman/php-secookie"
         }
     ],
     "autoload": {
@@ -46,7 +46,7 @@
     },
     "support": {
         "email": "fkooman@tuxed.net",
-        "source": "https://git.tuxed.net/fkooman/php-saml-sp"
+        "source": "https://git.sr.ht/~fkooman/php-saml-sp"
     },
     "type": "project"
 }
